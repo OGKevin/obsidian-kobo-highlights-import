@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import moment from 'moment';
 import { addIcon, App, Modal, normalizePath, Notice, Plugin } from 'obsidian';
-// import SqlJsWasm from "sql-wasm";
 import { sanitize } from "sanitize-filename-ts";
 import SqlJs from 'sql.js';
 import { binary } from './binaries/sql-wasm';
