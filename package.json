@@ -29,6 +29,7 @@
 		"@types/better-sqlite3": "^7.4.2",
 		"esbuild-plugin-wat": "^0.2.7",
 		"moment": "^2.29.4",
-		"sql.js": "^1.6.2"
+		"sanitize-filename-ts": "^1.0.2",
+		"sql.js": "^1.7.0"
 	}
 }

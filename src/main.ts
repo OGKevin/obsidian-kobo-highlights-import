@@ -1,10 +1,11 @@
 import * as fs from 'fs';
-import * as moment from 'moment';
+import moment from 'moment';
 import { addIcon, App, Modal, normalizePath, Notice, Plugin } from 'obsidian';
 // import SqlJsWasm from "sql-wasm";
+import { sanitize } from "sanitize-filename-ts";
 import SqlJs from 'sql.js';
+import { binary } from './binaries/sql-wasm';
 import { DEFAULT_SETTINGS, KoboHighlightsImporterSettings, KoboHighlightsImporterSettingsTab } from './settings/Settings';
-
 declare module 'obsidian' {
 	interface FileSystemAdapter {
 		// eslint-disable-next-line no-unused-vars
@@ -80,7 +81,7 @@ class ExtractHighlightsModal extends Modal {
 		}
 
 		const SQLEngine = await SqlJs({
-			// wasmBinary: SqlJsWasm
+			wasmBinary: binary
 		})
 
 		const fileBuffer = fs.readFileSync(this.sqlFilePath)
@@ -96,7 +97,8 @@ class ExtractHighlightsModal extends Modal {
 					content += transformedRows[book][chapter].join('\n\n')
 					content += `\n\n`
 				}
-				const fileName = normalizePath(`${this.settings.storageFolder}/${book}.md`)
+				const saniizedBookName = sanitize(book)
+				const fileName = normalizePath(`${this.settings.storageFolder}/${saniizedBookName}.md`)
 				this.app.vault.adapter.write(fileName, content)
 			}
 
