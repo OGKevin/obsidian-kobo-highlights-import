@@ -40,8 +40,6 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
                         this.plugin.settings.storageFolder = new_folder;
                         this.plugin.saveSettings();
                     });
-                // @ts-ignore
-                cb.containerEl.addClass("templater_search");
             });
     }
 

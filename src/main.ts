@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import moment from 'moment';
+import * as moment from 'moment';
 import { addIcon, App, Modal, normalizePath, Notice, Plugin } from 'obsidian';
+// import SqlJsWasm from "sql-wasm";
 import SqlJs from 'sql.js';
-import SqlJsWasm from '../node_modules/sql.js/dist/sql-wasm.wasm';
 import { DEFAULT_SETTINGS, KoboHighlightsImporterSettings, KoboHighlightsImporterSettingsTab } from './settings/Settings';
 
 declare module 'obsidian' {
@@ -23,7 +23,7 @@ const EREADER_ICON_PATH = `<path stroke="currentColor" fill="currentColor" d="M 
 
 export default class KoboHighlightsImporter extends Plugin {
 	settings: KoboHighlightsImporterSettings;
-	
+
 	async onload() {
 		addIcon('e-reader', EREADER_ICON_PATH)
 		await this.loadSettings();
@@ -48,9 +48,6 @@ export default class KoboHighlightsImporter extends Plugin {
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new KoboHighlightsImporterSettingsTab(this.app, this));
-	}
-
-	onunload() {
 	}
 
 	async loadSettings() {
@@ -83,7 +80,7 @@ class ExtractHighlightsModal extends Modal {
 		}
 
 		const SQLEngine = await SqlJs({
-			wasmBinary: SqlJsWasm
+			// wasmBinary: SqlJsWasm
 		})
 
 		const fileBuffer = fs.readFileSync(this.sqlFilePath)
@@ -156,7 +153,7 @@ class ExtractHighlightsModal extends Modal {
 		contentEl.appendChild(this.inputFileEl)
 		contentEl.appendChild(this.goButtonEl)
 	}
-	
+
 	onClose() {
 		const { contentEl } = this;
 		contentEl.empty();
@@ -172,8 +169,8 @@ function transformResults(dbRows: any, includeCreatedDate: boolean, dateFormat: 
 		}
 
 		// Remove continous whitespace
-		entry = entry.replace(/\s+/g,' ').trim();
-		
+		entry = entry.replace(/\s+/g, ' ').trim();
+
 		if (includeCreatedDate) {
 			const createdDate = new Date(e[4]);
 			const formattedDate = "[[" + (moment(createdDate)).format(dateFormat) + "]]";
