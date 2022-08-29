@@ -1,7 +1,8 @@
 # [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
 ARG VARIANT=16
-ARG WATCHEXEC_VERSION=1.20.5
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:0-${VARIANT}
+
+ARG WATCHEXEC_VERSION=1.20.5
 
 RUN cd /tmp \ 
     && wget https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb \
