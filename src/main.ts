@@ -41,26 +41,3 @@ export default class KoboHighlightsImporter extends Plugin {
 		await this.saveData(this.settings);
 	}
 }
-
-
-		if (includeCreatedDate) {
-			const createdDate = new Date(e[4]);
-			const formattedDate = "[[" + (moment(createdDate)).format(dateFormat) + "]]";
-			entry = entry + " - " + formattedDate;
-		}
-
-		if (old[e[1]]) {
-			if (old[e[1]][e[2]]) {
-				old[e[1]][e[2]].push(entry)
-			} else {
-				old[e[1]][e[2]] = [entry]
-			}
-		}
-		else {
-			old[e[1]] = {
-				[e[2]]: [entry]
-			}
-		}
-		return old
-	}, {})
-}

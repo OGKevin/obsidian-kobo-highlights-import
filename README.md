@@ -14,7 +14,6 @@ Once installed, the steps to import your highlights directly into the vault are:
 
 ## Templating
 
-
 | Tag        | Description                                      | Example          |
 |------------|--------------------------------------------------|------------------|
 | highlights | Will get replaced with the extracted highlights. | `{{highlights}}` |
