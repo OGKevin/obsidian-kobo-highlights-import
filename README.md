@@ -12,6 +12,13 @@ Once installed, the steps to import your highlights directly into the vault are:
 4. Locate _KoboReader.sqlite_ in the _.kobo_ folder ( this folder is hidden, so if you don't see it you should enable hidden files view from system configs )
 5. Extract
 
+## Templating
+
+
+| Tag        | Description                                      | Example          |
+|------------|--------------------------------------------------|------------------|
+| highlights | Will get replaced with the extracted highlights. | `{{highlights}}` |
+
 ## Helping Screenshots
 ![](./README_assets/step1.png)
 ![](./README_assets/step2.png)
