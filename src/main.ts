@@ -74,9 +74,10 @@ class ExtractHighlightsModal extends Modal {
 	}
 
 	async fetchHighlights() {
-
 		if (!this.sqlFilePath) {
-			throw new Error('No sqlite DB file selected...')
+			new Notice('No sqlite DB file selected...')
+
+			return
 		}
 
 		const SQLEngine = await SqlJs({
@@ -86,6 +87,18 @@ class ExtractHighlightsModal extends Modal {
 		const fileBuffer = fs.readFileSync(this.sqlFilePath)
 		const DB = new SQLEngine.Database(fileBuffer)
 		const results = DB.exec(HIGHLIGHTS_QUERY)
+
+		if (results.length === 0) {
+			new Notice(`
+				Database query returned no results.
+				Please check if your device is supported.`,
+			);
+
+			return
+		}
+
+		debugger
+
 		const transformedRows = transformResults(results[0].values, this.settings.includeCreatedDate, this.settings.dateFormat)
 
 		if (this.app.vault.adapter) {
@@ -104,6 +117,8 @@ class ExtractHighlightsModal extends Modal {
 		} else {
 			throw new Error('Cannot create new files: adapter not found');
 		}
+
+		new Notice('Highlights extracted!')
 	}
 
 	onOpen() {
@@ -117,14 +132,12 @@ class ExtractHighlightsModal extends Modal {
 			new Notice('Extracting highlights...')
 			this.fetchHighlights()
 				.then(() => {
-					new Notice('Highlights extracted!')
 					this.close()
 				}).catch(e => {
 					console.log(e)
 					new Notice('Something went wrong... Check console for more details.')
 				})
-		}
-		)
+		})
 
 		this.inputFileEl = contentEl.createEl('input');
 		this.inputFileEl.type = 'file'
