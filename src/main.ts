@@ -97,8 +97,6 @@ class ExtractHighlightsModal extends Modal {
 			return
 		}
 
-		debugger
-
 		const transformedRows = transformResults(results[0].values, this.settings.includeCreatedDate, this.settings.dateFormat)
 
 		if (this.app.vault.adapter) {
