@@ -2,8 +2,6 @@
 
 This plugin aims to make highlight import from Kobo devices easier.
 
-_At the time of writing, it has only been tested with a Kobo Libra 2 with few book highlights._
-
 ## How to use
 
 Once installed, the steps to import your highlights directly into the vault are:
@@ -14,6 +12,23 @@ Once installed, the steps to import your highlights directly into the vault are:
 4. Locate _KoboReader.sqlite_ in the _.kobo_ folder ( this folder is hidden, so if you don't see it you should enable hidden files view from system configs )
 5. Extract
 
+## Supported Devices
+
+The following devices have been confirmed to work with this plugin:
+
+- Kobo Aura H2O
+
+If your device is not in this list, there could be a chance that it's not supported.
+Please open an issue to add support.
+
+To be able to add support, the database that the device produces must be shared.
+As this is the key factor that determines support.
+Each device seems to produce a different layout of the database.
+
+The database can contain sensitive information.
+For this reason, please **DO NOT** share your database via a Github issue.
+Rather, reach out via [Discord](https://obsidian.md/community) so that the exchange can be done via DM.
+
 ## Helping Screenshots
 
 <img src="README_assets/step1.png" alt="step1" height="200"/><img src="README_assets/step2.png" alt="step1" width="200"/><img src="README_assets/step3.png" alt="step1" width="200"/><img src="README_assets/step4.png" alt="step1" width="200"/>
@@ -21,9 +36,3 @@ Once installed, the steps to import your highlights directly into the vault are:
 ## Contributing
 
 Please feel free to test, send feedbacks using Issues and open Pull Requests to improve the process. 
-
-## To Do
-
-- Add notes import feature
-- Auto detect .sqlite file
-- Use templates to generate imported highlights notes
