@@ -1,4 +1,3 @@
-
 export interface Bookmark {
     text: string;
     contentId: string;

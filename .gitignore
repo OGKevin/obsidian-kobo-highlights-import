@@ -24,3 +24,4 @@ data.json
 lib
 coverage
 .nyc_output
+KoboReader.sqlite
