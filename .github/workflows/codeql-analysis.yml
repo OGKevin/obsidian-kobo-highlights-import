@@ -42,7 +42,7 @@ jobs:
     - name: Setup Node.js environment
       uses: actions/setup-node@v3.4.1
       with:
-        node-version: '16.x'
+        node-version: '18.x'
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
