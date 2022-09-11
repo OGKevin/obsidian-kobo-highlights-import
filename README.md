@@ -2,8 +2,6 @@
 
 This plugin aims to make highlight import from Kobo devices easier.
 
-_At the time of writing, it has only been tested with a Kobo Libra 2 with few book highlights._
-
 ## How to use
 
 Once installed, the steps to import your highlights directly into the vault are:
@@ -15,15 +13,11 @@ Once installed, the steps to import your highlights directly into the vault are:
 5. Extract
 
 ## Helping Screenshots
-
-<img src="README_assets/step1.png" alt="step1" height="200"/><img src="README_assets/step2.png" alt="step1" width="200"/><img src="README_assets/step3.png" alt="step1" width="200"/><img src="README_assets/step4.png" alt="step1" width="200"/>
+![](./README_assets/step1.png)
+![](./README_assets/step2.png)
+![](./README_assets/step3.png)
+![](./README_assets/step4.png)
 
 ## Contributing
 
 Please feel free to test, send feedbacks using Issues and open Pull Requests to improve the process. 
-
-## To Do
-
-- Add notes import feature
-- Auto detect .sqlite file
-- Use templates to generate imported highlights notes
