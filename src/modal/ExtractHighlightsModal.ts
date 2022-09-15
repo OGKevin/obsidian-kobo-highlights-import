@@ -6,6 +6,8 @@ import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
+import { applyTemplateTransformations } from 'src/template/template';
+import { getTemplateContents } from 'src/template/templateContents';
 
 export class ExtractHighlightsModal extends Modal {
     goButtonEl!: HTMLButtonElement;
@@ -44,11 +46,16 @@ export class ExtractHighlightsModal extends Modal {
             this.settings.dateFormat,
         )
 
+        const template = await getTemplateContents(this.app, this.settings.templatePath)
+
         for (const [bookTitle, chapters] of content) {
             const markdown = service.fromMapToMarkdown(bookTitle, chapters)
             const saniizedBookName = sanitize(bookTitle)
             const fileName = normalizePath(`${this.settings.storageFolder}/${saniizedBookName}.md`)
-            this.app.vault.adapter.write(fileName, markdown)
+            this.app.vault.adapter.write(
+                fileName,
+                applyTemplateTransformations(template, markdown)
+            )
         }
     }
 
