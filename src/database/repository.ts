@@ -14,7 +14,14 @@ export class Repository {
 
         res[0].values.forEach(row => {
             if (!(row[0] && row[1] && row[3])) {
-                throw new Error("Bookmark column returned unexpected null")
+                console.warn(
+                    "Skipping bookmark with invalid values",
+                    row[0],
+                    row[1],
+                    row[3],
+                )
+
+                return
             }
 
             bookmakrs.push({
