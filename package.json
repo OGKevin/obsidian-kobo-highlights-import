@@ -18,7 +18,7 @@
 		"@types/chai": "4.3.3",
 		"@types/mocha": "9.1.1",
 		"@types/node": "18.7.16",
-		"@types/sql.js": "1.4.3",
+		"@types/sql.js": "1.4.4",
 		"@typescript-eslint/eslint-plugin": "5.38.0",
 		"@typescript-eslint/parser": "5.38.0",
 		"builtin-modules": "3.3.0",
