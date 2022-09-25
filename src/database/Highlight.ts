@@ -21,10 +21,14 @@ export class HighlightService {
             markdown += `\n\n`
         }
 
-        return markdown
+        return markdown.trim()
     }
 
-    convertToMap(arr: Highlight[], includeDate: boolean, dateFormat: string): Map<bookTitle, Map<chapter, highlight[]>> {
+    convertToMap(
+        arr: Highlight[],
+        includeDate: boolean,
+        dateFormat: string,
+    ): Map<bookTitle, Map<chapter, highlight[]>> {
         const m = new Map<string, Map<string, string[]>>()
 
         arr.forEach(x => {
@@ -32,10 +36,14 @@ export class HighlightService {
                 throw new Error("bookTitle must be set")
             }
 
-            let text = x.bookmark.text
+            let text = `> ${x.bookmark.text}`
+
+            if (x.bookmark.note) {
+                text += `\n\n${x.bookmark.note}`
+            }
 
             if (includeDate) {
-                text = text + ` - [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
+                text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
 
             const existingBook = m.get(x.content.bookTitle)

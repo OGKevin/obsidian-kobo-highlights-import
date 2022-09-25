@@ -55,9 +55,7 @@ describe('HighlightService', async function () {
 
 ## Chapter Eight: Holden
 
-“I guess I can’t be. How do you prove a negative?” - [[2022-08-05T20:46:41+00:00]]
-
-`
+> “I guess I can’t be. How do you prove a negative?” — [[2022-08-05T20:46:41+00:00]]`
         )
     });
 
@@ -85,9 +83,7 @@ describe('HighlightService', async function () {
 
 ## Chapter Eight: Holden
 
-“I guess I can’t be. How do you prove a negative?”
-
-`
+> “I guess I can’t be. How do you prove a negative?”`
         )
     });
 
