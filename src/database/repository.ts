@@ -95,10 +95,10 @@ export class Repository {
         statement.free()
 
         if (contents.length > 1) {
-            throw new Error(`filtering by contentId yielded more then 1 result: ${contentId}`)
+            console.warn(`filtering by contentId yielded more then 1 result: ${contentId}, using the first result.`)
         }
 
-        return contents.pop() || null
+        return contents.first() || null
     }
 
     async getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {

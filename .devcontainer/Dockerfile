@@ -1,13 +1,13 @@
 # [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=0-18@sha256:86b5bc74be785e3905b154dc5916f2d0021dae3e8a5adc03276cf7a46ff70cd2
+ARG VARIANT=18-bullseye
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 ARG WATCHEXEC_VERSION=1.20.5
 
-RUN cd /tmp \ 
-    && wget https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb \
-    && sudo dpkg -i watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb \
-    && cd -
+# RUN cd /tmp \ 
+#     && wget https://github.com/watchexec/watchexec/releases/download/cli-v${WATCHEXEC_VERSION}/watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb \
+#     && sudo dpkg -i watchexec-${WATCHEXEC_VERSION}-x86_64-unknown-linux-gnu.deb \
+#     && cd -
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
