@@ -98,7 +98,7 @@ export class Repository {
             console.warn(`filtering by contentId yielded more then 1 result: ${contentId}, using the first result.`)
         }
 
-        return contents.first() || null
+        return contents.shift() || null
     }
 
     async getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {
