@@ -54,9 +54,7 @@ describe('HighlightService', async function () {
 
 ## Chapter Eight: Holden
 
-> “I guess I can’t be. How do you prove a negative?”
-
-— [[` + dateCreatedText + `]]`
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
                 )
             })
 
@@ -118,9 +116,7 @@ describe('HighlightService', async function () {
 ## Chapter Eight: Holden
 
 > [!quote]
-> “I guess I can’t be. How do you prove a negative?”
-
-— [[` + dateCreatedText + `]]`
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
                 )
             })
             
@@ -162,9 +158,7 @@ describe('HighlightService', async function () {
 ## Chapter Eight: Holden
 
 > [!bug]
-> “I guess I can’t be. How do you prove a negative?”
-
-— [[` + dateCreatedText + `]]`
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
                 )
             })
         })
@@ -204,9 +198,7 @@ describe('HighlightService', async function () {
 
 > “I guess I can’t be. How do you prove a negative?”
 
-> This is a great note!
-
-— [[` + dateCreatedText + `]]`
+This is a great note! — [[` + dateCreatedText + `]]`
                 )
             })
 
@@ -228,7 +220,7 @@ describe('HighlightService', async function () {
 
 > “I guess I can’t be. How do you prove a negative?”
 
-> This is a great note!`
+This is a great note!`
                 )
             })
 
@@ -250,8 +242,7 @@ describe('HighlightService', async function () {
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
-
-> [!note]
+>> [!note]
 > This is a great note!`
                 )
             })
@@ -274,11 +265,8 @@ describe('HighlightService', async function () {
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
-
-> [!note]
-> This is a great note!
-
-— [[` + dateCreatedText + `]]`
+>> [!note]
+> This is a great note! — [[` + dateCreatedText + `]]`
                 )
             })
 
@@ -300,8 +288,7 @@ describe('HighlightService', async function () {
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
-
-> [!bug]
+>> [!bug]
 > This is a great note!`
                 )
             })
@@ -324,11 +311,8 @@ describe('HighlightService', async function () {
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
-
-> [!bug]
-> This is a great note!
-
-— [[` + dateCreatedText + `]]`
+>> [!bug]
+> This is a great note! — [[` + dateCreatedText + `]]`
                 )
             })
         })
@@ -415,7 +399,7 @@ describe('HighlightService', async function () {
         ])
 
         let repo: Repository
-        let service: HighlightServiceCopy
+		let service: HighlightService
 
         before(async function () {
             repo = <Repository> {}
@@ -425,7 +409,7 @@ describe('HighlightService', async function () {
             bookmarkMap.forEach(entry => bookmarks.push(entry))
             repo.getAllBookmark = () => Promise.resolve(bookmarks);
             repo.getBookmarkById = (bookmarkId) => Promise.resolve(bookmarkMap.get(bookmarkId) ?? null)
-            service = new HighlightServiceCopy(repo)
+			service = new HighlightService(repo)
         })
 
         it('getAllHighlight', async function () {

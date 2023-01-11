@@ -47,18 +47,19 @@ export class HighlightService {
             
             text += `> ${x.bookmark.text}`
 
-            if (includeCallouts && x.bookmark.note) {
-                text += `\n\n> [!` + annotationCallout + `]\n`
-            } else {
-                text += `\n\n`
-            }
+			if (x.bookmark.note) {
+				text += `\n`
 
-            if (x.bookmark.note) {
-                text += `> ${x.bookmark.note}\n\n`;
-            }
+				if (includeCallouts) {
+					text += `>> [!` + annotationCallout + `]`
+					text += `\n> ${x.bookmark.note}`;
+				} else {
+					text += `\n${x.bookmark.note}`;
+				}
+			}
 
             if (includeDate) {
-                text += `— [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
+                text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
 
             const existingBook = m.get(x.content.bookTitle)
