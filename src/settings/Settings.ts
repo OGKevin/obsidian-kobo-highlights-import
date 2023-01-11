@@ -8,6 +8,9 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
     includeCreatedDate: false,
     dateFormat: "YYYY-MM-DD",
     templatePath: "",
+    includeCallouts: true,
+    highlightCallout: "quote",
+    annotationCallout: "note",
 }
 
 export interface KoboHighlightsImporterSettings {
@@ -15,6 +18,9 @@ export interface KoboHighlightsImporterSettings {
     includeCreatedDate: boolean;
     dateFormat: string;
     templatePath: string;
+    includeCallouts: boolean,
+    highlightCallout: string,
+    annotationCallout: string,
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -30,6 +36,9 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
         this.add_enable_creation_date();
         this.add_date_fromat();
         this.add_temaplte_path();
+        this.add_enable_callouts();
+        this.add_highlight_callouts_format();
+        this.add_annotation_callouts_format();
     }
 
     add_destination_folder(): void {
@@ -87,5 +96,58 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
                         this.plugin.saveSettings();
                     })
             })
+    }
+
+    add_enable_callouts(): void {
+        const desc = document.createDocumentFragment();
+        desc.append("When enabled Kobo highlights importer will make use of Obsidian callouts for highlights and annotations.",
+        desc.createEl("br"),
+        "When disabled standard markdown block quotes will be used for highlights only.",
+          desc.createEl("br"),
+          "Check the ",
+          desc.createEl("a", {
+            href: "https://help.obsidian.md/How+to/Use+callouts",
+            text: "documentation"
+          }),
+        " to get a list of all available callouts that obsidian offers.");
+
+        new Setting(this.containerEl)
+            .setName("Use Callouts")
+            .setDesc(desc)
+            .addToggle((cb) => {
+                cb.setValue(this.plugin.settings.includeCallouts)
+                    .onChange((toggle) => {
+                        this.plugin.settings.includeCallouts = toggle;
+                        this.plugin.saveSettings();
+                    });
+            });
+    }
+
+    add_highlight_callouts_format(): void {
+        new Setting(this.containerEl)
+            .setName("Highlight callout format")
+            .setDesc(`The callout to use for highlights.`)
+            .addText((cb) => {
+                cb.setPlaceholder("quote")
+                    .setValue(this.plugin.settings.highlightCallout)
+                    .onChange(async (toggle) => {
+                        this.plugin.settings.highlightCallout = toggle;
+                        await this.plugin.saveSettings();
+                    });
+            });
+    }
+
+    add_annotation_callouts_format(): void {
+        new Setting(this.containerEl)
+            .setName("Annotation callout format")
+            .setDesc(`The callout to use for annotations.`)
+            .addText((cb) => {
+                cb.setPlaceholder("note")
+                    .setValue(this.plugin.settings.annotationCallout)
+                    .onChange(async (toggle) => {
+                        this.plugin.settings.annotationCallout = toggle;
+                        await this.plugin.saveSettings();
+                    });
+            });
     }
 }

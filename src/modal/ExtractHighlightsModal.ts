@@ -44,6 +44,9 @@ export class ExtractHighlightsModal extends Modal {
             await service.getAllHighlight(),
             this.settings.includeCreatedDate,
             this.settings.dateFormat,
+            this.settings.includeCallouts,
+            this.settings.highlightCallout,
+            this.settings.annotationCallout
         )
 
         const template = await getTemplateContents(this.app, this.settings.templatePath)

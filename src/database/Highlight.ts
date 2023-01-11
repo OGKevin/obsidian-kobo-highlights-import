@@ -28,6 +28,9 @@ export class HighlightService {
         arr: Highlight[],
         includeDate: boolean,
         dateFormat: string,
+        includeCallouts: boolean,
+        highlightCallout: string,
+        annotationCallout: string,
     ): Map<bookTitle, Map<chapter, highlight[]>> {
         const m = new Map<string, Map<string, string[]>>()
 
@@ -35,15 +38,27 @@ export class HighlightService {
             if (!x.content.bookTitle) {
                 throw new Error("bookTitle must be set")
             }
+            
+            let text = ``;
 
-            let text = `> ${x.bookmark.text}`
+            if (includeCallouts) {
+                text += `> [!` + highlightCallout + `]\n`
+            }
+            
+            text += `> ${x.bookmark.text}`
+
+            if (includeCallouts && x.bookmark.note) {
+                text += `\n\n> [!` + annotationCallout + `]\n`
+            } else {
+                text += `\n\n`
+            }
 
             if (x.bookmark.note) {
-                text += `\n\n${x.bookmark.note}`
+                text += `> ${x.bookmark.note}\n\n`;
             }
 
             if (includeDate) {
-                text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
+                text += `— [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
 
             const existingBook = m.get(x.content.bookTitle)
