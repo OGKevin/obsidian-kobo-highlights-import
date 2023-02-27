@@ -35,7 +35,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
         this.add_destination_folder();
         this.add_enable_creation_date();
         this.add_date_fromat();
-        this.add_temaplte_path();
+        this.add_template_path();
         this.add_enable_callouts();
         this.add_highlight_callouts_format();
         this.add_annotation_callouts_format();
@@ -56,7 +56,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
             });
     }
 
-    add_temaplte_path(): void {
+    add_template_path(): void {
         new Setting(this.containerEl)
             .setName('Tempalte Path')
             .setDesc('Which tempalte to use for extracted highlights')
