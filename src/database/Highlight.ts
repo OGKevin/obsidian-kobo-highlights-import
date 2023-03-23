@@ -13,8 +13,8 @@ export class HighlightService {
         this.repo = repo
     }
 
-    fromMapToMarkdown(bookTitle: string, chapters: Map<chapter, highlight[]>): string {
-        let markdown = `# ${bookTitle}\n\n`;
+    fromMapToMarkdown(chapters: Map<chapter, highlight[]>): string {
+        let markdown = "";
         for (const [chapter, highlights] of chapters) {
             markdown += `## ${chapter.trim()}\n\n`
             markdown += highlights.join('\n\n').trim()

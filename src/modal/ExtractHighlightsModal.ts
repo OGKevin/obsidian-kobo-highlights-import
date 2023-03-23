@@ -52,14 +52,14 @@ export class ExtractHighlightsModal extends Modal {
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
-            const markdown = service.fromMapToMarkdown(bookTitle, chapters)
+            const markdown = service.fromMapToMarkdown(chapters)
             const saniizedBookName = sanitize(bookTitle)
             const fileName = normalizePath(`${this.settings.storageFolder}/${saniizedBookName}.md`)
-            this.app.vault.adapter.write(
-                fileName,
-                applyTemplateTransformations(template, markdown)
-            )
-        }
+			await this.app.vault.adapter.write(
+				fileName,
+				applyTemplateTransformations(template, markdown, bookTitle)
+			)
+		}
     }
 
     onOpen() {

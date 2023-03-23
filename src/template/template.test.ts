@@ -1,43 +1,57 @@
 import * as chai from 'chai';
-import { applyTemplateTransformations, defaultTemplate } from './template';
+import {applyTemplateTransformations, defaultTemplate} from './template';
 
 
 describe('template', async function () {
-  it('applyTemplateTransformations default', async function () {
-    const content = applyTemplateTransformations(defaultTemplate, "test")
+	it('applyTemplateTransformations default', async function () {
+		const content = applyTemplateTransformations(defaultTemplate, "test", "test")
 
-    chai.expect(content).deep.eq("test")
-  });
+		chai.expect(content).deep.eq(
+			`# test
 
-  const templates = new Map<string, string[]>([
-    [
-      "default",
-      [defaultTemplate, "test"]
-    ],
-    [
-      "with front matter",
-      [
-        `
----
-tag: [tags]
----
-{{highlights}}
-`,
-        `---
-tag: [tags]
----
 test`
-      ]
-    ],
-  ])
+		)
+	});
 
-  for (const [title, t] of templates) {
-    it(`applyTemplateTransformations ${title}`, async function () {
-      const content = applyTemplateTransformations(t[0], "test")
+	const templates = new Map<string, string[]>([
+		[
+			"default",
+			[
+				defaultTemplate,
+				`# test title
 
-      chai.expect(content).deep.eq(t[1])
-    });
-  }
+test`
+			]
+		],
+		[
+			"with front matter",
+			[
+				`
+---
+tag: [tags]
+title: {{title}}
+---
+# {{title}}
+
+{{highlights}}`,
+				`---
+tag: [tags]
+title: test title
+---
+# test title
+
+test`
+			]
+		],
+	])
+
+	for (const [title, t] of templates) {
+		it(`applyTemplateTransformations ${title}`, async function () {
+			const content = applyTemplateTransformations(t[0], "test", "test title")
+
+			chai.expect(content).deep.eq(t[1])
+		});
+	}
 
 
 });

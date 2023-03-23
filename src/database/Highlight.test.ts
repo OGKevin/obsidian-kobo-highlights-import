@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import { Repository } from '../database/repository';
+import { Repository } from './repository';
 import { HighlightService } from './Highlight';
 import { Bookmark, Content, Highlight } from './interfaces';
 import moment from 'moment';
@@ -48,11 +48,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
                 )
@@ -68,11 +66,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > “I guess I can’t be. How do you prove a negative?”`
                 )
@@ -88,11 +84,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”`
@@ -109,11 +103,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
@@ -130,11 +122,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!bug]
 > “I guess I can’t be. How do you prove a negative?”`
@@ -151,11 +141,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!bug]
 > “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
@@ -190,11 +178,9 @@ describe('HighlightService', async function () {
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > “I guess I can’t be. How do you prove a negative?”
 
@@ -212,11 +198,9 @@ This is a great note! — [[` + dateCreatedText + `]]`
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > “I guess I can’t be. How do you prove a negative?”
 
@@ -234,11 +218,9 @@ This is a great note!`
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
@@ -257,11 +239,9 @@ This is a great note!`
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
@@ -280,11 +260,9 @@ This is a great note!`
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
@@ -303,11 +281,9 @@ This is a great note!`
                     return
                 }
 
-                const markdown = service.fromMapToMarkdown(highlight.content.bookTitle ?? "", map)
+                const markdown = service.fromMapToMarkdown(map)
                 chai.assert.deepEqual(
-                    markdown, `# Nemesis Games
-
-## Chapter Eight: Holden
+                    markdown, `## Chapter Eight: Holden
 
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
