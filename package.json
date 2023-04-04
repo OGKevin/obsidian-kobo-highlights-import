@@ -23,7 +23,7 @@
 		"@typescript-eslint/parser": "5.56.0",
 		"builtin-modules": "3.3.0",
 		"chai": "4.3.7",
-		"esbuild": "0.17.14",
+		"esbuild": "0.17.15",
 		"eslint": "8.36.0",
 		"mocha": "10.2.0",
 		"nyc": "15.1.0",
