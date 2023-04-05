@@ -10,7 +10,7 @@ export class Repository {
 
     async getAllBookmark(): Promise<Bookmark[]> {
         const res = this.db.exec(`select Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
-        const bookmakrs: Bookmark[] = []
+        const bookmarks: Bookmark[] = []
 
         res[0].values.forEach(row => {
             if (!(row[0] && row[1] && row[3])) {
@@ -24,7 +24,7 @@ export class Repository {
                 return
             }
 
-            bookmakrs.push({
+            bookmarks.push({
                 text: row[0].toString().replace(/\s+/g, ' ').trim(),
                 contentId: row[1].toString(),
                 note: row[2]?.toString(),
@@ -32,7 +32,7 @@ export class Repository {
             })
         });
 
-        return bookmakrs
+        return bookmarks
     }
 
     async getTotalBookmark(): Promise<number> {
