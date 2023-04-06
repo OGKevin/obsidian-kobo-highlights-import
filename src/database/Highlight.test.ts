@@ -331,6 +331,64 @@ This is a great note!
                 )
             })
         })
+
+        describe('Sample Bookmark with annotation, with existing highlights and added notes', async function(){
+            let highlight: Highlight
+            let dateCreatedText: string
+            let existingFile: string
+    
+            before(async function () {
+                const dateCreated = new Date(Date.UTC(2022, 7, 5, 20, 46, 41, 0))
+                const bookmark: Bookmark = {
+                    bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
+                    text: "“I guess I can’t be. How do you prove a negative?”",
+                    contentId: "file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+                    note: 'This is a great note!',
+                    dateCreated
+                }
+                highlight = await service.createHighlightFromBookmark(bookmark)
+                dateCreatedText = moment(dateCreated).format("")
+                existingFile = `## Chapter Eight: Holden
+
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
+> “I guess I can’t be. How do you prove a negative?”
+
+This is a great note! — [[` + dateCreatedText + `]]
+
+This is an exising note, added to the highlight.
+
+^325d95
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
+            })  
+
+            it('fromMaptoMarkdown with existing file', async function () {
+                const map = service
+                    .convertToMap([highlight], true, "", false, '[!quote]', '[!note]')
+                    .get(highlight.content.bookTitle ?? "")
+
+                if(!map) {
+                    chai.assert.isNotNull(map)
+                    return
+                }
+
+                const markdown = service.fromMapToMarkdown(map, existingFile)
+                chai.assert.deepEqual(
+                    markdown, `## Chapter Eight: Holden
+
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
+> “I guess I can’t be. How do you prove a negative?”
+
+This is a great note! — [[` + dateCreatedText + `]]
+
+This is an exising note, added to the highlight.
+
+^325d95
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
+                )
+            })
+        })
     })
 
     describe('with multiple content', async function() {
