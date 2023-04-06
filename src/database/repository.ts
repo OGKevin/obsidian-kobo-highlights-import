@@ -9,26 +9,29 @@ export class Repository {
     }
 
     async getAllBookmark(): Promise<Bookmark[]> {
-        const res = this.db.exec(`select Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
+        const res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
         const bookmarks: Bookmark[] = []
 
         res[0].values.forEach(row => {
-            if (!(row[0] && row[1] && row[3])) {
+            if (!(row[0] && row[1] && row[2] && row[4])) {
                 console.warn(
                     "Skipping bookmark with invalid values",
                     row[0],
                     row[1],
+                    row[2],
                     row[3],
+                    row[4],
                 )
 
                 return
             }
 
             bookmarks.push({
-                text: row[0].toString().replace(/\s+/g, ' ').trim(),
-                contentId: row[1].toString(),
-                note: row[2]?.toString(),
-                dateCreated: new Date(row[3].toString())
+                bookmarkId: row[0].toString(),
+                text: row[1].toString().replace(/\s+/g, ' ').trim(),
+                contentId: row[2].toString(),
+                note: row[3]?.toString(),
+                dateCreated: new Date(row[4].toString())
             })
         });
 
@@ -43,7 +46,7 @@ export class Repository {
 
     async getBookmarkById(id: string): Promise<Bookmark | null> {
         const statement = this.db.prepare(
-            `select Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
+            `select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
             {
                 $id: id
             }
@@ -55,15 +58,16 @@ export class Repository {
 
         const row = statement.get()
 
-        if (!(row[0] && row[1] && row[3])) {
+        if (!(row[0] && row[1] && row[2] && row[4])) {
             throw new Error("Bookmark column returned unexpected null")
         }
 
         return {
-            text: row[0].toString().replace(/\s+/g, ' ').trim(),
-            contentId: row[1].toString(),
-            note: row[2]?.toString(),
-            dateCreated: new Date(row[3].toString())
+            bookmarkId: row[0].toString(),
+            text: row[1].toString().replace(/\s+/g, ' ').trim(),
+            contentId: row[2].toString(),
+            note: row[3]?.toString(),
+            dateCreated: new Date(row[4].toString())
         }
     }
 

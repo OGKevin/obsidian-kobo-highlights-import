@@ -4,7 +4,10 @@ import { Repository } from "./repository";
 
 type bookTitle = string
 type chapter = string
-type highlight = string
+type bookmark = {
+    bookmarkId: string
+    content: string
+}
 
 export class HighlightService {
     repo: Repository
@@ -13,11 +16,29 @@ export class HighlightService {
         this.repo = repo
     }
 
-    fromMapToMarkdown(chapters: Map<chapter, highlight[]>): string {
+    extractExistingHighlight(bookmarkId: string, existingFile: string): string {
+        // Define search terms
+        const startSearch = `%%START-${bookmarkId}%%`
+        const endSearch = `%%END-${bookmarkId}%%`
+        // Find substring indices
+        const start = existingFile.indexOf(startSearch)
+        const end = existingFile.indexOf(endSearch) + endSearch.length + 1 // Add length of search term to include it in substring extraction
+        // Return the extracted substring
+        return existingFile.substring(start, end)
+    }
+
+    fromMapToMarkdown(chapters: Map<chapter, bookmark[]>, existingFile?: string): string {
         let markdown = "";
         for (const [chapter, highlights] of chapters) {
             markdown += `## ${chapter.trim()}\n\n`
-            markdown += highlights.join('\n\n').trim()
+            //markdown += highlights.join('\n\n').trim()
+            markdown += highlights.map((highlight) => {
+                if (existingFile?.includes(highlight.bookmarkId)) {
+                    return this.extractExistingHighlight(highlight.bookmarkId, existingFile)
+                } else {
+                    return highlight.content
+                }
+            }).join('\n\n').trim()
             markdown += `\n\n`
         }
 
@@ -31,15 +52,16 @@ export class HighlightService {
         includeCallouts: boolean,
         highlightCallout: string,
         annotationCallout: string,
-    ): Map<bookTitle, Map<chapter, highlight[]>> {
-        const m = new Map<string, Map<string, string[]>>()
+    ): Map<bookTitle, Map<chapter, bookmark[]>> {
+        const m = new Map<string, Map<string, bookmark[]>>()
 
         arr.forEach(x => {
             if (!x.content.bookTitle) {
                 throw new Error("bookTitle must be set")
             }
             
-            let text = ``;
+            // Start annotation
+            let text = `%%START-${x.bookmark.bookmarkId}%%\n`;
 
             if (includeCallouts) {
                 text += `> [!` + highlightCallout + `]\n`
@@ -61,19 +83,21 @@ export class HighlightService {
             if (includeDate) {
                 text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
+            // End annotation
+            text += `\n\n%%END-${x.bookmark.bookmarkId}%%\n`;
 
             const existingBook = m.get(x.content.bookTitle)
-
+            const highlight: bookmark = {bookmarkId: x.bookmark.bookmarkId, content: text}
             if (existingBook) {
                 const existingChapter = existingBook.get(x.content.title)
 
                 if (existingChapter) {
-                    existingChapter.push(text)
+                    existingChapter.push(highlight)
                 } else {
-                    existingBook.set(x.content.title, [text])
+                    existingBook.set(x.content.title, [highlight])
                 }
             } else {
-                m.set(x.content.bookTitle, new Map<string, string[]>().set(x.content.title, [text]))
+                m.set(x.content.bookTitle, new Map<string, bookmark[]>().set(x.content.title, [highlight]))
             }
         })
 
@@ -85,7 +109,7 @@ export class HighlightService {
 
         const bookmarks = await this.repo.getAllBookmark()
         for (const bookmark of bookmarks) {
-            highlights.push(await this.createHilightFromBookmark(bookmark))
+            highlights.push(await this.createHighlightFromBookmark(bookmark))
         }
 
         return highlights.sort(function (a, b): number {
@@ -98,7 +122,7 @@ export class HighlightService {
         })
     }
 
-    async createHilightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
+    async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
         let content = await this.repo.getContentByContentId(bookmark.contentId)
 
         if (content == null) {

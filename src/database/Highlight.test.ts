@@ -13,6 +13,7 @@ describe('HighlightService', async function () {
         before(async function () {
             const repo = <Repository> {}
             repo.getContentByContentId = () => Promise.resolve({
+                bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
                 title: "Chapter Eight: Holden",
                 contentId: "file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
                 bookTitle: "Nemesis Games",
@@ -29,12 +30,13 @@ describe('HighlightService', async function () {
             before(async function () {
                 const dateCreated = new Date(Date.UTC(2022, 7, 5, 20, 46, 41, 0))
                 const bookmark: Bookmark = {
+                    bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
                     note: '',
                     dateCreated
                 }
-                highlight = await service.createHilightFromBookmark(bookmark)
+                highlight = await service.createHighlightFromBookmark(bookmark)
                 dateCreatedText = moment(dateCreated).format("")
             })
 
@@ -52,7 +54,10 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
-> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -70,7 +75,10 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
-> “I guess I can’t be. How do you prove a negative?”`
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
+> “I guess I can’t be. How do you prove a negative?”
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -88,8 +96,11 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
-> “I guess I can’t be. How do you prove a negative?”`
+> “I guess I can’t be. How do you prove a negative?”
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -107,8 +118,11 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
-> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
             
@@ -126,8 +140,11 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!bug]
-> “I guess I can’t be. How do you prove a negative?”`
+> “I guess I can’t be. How do you prove a negative?”
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -145,8 +162,11 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!bug]
-> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
         })
@@ -159,12 +179,13 @@ describe('HighlightService', async function () {
             before(async function () {
                 const dateCreated = new Date(Date.UTC(2022, 7, 5, 20, 46, 41, 0))
                 const bookmark: Bookmark = {
+                    bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
                     note: 'This is a great note!',
                     dateCreated
                 }
-                highlight = await service.createHilightFromBookmark(bookmark)
+                highlight = await service.createHighlightFromBookmark(bookmark)
                 dateCreatedText = moment(dateCreated).format("")
             })
 
@@ -182,9 +203,12 @@ describe('HighlightService', async function () {
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > “I guess I can’t be. How do you prove a negative?”
 
-This is a great note! — [[` + dateCreatedText + `]]`
+This is a great note! — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -202,9 +226,12 @@ This is a great note! — [[` + dateCreatedText + `]]`
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > “I guess I can’t be. How do you prove a negative?”
 
-This is a great note!`
+This is a great note!
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -222,10 +249,13 @@ This is a great note!`
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
 >> [!note]
-> This is a great note!`
+> This is a great note!
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
             
@@ -243,10 +273,13 @@ This is a great note!`
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
 >> [!note]
-> This is a great note! — [[` + dateCreatedText + `]]`
+> This is a great note! — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -264,10 +297,13 @@ This is a great note!`
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
 >> [!bug]
-> This is a great note!`
+> This is a great note!
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
 
@@ -285,10 +321,13 @@ This is a great note!`
                 chai.assert.deepEqual(
                     markdown, `## Chapter Eight: Holden
 
+%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
 > [!quote]
 > “I guess I can’t be. How do you prove a negative?”
 >> [!bug]
-> This is a great note! — [[` + dateCreatedText + `]]`
+> This is a great note! — [[` + dateCreatedText + `]]
+
+%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`
                 )
             })
         })
@@ -395,14 +434,14 @@ This is a great note!`
         })
 
         for (const [id, content] of contentMap) {
-            it(`createHilightFromBookmark ${id}`, async function () {
+            it(`createHighlightFromBookmark ${id}`, async function () {
                 const bookmark = await repo.getBookmarkById(id)
                 if (!bookmark) {
                     chai.assert.isNotNull(bookmark)
                     return
                 }
 
-                const highlight = await service.createHilightFromBookmark(bookmark)
+                const highlight = await service.createHighlightFromBookmark(bookmark)
                 chai.assert.deepEqual(highlight, {
                     content: content,
                     bookmark: bookmark
