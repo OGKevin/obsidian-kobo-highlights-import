@@ -31,7 +31,6 @@ export class HighlightService {
         let markdown = "";
         for (const [chapter, highlights] of chapters) {
             markdown += `## ${chapter.trim()}\n\n`
-            //markdown += highlights.join('\n\n').trim()
             markdown += highlights.map((highlight) => {
                 if (existingFile?.includes(highlight.bookmarkId)) {
                     return this.extractExistingHighlight(highlight.bookmarkId, existingFile)
@@ -60,7 +59,7 @@ export class HighlightService {
                 throw new Error("bookTitle must be set")
             }
             
-            // Start annotation
+            // Start annotation marker
             let text = `%%START-${x.bookmark.bookmarkId}%%\n`;
 
             if (includeCallouts) {
@@ -83,7 +82,7 @@ export class HighlightService {
             if (includeDate) {
                 text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
-            // End annotation
+            // End annotation marker
             text += `\n\n%%END-${x.bookmark.bookmarkId}%%\n`;
 
             const existingBook = m.get(x.content.bookTitle)
