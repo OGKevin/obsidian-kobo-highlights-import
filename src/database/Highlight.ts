@@ -103,10 +103,10 @@ export class HighlightService {
         return m
     }
 
-    async getAllHighlight(): Promise<Highlight[]> {
+    async getAllHighlight(sortByChapterProgress?: boolean): Promise<Highlight[]> {
         const highlights: Highlight[] = []
 
-        const bookmarks = await this.repo.getAllBookmark()
+        const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress)
         for (const bookmark of bookmarks) {
             highlights.push(await this.createHighlightFromBookmark(bookmark))
         }

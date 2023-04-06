@@ -8,8 +8,13 @@ export class Repository {
         this.db = db
     }
 
-    async getAllBookmark(): Promise<Bookmark[]> {
-        const res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
+    async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
+        let res
+        if (sortByChapterProgress) {
+            res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`)
+        } else {
+            res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`)
+        }
         const bookmarks: Bookmark[] = []
 
         res[0].values.forEach(row => {

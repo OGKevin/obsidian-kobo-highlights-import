@@ -41,7 +41,7 @@ export class ExtractHighlightsModal extends Modal {
         )
 
         const content = service.convertToMap(
-            await service.getAllHighlight(),
+            await service.getAllHighlight(this.settings.sortByChapterProgress),
             this.settings.includeCreatedDate,
             this.settings.dateFormat,
             this.settings.includeCallouts,
