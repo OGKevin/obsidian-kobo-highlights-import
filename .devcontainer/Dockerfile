@@ -1,5 +1,5 @@
 # [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=18-bullseye@sha256:8d96097757566369dbb5430c67acb843402f5785ed458136208366a5d3d63c80
+ARG VARIANT=18-bullseye@sha256:3511cb8ff39e3b5c45a159e2e56628395b177be04ba9340dbc91919419cb11e8
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
 
 ARG WATCHEXEC_VERSION=1.20.5
