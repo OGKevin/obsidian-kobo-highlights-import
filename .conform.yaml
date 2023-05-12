@@ -1,0 +1,23 @@
+policies:
+  - type: commit
+    spec:
+      header:
+        length: 89
+        imperative: true
+        case: lower
+        invalidLastCharacters: .
+        jira:
+          keys: []
+      body:
+        required: true
+      dco: false
+      gpg:
+        required: true
+        identity: {}
+      spellcheck:
+        locale: US
+      maximumOfOneCommit: false
+      conventional:
+        types: []
+        scopes: []
+        descriptionLength: 72
