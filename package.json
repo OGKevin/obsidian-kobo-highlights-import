@@ -33,7 +33,7 @@
 		"typescript": "5.0.4"
 	},
 	"dependencies": {
-		"@popperjs/core": "2.11.7",
+		"@popperjs/core": "2.11.8",
 		"@types/better-sqlite3": "7.6.3",
 		"esbuild-plugin-wat": "0.2.7",
 		"moment": "2.29.4",
