@@ -29,7 +29,7 @@
 		"nyc": "15.1.0",
 		"obsidian": "1.2.8",
 		"ts-node": "10.9.1",
-		"tslib": "2.5.0",
+		"tslib": "2.5.3",
 		"typescript": "5.0.4"
 	},
 	"dependencies": {
