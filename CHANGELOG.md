@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.2](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/v1.5.1...1.5.2) (2023-07-09)
+
+
+### Continuous Integration
+
+* **github-action:** update actions/setup-node action to v3.7.0 ([#9](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/9)) ([0e999fa](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/0e999faaef41179676befeede53b12ef1a015553))
+
+
+### Miscellaneous Chores
+
+* add v1.5.2 to compatibility matrix ([#146](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/146)) ([e43f3c7](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/e43f3c7facfe0912447de252e8ba9832c893f718))
+* attempt to fix release-please extra files ([#145](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/145)) ([21aefb7](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/21aefb7140c4f2a5a9ab40ed3d2bc0f84bedc1cd))
+* fix release publishing workflow ([#144](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/144)) ([16169e6](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/16169e631b74d467b2473c0531d38133cc1b87db))
+* fix release-please config ([#148](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/148)) ([92e4ac5](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/92e4ac5130d9201ef5d7245668e02bbd759bd550))
+
 ## [1.5.1](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/1.5.0...v1.5.1) (2023-07-05)
 
 
