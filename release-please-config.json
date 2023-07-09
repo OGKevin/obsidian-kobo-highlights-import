@@ -1,4 +1,6 @@
 {
+  "include-v-in-tag": false,
+  "include-component-in-tag": false,
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
