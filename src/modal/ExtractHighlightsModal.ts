@@ -55,11 +55,11 @@ export class ExtractHighlightsModal extends Modal {
             const markdown = service.fromMapToMarkdown(chapters)
             const saniizedBookName = sanitize(bookTitle)
             const fileName = normalizePath(`${this.settings.storageFolder}/${saniizedBookName}.md`)
-			await this.app.vault.adapter.write(
-				fileName,
-				applyTemplateTransformations(template, markdown, bookTitle)
-			)
-		}
+            await this.app.vault.adapter.write(
+                fileName,
+                applyTemplateTransformations(template, markdown, bookTitle)
+            )
+        }
     }
 
     onOpen() {
@@ -86,6 +86,8 @@ export class ExtractHighlightsModal extends Modal {
         this.inputFileEl.type = 'file'
         this.inputFileEl.accept = '.sqlite'
         this.inputFileEl.addEventListener('change', ev => {
+            // Not sure what the type of this event is :(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const filePath = (<any>ev).target.files[0].path;
             fs.access(filePath, fs.constants.R_OK, (err) => {
                 if (err) {
