@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.5.3](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/1.5.2...1.5.3) (2023-07-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update typescript-eslint monorepo to 6.0.0 (major) ([#13](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/13)) (#156)
+
+### Features
+
+* **deps:** update typescript-eslint monorepo to 5.62.0 ([#150](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/150)) ([4f27de0](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/4f27de03276646459a82f24e05089b26dc24a88a))
+* **deps:** Update typescript-eslint monorepo to 6.0.0 (major) ([#13](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/13)) ([#156](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/156)) ([06c4a31](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/06c4a319ba70e51a1f5f528112e03406fdb8504e))
+
+
+### Bug Fixes
+
+* add wildcard at the beginning of like query ([#154](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/154)) ([1deb326](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/1deb3265cdaf666f10f1e9d23b15dbcc4efb44b6))
+
+
+### Miscellaneous Chores
+
+* run workflow on published releases ([#149](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/149)) ([3706570](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/3706570e61acea52a03116afd91e1dce4ddd1020))
+
 ## [1.5.2](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/v1.5.1...1.5.2) (2023-07-09)
 
 
