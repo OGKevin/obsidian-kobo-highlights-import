@@ -89,7 +89,7 @@ export class Repository {
             `select 
                 Title, ContentID, ChapterIDBookmarked, BookTitle from content
                 where ContentID like $id;`,
-            { $id: `${contentId}%` },
+            { $id: `%${contentId}%` },
         )
         const contents = this.parseContentStatement(statement)
         statement.free()
