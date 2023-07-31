@@ -17,10 +17,13 @@ export class ExtractHighlightsModal extends Modal {
 
     sqlFilePath: string | undefined
 
+    nrOfBooksExtracted: number
+
     constructor(
         app: App, settings: KoboHighlightsImporterSettings) {
         super(app);
         this.settings = settings
+        this.nrOfBooksExtracted = 0
     }
 
     private async fetchHighlights() {
@@ -49,6 +52,7 @@ export class ExtractHighlightsModal extends Modal {
             this.settings.annotationCallout
         )
 
+        this.nrOfBooksExtracted = content.size
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
@@ -73,7 +77,7 @@ export class ExtractHighlightsModal extends Modal {
             new Notice('Extracting highlights...')
             this.fetchHighlights()
                 .then(() => {
-                    new Notice('Highlights extracted!')
+                    new Notice('Extracted highlights from ' + this.nrOfBooksExtracted + ' books!')
                     this.close()
                 }).catch(e => {
                     console.log(e)

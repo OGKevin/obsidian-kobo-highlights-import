@@ -12,6 +12,12 @@ export class Repository {
         const res = this.db.exec(`select Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
         const bookmakrs: Bookmark[] = []
 
+        if (res[0].values == undefined) {
+            console.warn("Bookmarks table returend no results, do you have any annotations created?")
+
+            return bookmakrs
+        }
+
         res[0].values.forEach(row => {
             if (!(row[0] && row[1] && row[3])) {
                 console.warn(
