@@ -58,8 +58,8 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 
     add_template_path(): void {
         new Setting(this.containerEl)
-            .setName('Tempalte Path')
-            .setDesc('Which tempalte to use for extracted highlights')
+            .setName('Template Path')
+            .setDesc('Which template to use for extracted highlights')
             .addSearch((cb) => {
                 new FileSuggestor(this.app, cb.inputEl);
                 cb.setPlaceholder("Example: folder1/template")
