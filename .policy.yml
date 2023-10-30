@@ -1,0 +1,39 @@
+policy:
+  approval:
+    - or:
+        - Kevin made a change
+        - Kevin approves
+        - Kevin helps bot and approves
+
+approval_rules:
+  - name: Kevin made a change
+    if:
+      has_author_in:
+        users: [ "OGKevin" ]
+    options:
+      allow_author: true
+      allow_contributor: true
+  - name: Kevin approves
+    options:
+      methods:
+        comments:
+          - "/lgtm"
+        github_review: true
+    requires:
+      count: 1
+      users: [ "OGKevin" ]
+  - name: Kevin helps bot and approves
+    if:
+      has_author_in:
+        users: [ "ogkevin-robot[bot]" ]
+      has_contributor_in:
+        users: [ "OGKevin" ]
+    options:
+      allow_non_author_contributor: true
+      methods:
+        comments:
+          - "/lgtm"
+        github_review: true
+    requires:
+      count: 1
+      users: [ "OGKevin" ]
