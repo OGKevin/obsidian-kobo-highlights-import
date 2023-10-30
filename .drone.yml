@@ -17,14 +17,27 @@
       },
       {
          "commands": [
-            "chown 610 /secret"
+            "chown 610 /secret",
+            "chown 610 /opt/containerbase"
          ],
          "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
-         "name": "fix secrets ownership",
+         "name": "fix file ownership",
          "volumes": [
             {
                "name": "secret",
                "path": "/secret"
+            },
+            {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
             }
          ],
          "when": {
@@ -54,6 +67,18 @@
             {
                "name": "secret",
                "path": "/secret"
+            },
+            {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
             }
          ],
          "when": {
@@ -98,6 +123,10 @@
                "path": "/secret"
             },
             {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
                "name": "consul",
                "path": "/usr/local/bin/consul"
             },
@@ -122,6 +151,10 @@
    },
    "type": "docker",
    "volumes": [
+      {
+         "name": "containerbase",
+         "temp": { }
+      },
       {
          "name": "secret",
          "temp": { }
@@ -159,14 +192,27 @@
       },
       {
          "commands": [
-            "chown 610 /secret"
+            "chown 610 /secret",
+            "chown 610 /opt/containerbase"
          ],
          "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
-         "name": "fix secrets ownership",
+         "name": "fix file ownership",
          "volumes": [
             {
                "name": "secret",
                "path": "/secret"
+            },
+            {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
             }
          ],
          "when": {
@@ -196,6 +242,18 @@
             {
                "name": "secret",
                "path": "/secret"
+            },
+            {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
             }
          ],
          "when": {
@@ -240,6 +298,10 @@
                "path": "/secret"
             },
             {
+               "name": "containerbase",
+               "path": "/opt/containerbase/"
+            },
+            {
                "name": "consul",
                "path": "/usr/local/bin/consul"
             },
@@ -270,6 +332,10 @@
    },
    "type": "docker",
    "volumes": [
+      {
+         "name": "containerbase",
+         "temp": { }
+      },
       {
          "name": "secret",
          "temp": { }
@@ -512,6 +578,6 @@
 }
 ---
 kind: signature
-hmac: 298f4691829addfbfef7cb437712b705289fca5f306ab17ee08077f597a5190c
+hmac: b744789f65161beb5319219db777a542a229935936e152eeef25bc6ea56b3d37
 
 ...
