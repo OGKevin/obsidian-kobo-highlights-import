@@ -17,8 +17,7 @@
       },
       {
          "commands": [
-            "chown 610 /secret",
-            "chown 610 /opt/containerbase"
+            "chown 610 /secret"
          ],
          "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
          "name": "fix file ownership",
@@ -26,10 +25,6 @@
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -67,10 +62,6 @@
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -116,15 +107,11 @@
          },
          "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
          "name": "renovate",
-         "user": "610:610",
+         "user": "610:0",
          "volumes": [
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -151,10 +138,6 @@
    },
    "type": "docker",
    "volumes": [
-      {
-         "name": "containerbase",
-         "temp": { }
-      },
       {
          "name": "secret",
          "temp": { }
@@ -192,8 +175,7 @@
       },
       {
          "commands": [
-            "chown 610 /secret",
-            "chown 610 /opt/containerbase"
+            "chown 610 /secret"
          ],
          "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
          "name": "fix file ownership",
@@ -201,10 +183,6 @@
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -242,10 +220,6 @@
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -291,15 +265,11 @@
          },
          "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
          "name": "renovate",
-         "user": "610:610",
+         "user": "610:0",
          "volumes": [
             {
                "name": "secret",
                "path": "/secret"
-            },
-            {
-               "name": "containerbase",
-               "path": "/opt/containerbase/"
             },
             {
                "name": "consul",
@@ -332,10 +302,6 @@
    },
    "type": "docker",
    "volumes": [
-      {
-         "name": "containerbase",
-         "temp": { }
-      },
       {
          "name": "secret",
          "temp": { }
@@ -578,6 +544,6 @@
 }
 ---
 kind: signature
-hmac: b744789f65161beb5319219db777a542a229935936e152eeef25bc6ea56b3d37
+hmac: c57b6f93fefa10b818d3a2d30ba796c7de58882b118906cf308444c459b497c2
 
 ...
