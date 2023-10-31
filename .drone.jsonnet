@@ -1,6 +1,7 @@
 local common = import '.drone-templates/common.libsonnet';
 local images = import '.drone-templates/images.libsonnet';
 local jsonnet = import '.drone-templates/jsonnet.libsonnet';
+local releasePlease = import '.drone-templates/release-please.libsonnet';
 local renovate = import '.drone-templates/renovate.libsonnet';
 
 local nodeImage = 'node:18-buster';
@@ -128,7 +129,7 @@ local koboPipeline = [
   },
 ];
 
-renovate + jsonnet + koboPipeline +
+renovate + jsonnet + releasePlease + koboPipeline +
 [
   x[1]
   for x in common.f.kv(common.secrets)

@@ -349,6 +349,115 @@
 }
 ---
 {
+   "clone": {
+      "disable": true
+   },
+   "kind": "pipeline",
+   "name": "release-please",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "image": "rssnyder/drone-github-app:latest@sha256:5867cd348c73f1258b6b14f6139fb79d0d47cf36ad657e62166ebaef7e8eb0f7",
+         "name": "get app token",
+         "settings": {
+            "APP_ID": {
+               "from_secret": "github_app_id"
+            },
+            "INSTALLATION": {
+               "from_secret": "github_installation_id"
+            },
+            "PEM_B64": {
+               "from_secret": "github_private_key"
+            },
+            "TOKEN_FILE": "/secret/gh-token.txt"
+         },
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "commands": [
+            "consul lock -child-exit-code \"release-please/${DRONE_REPO}\" node /app/build/src/bin/release-please.js release-pr --token $(cat /secret/gh-token.txt) --repo-url $DRONE_REPO_LINK"
+         ],
+         "depends_on": [
+            "get app token"
+         ],
+         "image": "ghcr.io/ogkevin/release-please:v15.13.0@sha256:289668997ed54c23abe13fce4b0227b0f163d5db8a42dbee5c9a10f635ca1662",
+         "name": "release-pr",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "consul lock -child-exit-code \"release-please/${DRONE_REPO}\" node /app/build/src/bin/release-please.js github-release --token $(cat /secret/gh-token.txt) --repo-url $DRONE_REPO_LINK"
+         ],
+         "depends_on": [
+            "get app token"
+         ],
+         "image": "ghcr.io/ogkevin/release-please:v15.13.0@sha256:289668997ed54c23abe13fce4b0227b0f163d5db8a42dbee5c9a10f635ca1662",
+         "name": "github-release",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ]
+      }
+   ],
+   "trigger": {
+      "branch": [
+         "main",
+         "master"
+      ],
+      "event": [
+         "custom",
+         "push"
+      ]
+   },
+   "type": "docker",
+   "volumes": [
+      {
+         "name": "secret",
+         "temp": { }
+      },
+      {
+         "host": {
+            "path": "/usr/local/bin/consul"
+         },
+         "name": "consul"
+      }
+   ]
+}
+---
+{
    "kind": "pipeline",
    "name": "npm",
    "platform": {
@@ -544,6 +653,6 @@
 }
 ---
 kind: signature
-hmac: c57b6f93fefa10b818d3a2d30ba796c7de58882b118906cf308444c459b497c2
+hmac: 65c33c15d37a05290f8cd935aae043afaeb0ff02539a7d0150d06ed3b8f0c6f2
 
 ...
