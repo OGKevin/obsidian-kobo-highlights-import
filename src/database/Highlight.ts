@@ -38,13 +38,13 @@ export class HighlightService {
             if (!x.content.bookTitle) {
                 throw new Error("bookTitle must be set")
             }
-            
+
             let text = ``;
 
             if (includeCallouts) {
                 text += `> [!` + highlightCallout + `]\n`
             }
-            
+
             text += `> ${x.bookmark.text}`
 
 			if (x.bookmark.note) {
@@ -104,7 +104,15 @@ export class HighlightService {
         if (content == null) {
             content = await this.repo.getContentLikeContentId(bookmark.contentId)
             if (content == null) {
-                throw Error(`bookmark seems to link to a non existing content: ${bookmark.contentId}`)
+                console.warn(`bookmark seems to link to a non existing content: ${bookmark.contentId}`)
+                return {
+                    bookmark: bookmark,
+                    content: {
+                        title: 'Unknown Title',
+                        contentId: bookmark.contentId,
+                        chapterIdBookmarked: 'false',
+                        bookTitle: 'Unknown Book'}
+                }
             }
         }
 

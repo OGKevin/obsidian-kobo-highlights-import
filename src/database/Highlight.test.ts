@@ -7,7 +7,7 @@ import moment from 'moment';
 describe('HighlightService', async function () {
 
     describe('Sample Content', async function () {
-        
+
         let service: HighlightService
 
         before(async function () {
@@ -22,7 +22,7 @@ describe('HighlightService', async function () {
         })
 
         describe('Sample Bookmark with no annotation', async function () {
-            
+
             let highlight: Highlight
             let dateCreatedText: string
 
@@ -111,7 +111,7 @@ describe('HighlightService', async function () {
 > “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
                 )
             })
-            
+
             it('fromMaptoMarkdown with custom callouts', async function () {
                 const map = service
                     .convertToMap([highlight], false, "", true, 'bug', 'note')
@@ -152,7 +152,7 @@ describe('HighlightService', async function () {
         })
 
         describe('Sample Bookmark with annotation', async function () {
-            
+
             let highlight: Highlight
             let dateCreatedText: string
 
@@ -228,7 +228,7 @@ This is a great note!`
 > This is a great note!`
                 )
             })
-            
+
             it('fromMaptoMarkdown with callouts and date', async function () {
                 const map = service
                     .convertToMap([highlight], true, "", true, 'quote', 'note')
@@ -294,7 +294,54 @@ This is a great note!`
         })
     })
 
-    describe('with multiple content', async function() {
+    describe('Sample Content Missing', async function () {
+
+        let service: HighlightService
+
+        before(async function () {
+            const repo = <Repository>{}
+            repo.getContentByContentId = ()  => Promise.resolve(null);
+            repo.getContentLikeContentId = () => Promise.resolve(null);
+            service = new HighlightService(repo)
+        })
+        describe('Sample Bookmark linked to missing content', async function () {
+
+            let highlight: Highlight
+            let dateCreatedText: string
+
+            before(async function () {
+                const dateCreated = new Date(Date.UTC(2022, 7, 5, 20, 46, 41, 0))
+                const bookmark: Bookmark = {
+                    text: "“I guess I can’t be. How do you prove a negative?”",
+                    contentId: "missing-content-id",
+                    note: '',
+                    dateCreated
+                }
+                highlight = await service.createHilightFromBookmark(bookmark)
+                dateCreatedText = moment(dateCreated).format("")
+            })
+
+            it('fromMaptoMarkdown with date', async function () {
+                const map = service
+                    .convertToMap([highlight], true, "", false, '[!quote]', '[!note]')
+                    .get(highlight.content.bookTitle ?? "")
+
+                if (!map) {
+                    chai.assert.isNotNull(map)
+                    return
+                }
+
+                const markdown = service.fromMapToMarkdown(map)
+                chai.assert.deepEqual(
+                    markdown, `## Unknown Title
+
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
+                )
+            })
+        })
+    })
+
+    describe('with multiple content', async function () {
 
         const contentMap = new Map<string, Content>([
             [
@@ -375,7 +422,7 @@ This is a great note!`
         ])
 
         let repo: Repository
-		let service: HighlightService
+        let service: HighlightService
 
         before(async function () {
             repo = <Repository> {}
@@ -385,7 +432,7 @@ This is a great note!`
             bookmarkMap.forEach(entry => bookmarks.push(entry))
             repo.getAllBookmark = () => Promise.resolve(bookmarks);
             repo.getBookmarkById = (bookmarkId) => Promise.resolve(bookmarkMap.get(bookmarkId) ?? null)
-			service = new HighlightService(repo)
+            service = new HighlightService(repo)
         })
 
         it('getAllHighlight', async function () {
