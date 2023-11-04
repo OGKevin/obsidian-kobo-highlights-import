@@ -1,0 +1,658 @@
+---
+{
+   "kind": "pipeline",
+   "name": "renovate-push",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "commands": [
+            "renovate-config-validator"
+         ],
+         "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
+         "name": "validate config",
+         "user": "610:610"
+      },
+      {
+         "commands": [
+            "chown 610 /secret"
+         ],
+         "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
+         "name": "fix file ownership",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "image": "rssnyder/drone-github-app:latest@sha256:5867cd348c73f1258b6b14f6139fb79d0d47cf36ad657e62166ebaef7e8eb0f7",
+         "name": "get app token",
+         "settings": {
+            "APP_ID": {
+               "from_secret": "github_app_id"
+            },
+            "INSTALLATION": {
+               "from_secret": "github_installation_id"
+            },
+            "PEM_B64": {
+               "from_secret": "github_private_key"
+            },
+            "TOKEN_FILE": "/secret/gh-token.txt"
+         },
+         "user": "610:610",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "commands": [
+            "export RENOVATE_TOKEN=\"$(cat /secret/gh-token.txt)\"",
+            "export GITHUB_COM_TOKEN=\"$(cat /secret/gh-token.txt)\"",
+            "consul kv get renovate/\"${DRONE_REPO}\"/.lock || consul lock -timeout 1m -child-exit-code \"renovate/${DRONE_REPO}\" docker-entrypoint.sh"
+         ],
+         "environment": {
+            "DOCKER_GHCR_IO_PASSWORD": {
+               "from_secret": "ghcr_token"
+            },
+            "DOCKER_GHCR_IO_USERNAME": {
+               "from_secret": "ghcr_user"
+            },
+            "LOG_LEVEL": "debug",
+            "RENOVATE_BASE_DIR": "/data",
+            "RENOVATE_DETECT_HOST_RULES_FROM_ENV": "true",
+            "RENOVATE_FORK_PROCESSING": "enabled",
+            "RENOVATE_GIT_AUTHOR": "OGKevin Robot <140143426+ogkevin-robot[bot]@users.noreply.github.com>",
+            "RENOVATE_ONBOARDING": "true",
+            "RENOVATE_PERSIST_REPO_DATA": "true",
+            "RENOVATE_PLATFORM_COMMIT": "true",
+            "RENOVATE_REDIS_URL": "redis://${OG_REDIS_URL}/2",
+            "RENOVATE_REPOSITORIES": "${DRONE_REPO}",
+            "RENOVATE_REVIEWERS": "OGKevin",
+            "RENOVATE_USERNAME": "OGKevin-robot[bot]"
+         },
+         "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
+         "name": "renovate",
+         "user": "610:0",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      }
+   ],
+   "trigger": {
+      "event": [
+         "push",
+         "custom"
+      ]
+   },
+   "type": "docker",
+   "volumes": [
+      {
+         "name": "secret",
+         "temp": { }
+      },
+      {
+         "host": {
+            "path": "/var/lib/nomad/volumes/renovate"
+         },
+         "name": "renovate"
+      },
+      {
+         "host": {
+            "path": "/usr/local/bin/consul"
+         },
+         "name": "consul"
+      }
+   ]
+}
+---
+{
+   "kind": "pipeline",
+   "name": "renovate-cron",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "commands": [
+            "renovate-config-validator"
+         ],
+         "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
+         "name": "validate config",
+         "user": "610:610"
+      },
+      {
+         "commands": [
+            "chown 610 /secret"
+         ],
+         "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
+         "name": "fix file ownership",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "image": "rssnyder/drone-github-app:latest@sha256:5867cd348c73f1258b6b14f6139fb79d0d47cf36ad657e62166ebaef7e8eb0f7",
+         "name": "get app token",
+         "settings": {
+            "APP_ID": {
+               "from_secret": "github_app_id"
+            },
+            "INSTALLATION": {
+               "from_secret": "github_installation_id"
+            },
+            "PEM_B64": {
+               "from_secret": "github_private_key"
+            },
+            "TOKEN_FILE": "/secret/gh-token.txt"
+         },
+         "user": "610:610",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "commands": [
+            "export RENOVATE_TOKEN=\"$(cat /secret/gh-token.txt)\"",
+            "export GITHUB_COM_TOKEN=\"$(cat /secret/gh-token.txt)\"",
+            "consul kv get renovate/\"${DRONE_REPO}\"/.lock || consul lock -timeout 1m -child-exit-code \"renovate/${DRONE_REPO}\" docker-entrypoint.sh"
+         ],
+         "environment": {
+            "DOCKER_GHCR_IO_PASSWORD": {
+               "from_secret": "ghcr_token"
+            },
+            "DOCKER_GHCR_IO_USERNAME": {
+               "from_secret": "ghcr_user"
+            },
+            "LOG_LEVEL": "debug",
+            "RENOVATE_BASE_DIR": "/data",
+            "RENOVATE_DETECT_HOST_RULES_FROM_ENV": "true",
+            "RENOVATE_FORK_PROCESSING": "enabled",
+            "RENOVATE_GIT_AUTHOR": "OGKevin Robot <140143426+ogkevin-robot[bot]@users.noreply.github.com>",
+            "RENOVATE_ONBOARDING": "true",
+            "RENOVATE_PERSIST_REPO_DATA": "true",
+            "RENOVATE_PLATFORM_COMMIT": "true",
+            "RENOVATE_REDIS_URL": "redis://${OG_REDIS_URL}/2",
+            "RENOVATE_REPOSITORIES": "${DRONE_REPO}",
+            "RENOVATE_REVIEWERS": "OGKevin",
+            "RENOVATE_USERNAME": "OGKevin-robot[bot]"
+         },
+         "image": "renovate/renovate:37.13.3@sha256:d103ca33a98264d9367a2d5917b03ef4250a2cdd96a5c450fab983ddcfcfdb47",
+         "name": "renovate",
+         "user": "610:0",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            },
+            {
+               "name": "renovate",
+               "path": "/data"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      }
+   ],
+   "trigger": {
+      "branch": [
+         "main",
+         "master"
+      ],
+      "cron": [
+         "renovate"
+      ],
+      "event": [
+         "cron"
+      ]
+   },
+   "type": "docker",
+   "volumes": [
+      {
+         "name": "secret",
+         "temp": { }
+      },
+      {
+         "host": {
+            "path": "/var/lib/nomad/volumes/renovate"
+         },
+         "name": "renovate"
+      },
+      {
+         "host": {
+            "path": "/usr/local/bin/consul"
+         },
+         "name": "consul"
+      }
+   ]
+}
+---
+{
+   "kind": "pipeline",
+   "name": "jsonnet",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "commands": [
+            "git diff --name-only HEAD~1 | grep '.jsonnet$' | xargs -I{} jsonnetfmt -i {}",
+            "git diff --name-only HEAD~1 | grep '.libsonnet$' | xargs -I{} jsonnetfmt -i {}",
+            "git diff --exit-code"
+         ],
+         "image": "ghcr.io/ogkevin/jsonnet:latest@sha256:bf24a4427731e89b42014529918f122614b2ae96aa62adc7defe867e636f5dc7",
+         "name": "lint"
+      }
+   ],
+   "trigger": {
+      "event": [
+         "custom",
+         "push"
+      ]
+   },
+   "type": "docker"
+}
+---
+{
+   "clone": {
+      "disable": true
+   },
+   "kind": "pipeline",
+   "name": "release-please",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "image": "rssnyder/drone-github-app:latest@sha256:5867cd348c73f1258b6b14f6139fb79d0d47cf36ad657e62166ebaef7e8eb0f7",
+         "name": "get app token",
+         "settings": {
+            "APP_ID": {
+               "from_secret": "github_app_id"
+            },
+            "INSTALLATION": {
+               "from_secret": "github_installation_id"
+            },
+            "PEM_B64": {
+               "from_secret": "github_private_key"
+            },
+            "TOKEN_FILE": "/secret/gh-token.txt"
+         },
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ],
+         "when": {
+            "branch": [
+               "main",
+               "master"
+            ]
+         }
+      },
+      {
+         "commands": [
+            "consul lock -child-exit-code \"release-please/${DRONE_REPO}\" node /app/build/src/bin/release-please.js release-pr --token $(cat /secret/gh-token.txt) --repo-url $DRONE_REPO_LINK"
+         ],
+         "depends_on": [
+            "get app token"
+         ],
+         "image": "ghcr.io/ogkevin/release-please:v15.13.0@sha256:289668997ed54c23abe13fce4b0227b0f163d5db8a42dbee5c9a10f635ca1662",
+         "name": "release-pr",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "consul lock -child-exit-code \"release-please/${DRONE_REPO}\" node /app/build/src/bin/release-please.js github-release --token $(cat /secret/gh-token.txt) --repo-url $DRONE_REPO_LINK"
+         ],
+         "depends_on": [
+            "get app token"
+         ],
+         "image": "ghcr.io/ogkevin/release-please:v15.13.0@sha256:289668997ed54c23abe13fce4b0227b0f163d5db8a42dbee5c9a10f635ca1662",
+         "name": "github-release",
+         "volumes": [
+            {
+               "name": "secret",
+               "path": "/secret"
+            },
+            {
+               "name": "consul",
+               "path": "/usr/local/bin/consul"
+            }
+         ]
+      }
+   ],
+   "trigger": {
+      "branch": [
+         "main",
+         "master"
+      ],
+      "event": [
+         "custom",
+         "push"
+      ]
+   },
+   "type": "docker",
+   "volumes": [
+      {
+         "name": "secret",
+         "temp": { }
+      },
+      {
+         "host": {
+            "path": "/usr/local/bin/consul"
+         },
+         "name": "consul"
+      }
+   ]
+}
+---
+{
+   "kind": "pipeline",
+   "name": "npm",
+   "platform": {
+      "arch": "arm64",
+      "os": "linux"
+   },
+   "steps": [
+      {
+         "commands": [
+            "echo \"$CONFIG\" > /root/.aws/credentials"
+         ],
+         "environment": {
+            "CONFIG": {
+               "from_secret": "aws"
+            }
+         },
+         "image": "debian:11@sha256:7a89d1fd045f797f2f34dd778bdf19335587357c3603859f2048f4c0285b06a8",
+         "name": "set aws credentials",
+         "volumes": [
+            {
+               "name": "aws-config",
+               "path": "/root/.aws"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "aws --endpoint-url http://100.82.97.39:9000 s3 cp s3://repo-obsidian-kobo-highlights-import/KoboReader.sqlite /drone/src/KoboReader.sqlite"
+         ],
+         "image": "docker.io/amazon/aws-cli:2.13.15@sha256:ac2c7d3827a8fef1024357ada9c6ccd8d0ce098a85cffd6803a52bb8cb4842ed",
+         "name": "copy kobo database",
+         "volumes": [
+            {
+               "name": "aws-config",
+               "path": "/root/.aws"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "npm install"
+         ],
+         "image": "node:18-buster",
+         "name": "install",
+         "volumes": [
+            {
+               "name": "node_modules",
+               "path": "/drone/src/node_modules"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "npm run lint"
+         ],
+         "depends_on": [
+            "install"
+         ],
+         "image": "node:18-buster",
+         "name": "lint",
+         "volumes": [
+            {
+               "name": "node_modules",
+               "path": "/drone/src/node_modules"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "npm run test"
+         ],
+         "depends_on": [
+            "install",
+            "copy kobo database"
+         ],
+         "image": "node:18-buster",
+         "name": "test",
+         "volumes": [
+            {
+               "name": "node_modules",
+               "path": "/drone/src/node_modules"
+            }
+         ]
+      },
+      {
+         "commands": [
+            "npm run build"
+         ],
+         "depends_on": [
+            "install"
+         ],
+         "image": "node:18-buster",
+         "name": "build",
+         "volumes": [
+            {
+               "name": "node_modules",
+               "path": "/drone/src/node_modules"
+            }
+         ]
+      }
+   ],
+   "trigger": {
+      "event": [
+         "custom",
+         "push"
+      ]
+   },
+   "type": "docker",
+   "volumes": [
+      {
+         "host": {
+            "path": "/tmp/node_modules/kobo"
+         },
+         "name": "node_modules"
+      },
+      {
+         "name": "aws-config",
+         "temp": { }
+      }
+   ]
+}
+---
+{
+   "get": {
+      "name": "credentials",
+      "path": "secret/data/ci/aws"
+   },
+   "kind": "secret",
+   "name": "aws"
+}
+---
+{
+   "get": {
+      "name": "token",
+      "path": "secret/data/ci/dockerhub"
+   },
+   "kind": "secret",
+   "name": "dockerhub_token"
+}
+---
+{
+   "get": {
+      "name": "user",
+      "path": "secret/data/ci/dockerhub"
+   },
+   "kind": "secret",
+   "name": "dockerhub_user"
+}
+---
+{
+   "get": {
+      "name": "token",
+      "path": "secret/data/ci/ghcr"
+   },
+   "kind": "secret",
+   "name": "ghcr_token"
+}
+---
+{
+   "get": {
+      "name": "user",
+      "path": "secret/data/ci/ghcr"
+   },
+   "kind": "secret",
+   "name": "ghcr_user"
+}
+---
+{
+   "get": {
+      "name": "app_id",
+      "path": "secret/data/ci/github"
+   },
+   "kind": "secret",
+   "name": "github_app_id"
+}
+---
+{
+   "get": {
+      "name": "installation_id",
+      "path": "secret/data/ci/github"
+   },
+   "kind": "secret",
+   "name": "github_installation_id"
+}
+---
+{
+   "get": {
+      "name": "app_base64_private_key",
+      "path": "secret/data/ci/github"
+   },
+   "kind": "secret",
+   "name": "github_private_key"
+}
+---
+kind: signature
+hmac: 65c33c15d37a05290f8cd935aae043afaeb0ff02539a7d0150d06ed3b8f0c6f2
+
+...
