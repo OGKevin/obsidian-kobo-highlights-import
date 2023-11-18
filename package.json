@@ -15,7 +15,7 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/chai": "4.3.9",
+		"@types/chai": "4.3.10",
 		"@types/mocha": "10.0.3",
 		"@types/node": "18.18.9",
 		"@types/sql.js": "1.4.4",
