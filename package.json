@@ -24,7 +24,7 @@
 		"builtin-modules": "3.3.0",
 		"chai": "4.3.10",
 		"esbuild": "0.19.8",
-		"eslint": "8.54.0",
+		"eslint": "8.55.0",
 		"mocha": "10.2.0",
 		"nyc": "15.1.0",
 		"obsidian": "1.4.11",
