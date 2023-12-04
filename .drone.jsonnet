@@ -88,6 +88,7 @@ local koboPipeline = [
           'install',
           'copy kobo database',
         ],
+        mem_limit: 4096,
       },
       {
         name: 'build',

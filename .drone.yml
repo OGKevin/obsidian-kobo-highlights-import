@@ -540,7 +540,8 @@
                "name": "node_modules",
                "path": "/drone/src/node_modules"
             }
-         ]
+         ],
+         "mem_limit": 4096,
       },
       {
          "commands": [
