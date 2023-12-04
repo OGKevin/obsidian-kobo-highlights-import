@@ -500,7 +500,7 @@
          "commands": [
             "npm install"
          ],
-         "image": "node:18-buster",
+         "image": "node:20",
          "name": "install",
          "volumes": [
             {
@@ -516,7 +516,7 @@
          "depends_on": [
             "install"
          ],
-         "image": "node:18-buster",
+         "image": "node:20",
          "name": "lint",
          "volumes": [
             {
@@ -533,7 +533,7 @@
             "install",
             "copy kobo database"
          ],
-         "image": "node:18-buster",
+         "image": "node:20",
          "name": "test",
          "volumes": [
             {
@@ -550,7 +550,7 @@
          "depends_on": [
             "install"
          ],
-         "image": "node:18-buster",
+         "image": "node:20",
          "name": "build",
          "volumes": [
             {
