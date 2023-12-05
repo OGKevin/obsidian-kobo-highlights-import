@@ -19,7 +19,10 @@
 				"eamodio.gitlens",
 				"maty.vscode-mocha-sidebar",
 				"ryanluker.vscode-coverage-gutters"
-			]
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			}
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -30,6 +33,8 @@
 	"remoteUser": "node",
 	"features": {
 		"git": "latest",
-		"github-cli": "latest"
+		"github-cli": "latest",
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/earthly/devcontainer-features/earthly:1": {}
 	}
 }
