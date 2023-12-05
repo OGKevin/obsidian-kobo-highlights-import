@@ -4,7 +4,7 @@ local jsonnet = import '.drone-templates/jsonnet.libsonnet';
 local releasePlease = import '.drone-templates/release-please.libsonnet';
 local renovate = import '.drone-templates/renovate.libsonnet';
 
-local nodeImage = 'node:18-buster';
+local nodeImage = 'node:20';
 
 local koboPipeline = [
   common.defaultPushTrigger + common.platform + {
