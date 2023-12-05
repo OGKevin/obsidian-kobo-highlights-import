@@ -19,7 +19,10 @@
 				"eamodio.gitlens",
 				"maty.vscode-mocha-sidebar",
 				"ryanluker.vscode-coverage-gutters"
-			]
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			}
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
