@@ -74,10 +74,11 @@ generate-droneci-spec:
     COPY .drone-templates .drone-templates
     COPY .drone.jsonnet .
     
-    RUN jsonnetfmt -i .drone.jsonnet && drone jsonnet --stream
-    RUN mv .drone.jsonnet .drone.yml /outputs
+    RUN jsonnetfmt -i .drone.jsonnet 
+    RUN drone jsonnet --stream
     
-    SAVE ARTIFACT /outputs AS LOCAL .   
+    SAVE ARTIFACT .drone.jsonnet AS LOCAL .drone.jsonnet  
+    SAVE ARTIFACT .drone.yml AS LOCAL .drone.yml  
 
 lint-drone-spec:
     FROM +generate-droneci-spec
@@ -88,7 +89,7 @@ sign-drone-spec:
     FROM +dronecli
 
     ARG DRONE_SERVER=https://drone.ogkevin.nl
-    COPY +generate-droneci-spec/outputs/.drone.yml .
+    COPY +generate-droneci-spec/.drone.yml .
 
     RUN --secret DRONE_TOKEN drone sign OGKevin/obsidian-kobo-highlights-import --save
     SAVE ARTIFACT .drone.yml AS LOCAL .drone.yml
