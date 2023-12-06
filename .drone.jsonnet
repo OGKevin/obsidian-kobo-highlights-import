@@ -17,10 +17,10 @@ local koboPipeline = [
         name: 'test all',
         image: earthlyImage,
         commands: [
-          'earthly --secret VAULT_TOKEN --ci +test-all',
+          'earthly --secret VAULT_TOKEN --buildkit-host $BUILDKIT_HOST --ci +test-all',
         ],
       },
-      ],
+    ],
     volumes: [],
   },
   {

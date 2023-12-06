@@ -467,7 +467,7 @@
    "steps": [
       {
          "commands": [
-            "earthly --secret VAULT_TOKEN --ci +test-all"
+            "earthly --secret VAULT_TOKEN --buildkit-host $BUILDKIT_HOST --ci +test-all"
          ],
          "image": "earthly/earthly:v0.7.22",
          "name": "test all"
@@ -556,6 +556,6 @@
 }
 ---
 kind: signature
-hmac: 3c4c98f62b5e669d0bae3cb37f905f7f70c99488439899b69d32b484c5c604ff
+hmac: 8b84a3478ae2ead8995ebc85e4108ccf1b17735bfddbbb8870fabfdb59c67977
 
 ...
