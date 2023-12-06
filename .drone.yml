@@ -467,6 +467,7 @@
    "steps": [
       {
          "commands": [
+            "earthly config global.tls_enabled $BUILDKIT_TLS_ENABLED",
             "earthly --secret VAULT_TOKEN --buildkit-host $BUILDKIT_HOST --ci +test-all"
          ],
          "image": "earthly/earthly:v0.7.22",
@@ -556,6 +557,6 @@
 }
 ---
 kind: signature
-hmac: 8b84a3478ae2ead8995ebc85e4108ccf1b17735bfddbbb8870fabfdb59c67977
+hmac: 130708218d698368633c541a839fc3c8104692ddafafa2e922e74dc03004bc0e
 
 ...
