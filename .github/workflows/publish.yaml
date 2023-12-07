@@ -1,4 +1,4 @@
-name: Build plugin
+name: Publish plugin
 
 on:
   release:
@@ -8,7 +8,7 @@ env:
   PLUGIN_NAME: kobo-highlights-import
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +29,7 @@ jobs:
           echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
       - name: Upload zip file
         id: upload-zip
-        uses: actions/upload-release-asset@v1
+        uses: sekwah41/upload-release-assets@v1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -39,7 +39,7 @@ jobs:
           asset_content_type: application/zip
       - name: Upload main.js
         id: upload-main
-        uses: actions/upload-release-asset@v1
+        uses: sekwah41/upload-release-assets@v1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -49,7 +49,7 @@ jobs:
           asset_content_type: text/javascript
       - name: Upload manifest.json
         id: upload-manifest
-        uses: actions/upload-release-asset@v1
+        uses: sekwah41/upload-release-assets@v1.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
