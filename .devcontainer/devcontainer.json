@@ -37,6 +37,10 @@
 		},
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/earthly/devcontainer-features/earthly:1": {}
+		"ghcr.io/earthly/devcontainer-features/earthly:1": {},
+		"ghcr.io/devcontainers-contrib/features/tailscale:1": {}
+	},
+	"postStartCommand": {
+		"tailscaled": "nohup bash -c 'sudo tailscaled &' >> /tmp/tailscaled.log 2>&1"
 	}
 }
