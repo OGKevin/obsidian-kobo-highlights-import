@@ -9,6 +9,8 @@ type highlight = string
 export class HighlightService {
     repo: Repository
 
+    unkonwnBookTitle = 'Unknown Book'
+
     constructor(repo: Repository) {
         this.repo = repo
     }
@@ -47,16 +49,16 @@ export class HighlightService {
 
             text += `> ${x.bookmark.text}`
 
-			if (x.bookmark.note) {
-				text += `\n`
+            if (x.bookmark.note) {
+                text += `\n`
 
-				if (includeCallouts) {
-					text += `>> [!` + annotationCallout + `]`
-					text += `\n> ${x.bookmark.note}`;
-				} else {
-					text += `\n${x.bookmark.note}`;
-				}
-			}
+                if (includeCallouts) {
+                    text += `>> [!` + annotationCallout + `]`
+                    text += `\n> ${x.bookmark.note}`;
+                } else {
+                    text += `\n${x.bookmark.note}`;
+                }
+            }
 
             if (includeDate) {
                 text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
@@ -108,10 +110,11 @@ export class HighlightService {
                 return {
                     bookmark: bookmark,
                     content: {
-                        title: 'Unknown Title',
+                        title: this.unkonwnBookTitle,
                         contentId: bookmark.contentId,
                         chapterIdBookmarked: 'false',
-                        bookTitle: 'Unknown Book'}
+                        bookTitle: this.unkonwnBookTitle,
+                    }
                 }
             }
         }
