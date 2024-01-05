@@ -17,6 +17,12 @@ export class Repository {
         }
         const bookmarks: Bookmark[] = []
 
+        if (res[0].values == undefined) {
+            console.warn("Bookmarks table returend no results, do you have any annotations created?")
+
+            return bookmakrs
+        }
+
         res[0].values.forEach(row => {
             if (!(row[0] && row[1] && row[2] && row[4])) {
                 console.warn(
@@ -98,7 +104,7 @@ export class Repository {
             `select 
                 Title, ContentID, ChapterIDBookmarked, BookTitle from content
                 where ContentID like $id;`,
-            { $id: `${contentId}%` },
+            { $id: `%${contentId}%` },
         )
         const contents = this.parseContentStatement(statement)
         statement.free()

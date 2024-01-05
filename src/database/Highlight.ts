@@ -12,6 +12,8 @@ type bookmark = {
 export class HighlightService {
     repo: Repository
 
+    unkonwnBookTitle = 'Unknown Title'
+
     constructor(repo: Repository) {
         this.repo = repo
     }
@@ -58,26 +60,26 @@ export class HighlightService {
             if (!x.content.bookTitle) {
                 throw new Error("bookTitle must be set")
             }
-            
+
             // Start annotation marker
             let text = `%%START-${x.bookmark.bookmarkId}%%\n`;
 
             if (includeCallouts) {
                 text += `> [!` + highlightCallout + `]\n`
             }
-            
+
             text += `> ${x.bookmark.text}`
 
-			if (x.bookmark.note) {
-				text += `\n`
+            if (x.bookmark.note) {
+                text += `\n`
 
-				if (includeCallouts) {
-					text += `>> [!` + annotationCallout + `]`
-					text += `\n> ${x.bookmark.note}`;
-				} else {
-					text += `\n${x.bookmark.note}`;
-				}
-			}
+                if (includeCallouts) {
+                    text += `>> [!` + annotationCallout + `]`
+                    text += `\n> ${x.bookmark.note}`;
+                } else {
+                    text += `\n${x.bookmark.note}`;
+                }
+            }
 
             if (includeDate) {
                 text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
@@ -127,7 +129,16 @@ export class HighlightService {
         if (content == null) {
             content = await this.repo.getContentLikeContentId(bookmark.contentId)
             if (content == null) {
-                throw Error(`bookmark seems to link to a non existing content: ${bookmark.contentId}`)
+                console.warn(`bookmark seems to link to a non existing content: ${bookmark.contentId}`)
+                return {
+                    bookmark: bookmark,
+                    content: {
+                        title: this.unkonwnBookTitle,
+                        contentId: bookmark.contentId,
+                        chapterIdBookmarked: 'false',
+                        bookTitle: this.unkonwnBookTitle,
+                    }
+                }
             }
         }
 

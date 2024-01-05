@@ -17,10 +17,13 @@ export class ExtractHighlightsModal extends Modal {
 
     sqlFilePath: string | undefined
 
+    nrOfBooksExtracted: number
+
     constructor(
         app: App, settings: KoboHighlightsImporterSettings) {
         super(app);
         this.settings = settings
+        this.nrOfBooksExtracted = 0
     }
 
     private async fetchHighlights() {
@@ -49,9 +52,11 @@ export class ExtractHighlightsModal extends Modal {
             this.settings.annotationCallout
         )
 
+        this.nrOfBooksExtracted = content.size
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
+
             const sanitizedBookName = sanitize(bookTitle)
             const fileName = normalizePath(`${this.settings.storageFolder}/${sanitizedBookName}.md`)
             // Check if file already exists
@@ -64,12 +69,12 @@ export class ExtractHighlightsModal extends Modal {
             const markdown = service.fromMapToMarkdown(chapters, existingFile)
          
             // Write file
+
             await this.app.vault.adapter.write(
                 fileName,
                 applyTemplateTransformations(template, markdown, bookTitle)
             )
-         
-		}
+        }
     }
 
     onOpen() {
@@ -83,7 +88,7 @@ export class ExtractHighlightsModal extends Modal {
             new Notice('Extracting highlights...')
             this.fetchHighlights()
                 .then(() => {
-                    new Notice('Highlights extracted!')
+                    new Notice('Extracted highlights from ' + this.nrOfBooksExtracted + ' books!')
                     this.close()
                 }).catch(e => {
                     console.log(e)
@@ -96,6 +101,8 @@ export class ExtractHighlightsModal extends Modal {
         this.inputFileEl.type = 'file'
         this.inputFileEl.accept = '.sqlite'
         this.inputFileEl.addEventListener('change', ev => {
+            // Not sure what the type of this event is :(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const filePath = (<any>ev).target.files[0].path;
             fs.access(filePath, fs.constants.R_OK, (err) => {
                 if (err) {

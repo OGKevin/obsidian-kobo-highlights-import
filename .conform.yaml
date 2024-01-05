@@ -1,0 +1,24 @@
+policies:
+    - type: commit
+      spec:
+          header:
+              length: 89
+              imperative: true
+              case: lower
+              invalidLastCharacters: .
+          body:
+              required: true
+          dco: false
+          gpg:
+              required: true
+          spellcheck:
+              locale: US
+          maximumOfOneCommit: false
+          conventional:
+              types:
+                  - feat
+                  - fix
+                  - chore
+                  - deps
+                  - docs
+              descriptionLength: 72
