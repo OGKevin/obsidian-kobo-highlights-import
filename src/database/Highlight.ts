@@ -9,7 +9,7 @@ type highlight = string
 export class HighlightService {
     repo: Repository
 
-    unkonwnBookTitle = 'Unknown Book'
+    unkonwnBookTitle = 'Unknown Title'
 
     constructor(repo: Repository) {
         this.repo = repo
