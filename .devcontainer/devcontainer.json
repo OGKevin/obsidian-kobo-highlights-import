@@ -19,7 +19,10 @@
 				"eamodio.gitlens",
 				"maty.vscode-mocha-sidebar",
 				"ryanluker.vscode-coverage-gutters"
-			]
+			],
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh"
+			}
 		}
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
@@ -29,7 +32,15 @@
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "node",
 	"features": {
-		"git": "latest",
-		"github-cli": "latest"
+		"ghcr.io/devcontainers/features/git:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/earthly/devcontainer-features/earthly:1": {},
+		"ghcr.io/devcontainers-contrib/features/tailscale:1": {}
+	},
+	"postStartCommand": {
+		"tailscaled": "nohup bash -c 'sudo tailscaled &' >> /tmp/tailscaled.log 2>&1"
 	}
 }
