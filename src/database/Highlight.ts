@@ -6,8 +6,13 @@ type bookTitle = string
 type chapter = string
 type bookmark = {
     bookmarkId: string
-    content: string
+    // This contains the whole block, from START- to END-
+    fullContent: string
+    // This contains only the content inside START-EXTRACTED and END-EXTRACTED
+    highlightContent: string
 }
+
+export const typeWhateverYouWantPlaceholder = `--> Here you can type whatever you want, it will not be overwritten by the plugin. <--`
 
 export class HighlightService {
     repo: Repository
@@ -18,26 +23,36 @@ export class HighlightService {
         this.repo = repo
     }
 
-    extractExistingHighlight(bookmarkId: string, existingFile: string): string {
+    extractExistingHighlight(bookmark: bookmark, existingContent: string): string {
         // Define search terms
-        const startSearch = `%%START-${bookmarkId}%%`
-        const endSearch = `%%END-${bookmarkId}%%`
+        const startSearch = `%%START-${bookmark.bookmarkId}%%`
+        const endSearch = `%%END-${bookmark.bookmarkId}%%`
         // Find substring indices
-        const start = existingFile.indexOf(startSearch)
-        const end = existingFile.indexOf(endSearch) + endSearch.length + 1 // Add length of search term to include it in substring extraction
+        const start = existingContent.indexOf(startSearch)
+        const end = existingContent.indexOf(endSearch) + endSearch.length + 1 // Add length of search term to include it in substring extraction
         // Return the extracted substring
-        return existingFile.substring(start, end)
+        return this.upateHighlightFromExtractedFile(bookmark, existingContent.substring(start, end))
     }
 
-    fromMapToMarkdown(chapters: Map<chapter, bookmark[]>, existingFile?: string): string {
+    upateHighlightFromExtractedFile(bookmark: bookmark, existingContent: string): string {
+        const startSearch = `%%START-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
+        const endSearch = `%%END-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
+
+        const start = existingContent.indexOf(startSearch) + startSearch.length + 1
+        const end = existingContent.indexOf(endSearch) - 1 // Add length of search term to include it in substring extraction
+
+        return existingContent.replace(existingContent.substring(start, end), bookmark.highlightContent)
+    }
+
+    fromMapToMarkdown(chapters: Map<chapter, bookmark[]>, existingFileContents?: string): string {
         let markdown = "";
         for (const [chapter, highlights] of chapters) {
             markdown += `## ${chapter.trim()}\n\n`
             markdown += highlights.map((highlight) => {
-                if (existingFile?.includes(highlight.bookmarkId)) {
-                    return this.extractExistingHighlight(highlight.bookmarkId, existingFile)
+                if (existingFileContents?.includes(highlight.bookmarkId)) {
+                    return this.extractExistingHighlight(highlight, existingFileContents)
                 } else {
-                    return highlight.content
+                    return highlight.fullContent
                 }
             }).join('\n\n').trim()
             markdown += `\n\n`
@@ -62,33 +77,42 @@ export class HighlightService {
             }
 
             // Start annotation marker
-            let text = `%%START-${x.bookmark.bookmarkId}%%\n`;
+            let text = `%%START-${x.bookmark.bookmarkId}%%\n\n`;
+            text += `${typeWhateverYouWantPlaceholder}\n\n`
+            text += `%%START-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n`
+
+            let higlightContent = ""
 
             if (includeCallouts) {
-                text += `> [!` + highlightCallout + `]\n`
+                higlightContent += `> [!` + highlightCallout + `]\n`
             }
 
-            text += `> ${x.bookmark.text}`
+            higlightContent += `> ${x.bookmark.text}`
 
             if (x.bookmark.note) {
-                text += `\n`
+                higlightContent += `\n`
 
                 if (includeCallouts) {
-                    text += `>> [!` + annotationCallout + `]`
-                    text += `\n> ${x.bookmark.note}`;
+                    higlightContent += `>> [!` + annotationCallout + `]`
+                    higlightContent += `\n> ${x.bookmark.note}`;
                 } else {
-                    text += `\n${x.bookmark.note}`;
+                    higlightContent += `\n${x.bookmark.note}`;
                 }
             }
 
             if (includeDate) {
-                text += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
+                higlightContent += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
+
+            text += higlightContent
+
             // End annotation marker
-            text += `\n\n%%END-${x.bookmark.bookmarkId}%%\n`;
+            text += `\n%%END-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n\n`
+            text += `${typeWhateverYouWantPlaceholder}\n\n`
+            text += `%%END-${x.bookmark.bookmarkId}%%\n`;
 
             const existingBook = m.get(x.content.bookTitle)
-            const highlight: bookmark = {bookmarkId: x.bookmark.bookmarkId, content: text}
+            const highlight: bookmark = { bookmarkId: x.bookmark.bookmarkId, fullContent: text, highlightContent: higlightContent }
             if (existingBook) {
                 const existingChapter = existingBook.get(x.content.title)
 

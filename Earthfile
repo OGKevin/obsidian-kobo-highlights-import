@@ -35,7 +35,7 @@ kobo-test-db:
     COPY +creds-aws/creds /root/.aws/credentials
     
     RUN aws --endpoint-url http://100.82.97.39:9000 s3 cp s3://repo-obsidian-kobo-highlights-import/KoboReader.sqlite KoboReader.sqlite
-    SAVE ARTIFACT KoboReader.sqlite
+    SAVE ARTIFACT KoboReader.sqlite AS LOCAL KoboReader.sqlite
 
 test:
     FROM +node
