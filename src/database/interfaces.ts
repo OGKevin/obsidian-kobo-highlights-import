@@ -1,4 +1,5 @@
 export interface Bookmark {
+    bookmarkId: string,
     text: string;
     contentId: string;
     note?: string;

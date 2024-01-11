@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
     storageFolder: '',
     includeCreatedDate: false,
     dateFormat: "YYYY-MM-DD",
+    sortByChapterProgress: false,
     templatePath: "",
     includeCallouts: true,
     highlightCallout: "quote",
@@ -17,6 +18,7 @@ export interface KoboHighlightsImporterSettings {
     storageFolder: string;
     includeCreatedDate: boolean;
     dateFormat: string;
+    sortByChapterProgress: boolean;
     templatePath: string;
     includeCallouts: boolean,
     highlightCallout: string,
@@ -34,8 +36,9 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 
         this.add_destination_folder();
         this.add_enable_creation_date();
-        this.add_date_fromat();
+        this.add_date_format();
         this.add_template_path();
+        this.add_sort_by_chapter_progress();
         this.add_enable_callouts();
         this.add_highlight_callouts_format();
         this.add_annotation_callouts_format();
@@ -76,15 +79,15 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
             .setName("Add creation date")
             .setDesc(`If the exported higlights should include '- [[${this.plugin.settings.dateFormat}]]'`)
             .addToggle((cb) => {
-                cb.setValue(this.plugin.settings.includeCreatedDate)
+                cb.setValue(this.plugin.settings.sortByChapterProgress)
                     .onChange((toggle) => {
-                        this.plugin.settings.includeCreatedDate = toggle;
+                        this.plugin.settings.sortByChapterProgress = toggle;
                         this.plugin.saveSettings();
                     })
             })
     }
 
-    add_date_fromat(): void {
+    add_date_format(): void {
         new Setting(this.containerEl)
             .setName("Date format")
             .setDesc("The format of date to use")
@@ -98,6 +101,21 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
             })
     }
 
+    add_sort_by_chapter_progress(): void {
+        const desc = document.createDocumentFragment();
+        desc.append("Turn on to sort highlights by chapter progess. If turned off, highlights are sorted by creation date and time.")
+
+        new Setting(this.containerEl)
+            .setName("Sort by chapter progress")
+            .setDesc(desc)
+            .addToggle((cb) => {
+                cb.setValue(this.plugin.settings.sortByChapterProgress)
+                    .onChange((toggle) => {
+                        this.plugin.settings.sortByChapterProgress = toggle;
+                        this.plugin.saveSettings();
+                    });
+            })
+    }
     add_enable_callouts(): void {
         const desc = document.createDocumentFragment();
         desc.append("When enabled Kobo highlights importer will make use of Obsidian callouts for highlights and annotations.",

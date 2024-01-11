@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import { readFileSync } from 'fs';
 import SqlJs, { Database } from 'sql.js';
 import { binary } from '../binaries/sql-wasm';
-import { Repository } from '../database/repository';
+import { Repository } from './repository';
 
 describe('Repository', async function () {
     let db: Database

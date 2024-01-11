@@ -5,11 +5,11 @@ export const defaultTemplate = `
 `
 
 export function applyTemplateTransformations(
-	rawTemaple: string,
+	rawTemplate: string,
 	highlights: string,
 	bookTitle: string,
 ): string {
-	return rawTemaple
+	return rawTemplate
 		.replace(
 			/{{\s*highlights\s*}}/gi,
 			highlights,

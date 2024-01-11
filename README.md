@@ -53,6 +53,22 @@ bookTitle: {{title}}
 | highlights | Will get replaced with the extracted highlights. | `{{highlights}}` |
 | title		    | The title of the book                            | `{{title}}`      |
 
+## Highlight markers
+The plugin uses comments as highlight markers, to enable support for keeping existing highlights. All content between these markers will be transferred to the updated file. 
+
+```
+%%START-<MARKER IDENTIFIER>%%
+
+--> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+
+%%START-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
+...highlight
+%%END-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
+
+--> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+
+%%END-<MARKER IDENTIFIER>%%`
+```
 ## Helping Screenshots
 
 ![](./README_assets/step1.png)
