@@ -8,37 +8,45 @@ export class Repository {
         this.db = db
     }
 
-    async getAllBookmark(): Promise<Bookmark[]> {
-        const res = this.db.exec(`select Text, ContentID, annotation, DateCreated from Bookmark where Text is not null;`)
-        const bookmakrs: Bookmark[] = []
+    async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
+        let res
+        if (sortByChapterProgress) {
+            res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`)
+        } else {
+            res = this.db.exec(`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`)
+        }
+        const bookmarks: Bookmark[] = []
 
         if (res[0].values == undefined) {
             console.warn("Bookmarks table returend no results, do you have any annotations created?")
 
-            return bookmakrs
+            return bookmarks
         }
 
         res[0].values.forEach(row => {
-            if (!(row[0] && row[1] && row[3])) {
+            if (!(row[0] && row[1] && row[2] && row[4])) {
                 console.warn(
                     "Skipping bookmark with invalid values",
                     row[0],
                     row[1],
+                    row[2],
                     row[3],
+                    row[4],
                 )
 
                 return
             }
 
-            bookmakrs.push({
-                text: row[0].toString().replace(/\s+/g, ' ').trim(),
-                contentId: row[1].toString(),
-                note: row[2]?.toString(),
-                dateCreated: new Date(row[3].toString())
+            bookmarks.push({
+                bookmarkId: row[0].toString(),
+                text: row[1].toString().replace(/\s+/g, ' ').trim(),
+                contentId: row[2].toString(),
+                note: row[3]?.toString(),
+                dateCreated: new Date(row[4].toString())
             })
         });
 
-        return bookmakrs
+        return bookmarks
     }
 
     async getTotalBookmark(): Promise<number> {
@@ -49,7 +57,7 @@ export class Repository {
 
     async getBookmarkById(id: string): Promise<Bookmark | null> {
         const statement = this.db.prepare(
-            `select Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
+            `select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
             {
                 $id: id
             }
@@ -61,15 +69,16 @@ export class Repository {
 
         const row = statement.get()
 
-        if (!(row[0] && row[1] && row[3])) {
+        if (!(row[0] && row[1] && row[2] && row[4])) {
             throw new Error("Bookmark column returned unexpected null")
         }
 
         return {
-            text: row[0].toString().replace(/\s+/g, ' ').trim(),
-            contentId: row[1].toString(),
-            note: row[2]?.toString(),
-            dateCreated: new Date(row[3].toString())
+            bookmarkId: row[0].toString(),
+            text: row[1].toString().replace(/\s+/g, ' ').trim(),
+            contentId: row[2].toString(),
+            note: row[3]?.toString(),
+            dateCreated: new Date(row[4].toString())
         }
     }
 

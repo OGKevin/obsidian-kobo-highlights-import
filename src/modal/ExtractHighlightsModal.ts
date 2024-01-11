@@ -44,7 +44,7 @@ export class ExtractHighlightsModal extends Modal {
         )
 
         const content = service.convertToMap(
-            await service.getAllHighlight(),
+            await service.getAllHighlight(this.settings.sortByChapterProgress),
             this.settings.includeCreatedDate,
             this.settings.dateFormat,
             this.settings.includeCallouts,
@@ -56,9 +56,20 @@ export class ExtractHighlightsModal extends Modal {
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
-            const markdown = service.fromMapToMarkdown(chapters)
-            const saniizedBookName = sanitize(bookTitle)
-            const fileName = normalizePath(`${this.settings.storageFolder}/${saniizedBookName}.md`)
+
+            const sanitizedBookName = sanitize(bookTitle)
+            const fileName = normalizePath(`${this.settings.storageFolder}/${sanitizedBookName}.md`)
+            // Check if file already exists
+            let existingFile;
+            try {
+                existingFile = await this.app.vault.adapter.read(fileName)
+            } catch (error) {
+                console.warn("Attempted to read file, but it does not already exist.")
+            }
+            const markdown = service.fromMapToMarkdown(chapters, existingFile)
+         
+            // Write file
+
             await this.app.vault.adapter.write(
                 fileName,
                 applyTemplateTransformations(template, markdown, bookTitle)
