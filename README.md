@@ -58,9 +58,16 @@ The plugin uses comments as highlight markers, to enable support for keeping exi
 
 ```
 %%START-<MARKER IDENTIFIER>%%
-...highlight
 
-%%END-<MARKER IDENTIFIER>%%
+--> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+
+%%START-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
+...highlight
+%%END-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
+
+--> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+
+%%END-<MARKER IDENTIFIER>%%`
 ```
 ## Helping Screenshots
 
