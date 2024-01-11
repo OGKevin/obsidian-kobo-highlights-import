@@ -3,6 +3,7 @@ import { Repository } from './repository';
 import { HighlightService } from './Highlight';
 import { Bookmark, Content, Highlight } from './interfaces';
 import moment from 'moment';
+import {v4 as uuidv4} from 'uuid';
 
 describe('HighlightService', async function () {
 
@@ -408,13 +409,15 @@ This is an exising note, added to the highlight.
 
             before(async function () {
                 const dateCreated = new Date(Date.UTC(2022, 7, 5, 20, 46, 41, 0))
+                const bookmarkID = uuidv4()
                 const bookmark: Bookmark = {
+                    bookmarkId: bookmarkID,
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "missing-content-id",
                     note: '',
                     dateCreated
                 }
-                highlight = await service.createHilightFromBookmark(bookmark)
+                highlight = await service.createHighlightFromBookmark(bookmark)
                 dateCreatedText = moment(dateCreated).format("")
             })
 
@@ -432,7 +435,10 @@ This is an exising note, added to the highlight.
                 chai.assert.deepEqual(
                     markdown, `## Unknown Title
 
-> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]`
+%%START-` + highlight.bookmark.bookmarkId + `%%
+> “I guess I can’t be. How do you prove a negative?” — [[` + dateCreatedText + `]]
+
+%%END-` + highlight.bookmark.bookmarkId + `%%`
                 )
             })
         })

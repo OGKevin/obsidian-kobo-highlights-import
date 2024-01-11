@@ -20,7 +20,7 @@ export class Repository {
         if (res[0].values == undefined) {
             console.warn("Bookmarks table returend no results, do you have any annotations created?")
 
-            return bookmakrs
+            return bookmarks
         }
 
         res[0].values.forEach(row => {
