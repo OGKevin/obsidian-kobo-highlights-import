@@ -7,7 +7,9 @@ This plugin aims to make highlight import from Kobo devices easier.
 	- [Templating](#templating)
 		- [Examples](#examples)
 		- [Variables](#variables)
+	- [Highlight markers](#highlight-markers)
 	- [Helping Screenshots](#helping-screenshots)
+	- [Obsidian Callouts](#obsidian-callouts)
 	- [Contributing](#contributing)
 
 ## How to use
