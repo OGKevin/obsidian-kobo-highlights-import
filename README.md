@@ -59,16 +59,20 @@ The plugin uses comments as highlight markers, to enable support for keeping exi
 ```
 %%START-<MARKER IDENTIFIER>%%
 
---> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+%% Here you can type whatever you want, it will not be overwritten by the plugin. %%
 
 %%START-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
 ...highlight
 %%END-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
 
---> Here you can type whatever you want, it will not be overwritten by the plugin. <--
+%% Here you can type whatever you want, it will not be overwritten by the plugin. $$
 
 %%END-<MARKER IDENTIFIER>%%`
 ```
+
+![](./README_assets/IMG_0078.png)
+![](./README_assets/IMG_0079.png)
+
 ## Helping Screenshots
 
 ![](./README_assets/step1.png)
