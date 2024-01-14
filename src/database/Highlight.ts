@@ -12,7 +12,7 @@ type bookmark = {
     highlightContent: string
 }
 
-export const typeWhateverYouWantPlaceholder = `--> Here you can type whatever you want, it will not be overwritten by the plugin. <--`
+export const typeWhateverYouWantPlaceholder = `%% Here you can type whatever you want, it will not be overwritten by the plugin. %%`
 
 export class HighlightService {
     repo: Repository
