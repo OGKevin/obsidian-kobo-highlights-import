@@ -17,7 +17,7 @@
 	"devDependencies": {
 		"@types/chai": "4.3.11",
 		"@types/mocha": "10.0.6",
-		"@types/node": "20.11.0",
+		"@types/node": "20.11.5",
 		"@types/sql.js": "1.4.9",
 		"@types/uuid": "^9.0.7",
 		"@typescript-eslint/eslint-plugin": "6.19.0",
