@@ -4,7 +4,7 @@ import {applyTemplateTransformations, defaultTemplate} from './template';
 
 describe('template', async function () {
 	it('applyTemplateTransformations default', async function () {
-		const content = applyTemplateTransformations(defaultTemplate, "test", "test")
+		const content = applyTemplateTransformations(defaultTemplate, "test", {title: "test title", author:"test"})
 
 		chai.expect(content).deep.eq(
 			`# test
@@ -47,7 +47,7 @@ test`
 
 	for (const [title, t] of templates) {
 		it(`applyTemplateTransformations ${title}`, async function () {
-			const content = applyTemplateTransformations(t[0], "test", "test title")
+			const content = applyTemplateTransformations(t[0], "test", {title: "test title", author: "test"})
 
 			chai.expect(content).deep.eq(t[1])
 		});

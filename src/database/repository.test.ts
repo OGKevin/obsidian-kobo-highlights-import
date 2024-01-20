@@ -50,4 +50,42 @@ describe('Repository', async function () {
         });
         chai.expect(await repo.getAllContentByBookTitle(titles.at(Math.floor(Math.random() * titles.length)) ?? "")).length.above(0)
     });
+    it('getBookDetailsOnePunchMan', async function () {
+        const details = await repo.getBookDetailsByBookTitle("One-Punch Man, Vol. 2")
+
+        chai.expect(details).not.null
+        chai.expect(details?.title).is.eq("One-Punch Man, Vol. 2")
+        chai.expect(details?.author).is.eq("ONE")
+        chai.expect(details?.description).not.null
+        chai.expect(details?.publisher).is.eq("VIZ Media LLC")
+        chai.expect(details?.dateLastRead).not.null
+        chai.expect(details?.readStatus).is.eq(2)
+        chai.expect(details?.percentRead).is.eq(100)
+        chai.expect(details?.isbn).is.eq("9781421585659")
+        chai.expect(details?.seriesNumber).is.eq(2)
+        chai.expect(details?.series).is.eq("One-Punch man")
+        chai.expect(details?.timeSpentReading).is.eq(780)
+    });
+    it('getAllBookDetailsByBookTitle', async function () {
+        const bookmarks = await repo.getAllBookmark()
+        let titles: string[] = []
+
+        bookmarks.forEach(async b => {
+            let content = await this.repo.getContentByContentId(b.contentId)
+
+            if (content == null) {
+                content = await this.repo.getContentLikeContentId(b.contentId)
+            }
+
+            titles.push(content.title)
+        })
+
+        titles = titles.filter((v, i, a) => a.indexOf(v) === i)
+
+        titles.forEach(async t => {
+            const details = await repo.getBookDetailsByBookTitle(t)
+
+            chai.expect(details).not.null;
+        })
+    });
 });

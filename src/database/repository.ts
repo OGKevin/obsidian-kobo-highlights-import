@@ -1,5 +1,5 @@
 import { Database, Statement } from "sql.js";
-import { Bookmark, Content } from "./interfaces";
+import { BookDetails, Bookmark, Content } from "./interfaces";
 
 export class Repository {
     db: Database
@@ -163,6 +163,42 @@ export class Repository {
         statement.free()
 
         return contents
+    }
+
+    async getBookDetailsByBookTitle(bookTitle: string): Promise<BookDetails | null> {
+        const statement = this.db.prepare(
+            `select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;`,
+            {
+                $title: bookTitle
+            }
+        )
+
+        if (!statement.step()) {
+            return null
+        }
+
+        const row = statement.get()
+
+        if (row.length == 0 || row[0] == null) {
+            console.debug("Used query: select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 2;", { $title: bookTitle, result: row })
+            console.warn("Could not find book details in database")
+
+            return null
+        }
+
+        return {
+            title: bookTitle,
+            author: row[0].toString(),
+            description: row[1]?.toString(),
+            publisher: row[2]?.toString(),
+            dateLastRead: row[3] ? new Date(row[3].toString()) : undefined,
+            readStatus: row[4] ? +row[4].toString() : 0,
+            percentRead: row[5] ? +row[5].toString() : 0,
+            isbn: row[6]?.toString(),
+            series: row[7]?.toString(),
+            seriesNumber: row[8] ? +row[8].toString() : undefined,
+            timeSpentReading: row[9] ? +row[9].toString() : 0,
+        }
     }
 
     private parseContentStatement(statement: Statement): Content[] {

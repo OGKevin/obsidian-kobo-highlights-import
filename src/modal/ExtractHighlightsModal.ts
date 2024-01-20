@@ -66,13 +66,15 @@ export class ExtractHighlightsModal extends Modal {
             } catch (error) {
                 console.warn("Attempted to read file, but it does not already exist.")
             }
+
             const markdown = service.fromMapToMarkdown(chapters, existingFile)
+            const details = await service.getBookDetailsFromBookTitle(bookTitle)
          
             // Write file
 
             await this.app.vault.adapter.write(
                 fileName,
-                applyTemplateTransformations(template, markdown, bookTitle)
+                applyTemplateTransformations(template, markdown, details)
             )
         }
     }
