@@ -5,7 +5,6 @@ This plugin aims to make highlight import from Kobo devices easier.
 - [Obsidian Kobo Highlight Importer](#obsidian-kobo-highlight-importer)
 	- [How to use](#how-to-use)
 	- [Templating](#templating)
-		- [Examples](#examples)
 		- [Variables](#variables)
 	- [Highlight markers](#highlight-markers)
 	- [Helping Screenshots](#helping-screenshots)
@@ -29,31 +28,44 @@ Once installed, the steps to import your highlights directly into the vault are:
 The default template is:
 
 ```markdown
-# {{title}}
-
-{{highlights}}
-```
-
-### Examples
-
-```markdown
 ---
-tags:
-- books
-bookTitle: {{title}}
+title: {{Title}}
+author: {{Author}}
+publisher: {{Publisher}}
+dateLastRead: {{DateLastRead}}
+readStatus: {{ReadStatus}}
+percentRead: {{PercentRead}}
+isbn: {{ISBN}}
+series: {{Series}}
+seriesNumber: {{SeriesNumber}}
+timeSpentReading: {{TimeSpentReading}}
 ---
 
-# {{title}}
+# {{Title}}
+
+## Description
+
+{{Description}}
+
+## Highlights
 
 {{highlights}}
 ```
 
 ### Variables
 
-| Tag        | Description                                      | Example          |
-|------------|--------------------------------------------------|------------------|
-| highlights | Will get replaced with the extracted highlights. | `{{highlights}}` |
-| title		    | The title of the book                            | `{{title}}`      |
+| Tag              | Description                                      | Example                |
+| ---------------- | ------------------------------------------------ | ---------------------- |
+| highlights       | Will get replaced with the extracted highlights. | `{{highlights}}`       |
+| title            | The title of the book.                           | `{{title}}`            |
+| author           | The author of the book.                          | `{{author}}`           |
+| pulbisher        | The publisher of the book                        | `{{publihser}}`        |
+| dateLastRead     | The date the book was last read in ISO format.   | `{{dateLastRead}}`     |
+| readStatus       | Can be: Unopened, Reading, Read.                 | `{{readStatus}}`       |
+| isbn             | The ISBN of the book.                            | `{{isbn}}`             |
+| series           | The series of which the book is a part of.       | `{{series}}`           |
+| seriesNumber     | The position of the book in the series.          | `{{seriesNumber}}`     |
+| timeSpentReading | The time spent reading the book.                 | `{{timeSpentReading}}` |
 
 ## Highlight markers
 The plugin uses comments as highlight markers, to enable support for keeping existing highlights. All content between these markers will be transferred to the updated file. 

@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { Bookmark, Content, Highlight } from "./interfaces";
+import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
 import { Repository } from "./repository";
 
 type bookTitle = string
@@ -18,9 +18,23 @@ export class HighlightService {
     repo: Repository
 
     unkonwnBookTitle = 'Unknown Title'
+    unknownAuthor = 'Unknown Author'
 
     constructor(repo: Repository) {
         this.repo = repo
+    }
+
+    async getBookDetailsFromBookTitle(title: string): Promise<BookDetails> {
+        const details = await this.repo.getBookDetailsByBookTitle(title)
+        
+        if (details == null) {
+            return {
+                title: this.unkonwnBookTitle,
+                author: this.unknownAuthor
+            }
+        }
+
+        return details;
     }
 
     extractExistingHighlight(bookmark: bookmark, existingContent: string): string {
