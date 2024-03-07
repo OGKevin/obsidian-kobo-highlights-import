@@ -4,15 +4,16 @@ policy:
         - Kevin made a change
         - Kevin approves
         - Kevin helps bot and approves
-
 approval_rules:
   - name: Kevin made a change
     if:
       has_author_in:
-        users: [ "OGKevin" ]
+        users: ["OGKevin"]
     options:
       allow_author: true
       allow_contributor: true
+    has_successful_status:
+      - "npm / npm"
   - name: Kevin approves
     options:
       methods:
@@ -21,13 +22,15 @@ approval_rules:
         github_review: true
     requires:
       count: 1
-      users: [ "OGKevin" ]
+      users: ["OGKevin"]
+    has_successful_status:
+      - "npm / npm"
   - name: Kevin helps bot and approves
     if:
       has_author_in:
-        users: [ "ogkevin-robot[bot]" ]
+        users: ["ogkevin-robot[bot]"]
       has_contributor_in:
-        users: [ "OGKevin" ]
+        users: ["OGKevin"]
     options:
       allow_non_author_contributor: true
       methods:
@@ -36,4 +39,6 @@ approval_rules:
         github_review: true
     requires:
       count: 1
-      users: [ "OGKevin" ]
+      users: ["OGKevin"]
+    has_successful_status:
+      - "npm / npm"

@@ -1,16 +1,12 @@
 name: Publish plugin
-
 on:
   release:
     types: [published]
-
 env:
   PLUGIN_NAME: kobo-highlights-import
-
 jobs:
   publish:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
