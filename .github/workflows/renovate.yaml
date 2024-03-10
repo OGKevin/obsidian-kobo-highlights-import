@@ -1,7 +1,7 @@
 name: Renovate
 on:
   schedule:
-    - cron: "0/15 * * * *"
+    - cron: "0 0 */1 * *"
   workflow_dispatch:
     inputs:
       repoCache:
