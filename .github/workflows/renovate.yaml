@@ -91,7 +91,7 @@ jobs:
           sudo chown -R runneradmin:root /tmp/renovate/
           ls -R $cache_dir
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@v40.1.2
+        uses: renovatebot/github-action@v40.1.3
         with:
           token: "${{ steps.get_token.outputs.token }}"
         env:
