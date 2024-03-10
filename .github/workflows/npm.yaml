@@ -1,0 +1,34 @@
+name: "npm"
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+jobs:
+  npm:
+    runs-on: arc-runner
+    env:
+      USER: runner
+    steps:
+      - uses: actions/checkout@v4
+      - name: install packages
+        run: sudo apt-get update && sudo apt-get install -y curl xz-utils
+      - uses: cachix/install-nix-action@v23
+      - uses: DeterminateSystems/magic-nix-cache-action@v2
+      - name: Install devenv.sh
+        run: nix profile install tarball+https://install.devenv.sh/latest
+      - name: Setup For Test
+        shell: devenv shell bash -e {0}
+        run: |
+          mkdir $HOME/.aws
+          vault kv get -mount="secret" -field credentials "ci/aws" > $HOME/.aws/credentials
+          aws --endpoint-url http://100.82.97.39:9000 s3 cp s3://repo-obsidian-kobo-highlights-import/KoboReader.sqlite KoboReader.sqlite
+      - name: Lint
+        shell: devenv shell bash -e {0}
+        run: npm run lint
+      - name: Test
+        shell: devenv shell bash -e {0}
+        run: npm run test
+      - name: Build
+        shell: devenv shell bash -e {0}
+        run: npm run build

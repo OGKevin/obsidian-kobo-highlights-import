@@ -1,3 +1,0 @@
-[submodule ".drone-templates"]
-	path = .drone-templates
-	url = git@github.com:OGKevin/drone-templates.git
