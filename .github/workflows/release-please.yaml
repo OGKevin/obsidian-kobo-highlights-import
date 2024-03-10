@@ -9,10 +9,17 @@ jobs:
     steps:
       - name: Setup Secrets
         run: |
-          echo GITHUB_APP_ID="$(cat /secrets/github-app-id)" >> "$GITHUB_ENV"
+          github_app_id="$(cat /secrets/github-app-id)"
+          echo "::add-mask::$github_app_id"
+          echo "GITHUB_APP_ID=$github_app_id" >> "$GITHUB_ENV"
+          private_key="$(cat /secrets/github-private-key | base64 -d)"
+          while read -r line;
+          do
+            echo "::add-mask::${line}";
+          done <<< $private_key
           {
             echo 'GITHUB_PRIVATE_KEY<<EOF'
-            cat /secrets/github-private-key | base64 -d
+            echo "$private_key"
             echo EOF
           } >> "$GITHUB_ENV"
       - name: Get token
