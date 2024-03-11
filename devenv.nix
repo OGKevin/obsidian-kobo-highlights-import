@@ -13,6 +13,7 @@
     vault
     nodejs-slim
     awscli2
+    conform
   ];
 
   languages.javascript = {
@@ -23,6 +24,7 @@
   pre-commit.hooks = {
     eslint.enable = true;
     actionlint.enable = true;
+    conform.enable = true;
   };
 
   # https://devenv.sh/scripts/

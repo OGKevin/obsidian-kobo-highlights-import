@@ -1,0 +1,32 @@
+name: "pre-commit"
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    env:
+      USER: runner
+    steps:
+      - name: install packages
+        run: sudo apt-get update && sudo apt-get install -y curl xz-utils git
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: cachix/install-nix-action@v26
+      - uses: DeterminateSystems/magic-nix-cache-action@v3
+      - name: Install devenv.sh
+        run: nix profile install tarball+https://install.devenv.sh/latest
+      - name: Pre Commit
+        shell: devenv shell bash -e {0}
+        run: pre-commit run -s HEAD~1 -o HEAD
+  conform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Conform Action
+        uses: siderolabs/conform@v0.1.0-alpha.29
