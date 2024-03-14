@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 2
       - uses: cachix/install-nix-action@v26
-      - uses: DeterminateSystems/magic-nix-cache-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@v4
       - name: Install devenv.sh
         run: nix profile install tarball+https://install.devenv.sh/latest
       - name: Pre Commit

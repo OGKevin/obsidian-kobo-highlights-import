@@ -14,7 +14,7 @@ jobs:
       - name: install packages
         run: sudo apt-get update && sudo apt-get install -y curl xz-utils
       - uses: cachix/install-nix-action@v26
-      - uses: DeterminateSystems/magic-nix-cache-action@v3
+      - uses: DeterminateSystems/magic-nix-cache-action@v4
       - name: Install devenv.sh
         run: nix profile install tarball+https://install.devenv.sh/latest
       - name: Setup For Test
