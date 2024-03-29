@@ -9,8 +9,6 @@ approval_rules:
     if:
       has_author_in:
         users: ["OGKevin"]
-      has_successful_status:
-        - "npm / npm"
     options:
       allow_author: true
       allow_contributor: true
@@ -23,17 +21,12 @@ approval_rules:
     requires:
       count: 1
       users: ["OGKevin"]
-    if:
-      has_successful_status:
-        - "npm / npm"
   - name: Kevin helps bot and approves
     if:
       has_author_in:
         users: ["ogkevin-robot[bot]"]
       has_contributor_in:
         users: ["OGKevin"]
-      has_successful_status:
-        - "npm / npm"
     options:
       allow_non_author_contributor: true
       methods:

@@ -23,9 +23,6 @@ jobs:
             echo "$private_key"
             echo EOF
           } >> "$GITHUB_ENV"
-          redis_url="redis://$(cat /secrets/redis-creds | jq '.data.username' -r):$(cat /secrets/redis-creds | jq '.data.password' -r)@redis-master.redis.svc.cluster.local:6379/0"
-          echo "::add-mask::$redis_url"
-          echo RENOVATE_REDIS_URL="$redis_url" >> "$GITHUB_ENV"
           password="$(cat /secrets/github-ghcr-token)"
           echo "::add-mask::$password"
           echo DOCKER_GHCR_IO_PASSWORD="$password" >> "$GITHUB_ENV"
