@@ -2,7 +2,7 @@ import { BookDetails, ReadStatus } from "../database/interfaces"
 
 export const defaultTemplate = `
 ---
-title: {{Title}}
+title: "{{Title}}"
 author: {{Author}}
 publisher: {{Publisher}}
 dateLastRead: {{DateLastRead}}
