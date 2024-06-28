@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/2.0.0...3.0.0) (2024-03-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v4 ([#346](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/346))
+
+### Bug Fixes
+
+* **deps:** update @types/node to 20.11.26 ([#341](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/341)) ([d43e28a](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/d43e28abd2eb2ee03b4bcf9cb1fab7e790741fb2))
+
+
+### Continuous Integration
+
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v4 ([#346](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/346)) ([7b12749](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/7b127499d4622bb3c0f1521d5ff51d095ac286a2))
+
 ## [2.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/1.5.4...2.0.0) (2024-03-11)
 
 
