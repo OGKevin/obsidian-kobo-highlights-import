@@ -77,7 +77,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
     add_enable_creation_date(): void {
         new Setting(this.containerEl)
             .setName("Add creation date")
-            .setDesc(`If the exported higlights should include '- [[${this.plugin.settings.dateFormat}]]'`)
+            .setDesc(`If the exported highlights should include '- [[${this.plugin.settings.dateFormat}]]'`)
             .addToggle((cb) => {
                 cb.setValue(this.plugin.settings.sortByChapterProgress)
                     .onChange((toggle) => {
