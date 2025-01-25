@@ -15,7 +15,7 @@ export class ExtractHighlightsModal extends Modal {
 
     settings: KoboHighlightsImporterSettings
 
-    sqlFilePath: string | undefined
+    fileBuffer: ArrayBuffer | null | undefined
 
     nrOfBooksExtracted: number
 
@@ -27,15 +27,15 @@ export class ExtractHighlightsModal extends Modal {
     }
 
     private async fetchHighlights() {
-        if (!this.sqlFilePath) {
+        if (!this.fileBuffer) {
             throw new Error('No sqlite DB file selected...')
         }
 
         const SQLEngine = await SqlJs({
             wasmBinary: binary
         })
-        const fileBuffer = fs.readFileSync(this.sqlFilePath)
-        const db = new SQLEngine.Database(fileBuffer)
+
+        const db = new SQLEngine.Database(new Uint8Array(this.fileBuffer))
 
         const service: HighlightService = new HighlightService(
             new Repository(
@@ -102,21 +102,29 @@ export class ExtractHighlightsModal extends Modal {
         this.inputFileEl = contentEl.createEl('input');
         this.inputFileEl.type = 'file'
         this.inputFileEl.accept = '.sqlite'
-        this.inputFileEl.addEventListener('change', ev => {
-            // Not sure what the type of this event is :(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const filePath = (<any>ev).target.files[0].path;
-            fs.access(filePath, fs.constants.R_OK, (err) => {
-                if (err) {
-                    new Notice('Selected file is not readable')
-                } else {
-                    this.sqlFilePath = filePath
-                    this.goButtonEl.disabled = false
-                    this.goButtonEl.setAttr('style', 'background-color: green; color: black')
-                    new Notice('Ready to extract!')
-                }
-            })
-        })
+        this.inputFileEl.addEventListener("change", (ev) => {
+            const file = (<any>ev).target?.files[0];
+            if (!file) {
+              console.error("No file selected");
+              return;
+            }
+          
+            // Convert File to ArrayBuffer
+            const reader = new FileReader();
+            reader.onload = () => {
+              this.fileBuffer = reader.result as ArrayBuffer;  // Store the ArrayBuffer
+              this.goButtonEl.disabled = false;
+              this.goButtonEl.setAttr("style", "background-color: green; color: black");
+              new Notice("Ready to extract!");
+            };
+          
+            reader.onerror = (error) => {
+              console.error("FileReader error:", error);
+              new Notice("Error reading file");
+            };
+          
+            reader.readAsArrayBuffer(file);
+          });
 
         const heading = contentEl.createEl('h2')
         heading.textContent = 'Sqlite file location'
