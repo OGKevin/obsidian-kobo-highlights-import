@@ -14,6 +14,7 @@
     nodejs-slim
     awscli2
     conform
+		nodejs_22
   ];
 
   languages.javascript = {
