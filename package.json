@@ -1,48 +1,49 @@
 {
-	"name": "obsidian-kobo-highlights-importer-plugin",
-	"version": "2.0.0",
-	"description": "Import highlights from your Kobo device",
-	"main": "src/main.js",
-	"scripts": {
-		"lint": "eslint . --ext .ts",
-		"dev": "watchexec -r -e ts -- node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"test": "mocha",
-		"coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "MIT",
-	"devDependencies": {
-		"@types/chai": "4.3.12",
-		"@types/mocha": "10.0.6",
-		"@types/node": "20.11.26",
-		"@types/sql.js": "1.4.9",
-		"@types/uuid": "^9.0.7",
-		"@typescript-eslint/eslint-plugin": "7.1.1",
-		"@typescript-eslint/parser": "7.1.1",
-		"builtin-modules": "3.3.0",
-		"chai": "4.4.1",
-		"esbuild": "0.20.1",
-		"eslint": "8.57.0",
-		"mocha": "10.3.0",
-		"nyc": "15.1.0",
-		"obsidian": "1.4.11",
-		"ts-node": "10.9.2",
-		"tslib": "2.6.2",
-		"typescript": "5.4.2"
-	},
-	"dependencies": {
-		"@popperjs/core": "2.11.8",
-		"@types/better-sqlite3": "7.6.9",
-		"esbuild-plugin-wat": "0.2.7",
-		"moment": "2.30.1",
-		"sanitize-filename-ts": "1.0.2",
-		"sql.js": "1.8.0",
-		"uuid": "^9.0.1"
-	},
-	"engines": {
-		"node": ">=18.0.0 <21.0.0"
-	}
+  "name": "obsidian-kobo-highlights-importer-plugin",
+  "version": "2.0.0",
+  "description": "Import highlights from your Kobo device",
+  "main": "src/main.js",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "dev": "watchexec -r -e ts -- node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "version": "node version-bump.mjs && git add manifest.json versions.json",
+    "test": "mocha",
+    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "4.3.12",
+    "@types/mocha": "10.0.6",
+    "@types/node": "20.11.26",
+    "@types/sql.js": "1.4.9",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "7.1.1",
+    "@typescript-eslint/parser": "7.1.1",
+    "builtin-modules": "3.3.0",
+    "chai": "4.4.1",
+    "esbuild": "0.20.1",
+    "eslint": "8.57.0",
+    "mocha": "10.3.0",
+    "nyc": "15.1.0",
+    "obsidian": "1.4.11",
+    "ts-node": "10.9.2",
+    "tslib": "2.6.2",
+    "typescript": "5.4.2",
+    "release-please": "^16.15.0"
+  },
+  "dependencies": {
+    "@popperjs/core": "2.11.8",
+    "@types/better-sqlite3": "7.6.9",
+    "esbuild-plugin-wat": "0.2.7",
+    "moment": "2.30.1",
+    "sanitize-filename-ts": "1.0.2",
+    "sql.js": "1.8.0",
+    "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=20.0.0 <23.0.0"
+  }
 }

@@ -10,7 +10,7 @@ describe('template', async function () {
 
 		chai.expect(content).deep.eq(
 			`---
-title: test title
+title: "test title"
 author: test
 publisher: 
 dateLastRead: 
@@ -40,7 +40,7 @@ test`
 			[
 				defaultTemplate,
 				`---
-title: test title
+title: "test title"
 author: test
 publisher: 
 dateLastRead: 
