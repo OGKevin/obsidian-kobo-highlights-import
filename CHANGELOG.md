@@ -1,5 +1,70 @@
 # Changelog
 
+## [3.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/2.0.0...3.0.0) (2025-02-09)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update @types/node to 22.13.1
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v9
+* **deps:** Update builtin-modules to 4.0.0
+* **deps:** Update chai to 5.1.2
+* **deps:** Update mocha to 11.1.0
+* **deps:** Update @types/uuid to 10.0.0
+* **deps:** Update eslint to 9.20.0
+* **deps:** Update nyc to 17.1.0
+* **github-action:** Update renovatebot/github-action action to v41.0.12
+* **github-action:** Update cachix/install-nix-action action to v30
+* **deps:** Update typescript-eslint monorepo to 8.23.0
+* **deps:** Update uuid to 11.0.5
+* **docker-image:** Update mcr.microsoft.com/vscode/devcontainers/javascript-node Docker tag to v22
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v4 ([#346](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/346))
+
+### Features
+
+* **deps:** Update @types/node to 22.13.1 ([54e7f8a](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/54e7f8a5099c368d5736e17a2ee7dd9dff7e747d))
+* **deps:** Update @types/uuid to 10.0.0 ([31a94e1](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/31a94e14bfd2ffc2dcc3c7c8f3241d07e2a456c1))
+* **deps:** Update builtin-modules to 4.0.0 ([1477521](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/1477521134a230c41cb0b3a7e72a61cf2bcd990c))
+* **deps:** update chai to 4.5.0 ([07cd6a6](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/07cd6a6fdeaa60a7cfd23585dabd74f8611fd95c))
+* **deps:** Update chai to 5.1.2 ([45c629e](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/45c629ec19a803978ac93b96ee00828b94f52b65))
+* **deps:** update esbuild to 0.25.0 ([981e9c7](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/981e9c7425362fd96f46a3422a2f105154a679ff))
+* **deps:** Update eslint to 9.20.0 ([ff8823d](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/ff8823d2ad980dd2551d5572c74ff581e3e4f0bf))
+* **deps:** Update mocha to 11.1.0 ([0fd5035](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/0fd5035cc97bd2f71aaf281b34f26e55006905da))
+* **deps:** Update nyc to 17.1.0 ([a2c2a62](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/a2c2a62e8c64314949a17c3591a7a39591611ca6))
+* **deps:** update obsidian to 1.7.2 ([1b9f908](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/1b9f9080ff810759843dbd1294aee0bece765103))
+* **deps:** update sql.js to 1.12.0 ([83af60d](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/83af60da0f759341a29fbb38e358764910f92306))
+* **deps:** update tslib to 2.8.1 ([5a5d7ea](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/5a5d7eaae31ab4a6291063f21198357cfae87c8a))
+* **deps:** update typescript to 5.7.3 ([d5bafe8](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/d5bafe8e5934f07ee10698e17cdfd190036e4706))
+* **deps:** Update typescript-eslint monorepo to 8.23.0 ([820ea48](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/820ea4810f252e2a9815661f9af2fa09332f63f6))
+* **deps:** Update uuid to 11.0.5 ([99bf5eb](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/99bf5eba52493396382e40378ee5409813a12908))
+* **docker-image:** Update mcr.microsoft.com/vscode/devcontainers/javascript-node Docker tag to v22 ([1d948f9](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/1d948f91631f24f6b02c18d95d6712fe9bde6c08))
+
+
+### Bug Fixes
+
+* broken tests ([#367](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/367)) ([ecb6f6f](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/ecb6f6fae1715170b0a89b64e19f80b9c823665b))
+* **deps:** update @types/better-sqlite3 to 7.6.12 ([873191a](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/873191a7e2e1b2f8df79f2ab6fa1a947d068a867))
+* **deps:** update @types/mocha to 10.0.10 ([cf55422](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/cf554220cb2f73bc6cb323b9de8633185cf3d810))
+* **deps:** update @types/node to 20.11.26 ([#341](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/341)) ([d43e28a](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/d43e28abd2eb2ee03b4bcf9cb1fab7e790741fb2))
+* **deps:** update @types/node to 20.11.30 ([8629b44](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/8629b44c05e227a0bf3c97034f30c96ea0bcd01f))
+* **deps:** update esbuild to 0.20.2 ([15e7772](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/15e77725e74fe9a18413287e87ceb1303c8b277c))
+* **deps:** update typescript to 5.4.5 ([151a6b6](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/151a6b6d0e51b0310d47769b39ef596d1b3b8a18))
+* Store fileBuffer instead of sqFilepath during load ([#366](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/366)) ([ba0a822](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/ba0a8222de8fc612e748df492a7a9c3962dc5353)), closes [#362](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/362)
+* use quotation marks for title ([#357](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/357)) ([f3a85e0](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/f3a85e0d6e28afb68f4e2bec37af55e915626db0))
+
+
+### Reverts
+
+* feat(deps): update sql.js to 1.12.0" ([18501f7](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/18501f71797149250c31623dc99d6f9c52586f1e))
+
+
+### Continuous Integration
+
+* **github-action:** Update cachix/install-nix-action action to v30 ([70ab2ed](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/70ab2ed419d18cc38d4ab2bcdb303f8a181b23f5))
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v4 ([#346](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/346)) ([7b12749](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/7b127499d4622bb3c0f1521d5ff51d095ac286a2))
+* **github-action:** Update DeterminateSystems/magic-nix-cache-action action to v9 ([b1ee3d6](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/b1ee3d6f6f27e4ee0cbbf48a96483411573c8792))
+* **github-action:** Update renovatebot/github-action action to v41.0.12 ([3a98b81](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/3a98b81f3e58bfe67fbf2ef17fcfb613dde7fc38))
+
 ## [2.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/1.5.4...2.0.0) (2024-03-11)
 
 
