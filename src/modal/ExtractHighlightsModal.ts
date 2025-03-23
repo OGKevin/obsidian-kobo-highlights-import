@@ -9,6 +9,12 @@ import { KoboHighlightsImporterSettings } from "src/settings/Settings";
 import { applyTemplateTransformations } from 'src/template/template';
 import { getTemplateContents } from 'src/template/templateContents';
 
+type bookmark = {
+    bookmarkId: string
+    fullContent: string
+    highlightContent: string
+}
+
 export class ExtractHighlightsModal extends Modal {
     goButtonEl!: HTMLButtonElement;
     inputFileEl!: HTMLInputElement
@@ -51,8 +57,30 @@ export class ExtractHighlightsModal extends Modal {
             this.settings.highlightCallout,
             this.settings.annotationCallout
         )
+        
+        const allBooksContent = new Map<string, Map<string, bookmark[]>>()
+        
+        // Add all books with highlights
+        for (const [bookTitle, chapters] of content) {
+            allBooksContent.set(bookTitle, chapters);
+        }
+        
+        if (this.settings.importAllBooks) {
+            // Add books without highlights
+            const allBooks = await service.getAllBooks();
 
-        this.nrOfBooksExtracted = content.size
+            for (const [bookTitle, bookDetails] of allBooks) {
+                if (!allBooksContent.has(bookTitle)) {
+                    allBooksContent.set(bookTitle, service.createEmptyContentMap())
+                }
+            }
+        }
+        
+        this.nrOfBooksExtracted = allBooksContent.size;
+        await this.writeBooks(service, allBooksContent);
+    }
+
+    private async writeBooks(service: HighlightService, content: Map<string, Map<string, bookmark[]>>) {
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
