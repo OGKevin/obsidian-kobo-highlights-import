@@ -729,4 +729,132 @@ ${typeWhateverYouWantPlaceholder}
             })
         }
     })
+
+    describe('Import All Books', async function () {
+        let service: HighlightService
+        let repo: Repository
+        const bookDetails = [
+            {
+                title: "Book with Highlights",
+                author: "Author 1",
+                description: "Description 1",
+                publisher: "Publisher 1",
+                dateLastRead: new Date("2024-01-01"),
+                readStatus: 2,
+                percentRead: 100,
+                isbn: "1234567890",
+                series: "Series 1",
+                seriesNumber: 1,
+                timeSpentReading: 1000
+            },
+            {
+                title: "Book without Highlights",
+                author: "Author 2",
+                description: "Description 2",
+                publisher: "Publisher 2",
+                dateLastRead: new Date("2024-01-02"),
+                readStatus: 1,
+                percentRead: 50,
+                isbn: "0987654321",
+                series: "Series 2",
+                seriesNumber: 2,
+                timeSpentReading: 500
+            }
+        ];
+
+        before(async function () {
+            repo = <Repository>{};
+            
+            repo.getAllBookDetails = () => Promise.resolve(bookDetails);
+            repo.getBookDetailsByBookTitle = (title) => {
+                const details = bookDetails.find(book => book.title === title);
+                return Promise.resolve(details || null);
+            };
+            repo.getAllBookmark = () => Promise.resolve([{
+                bookmarkId: "bookmark1",
+                text: "Sample highlight",
+                contentId: "content1",
+                note: "Test note",
+                dateCreated: new Date("2024-01-01")
+            }]);
+            repo.getContentByContentId = () => Promise.resolve({
+                title: "Chapter 1",
+                contentId: "content1",
+                bookTitle: "Book with Highlights",
+                chapterIdBookmarked: "chapter1"
+            });
+
+            service = new HighlightService(repo);
+        });
+
+        it('getAllBooks should return all books with correct details', async function () {
+            const books = await service.getAllBooks();
+            chai.expect(books.size).to.equal(2);
+            
+            const bookWithHighlights = books.get("Book with Highlights");
+            const bookWithoutHighlights = books.get("Book without Highlights");
+            
+            chai.expect(bookWithHighlights).to.not.be.undefined;
+            chai.expect(bookWithoutHighlights).to.not.be.undefined;
+            
+            chai.expect(bookWithHighlights?.author).to.equal("Author 1");
+            chai.expect(bookWithHighlights?.percentRead).to.equal(100);
+            chai.expect(bookWithoutHighlights?.author).to.equal("Author 2");
+            chai.expect(bookWithoutHighlights?.percentRead).to.equal(50);
+        });
+
+        it('convertToMap should handle books with and without highlights correctly', async function () {
+            const highlights = await service.getAllHighlight();
+            const contentMap = service.convertToMap(highlights, false, "", false, "quote", "note");
+            
+            // Verify initial state with only books containing highlights
+            chai.expect(contentMap.size).to.equal(1);
+            chai.expect(contentMap.has("Book with Highlights")).to.be.true;
+            chai.expect(contentMap.has("Book without Highlights")).to.be.false;
+
+            // Add books without highlights
+            const allBooks = await service.getAllBooks();
+            for (const [bookTitle, bookDetails] of allBooks) {
+                if (!contentMap.has(bookTitle)) {
+                    contentMap.set(bookTitle, service.createEmptyContentMap());
+                }
+            }
+
+            // Verify final state with all books
+            chai.expect(contentMap.size).to.equal(2);
+            
+            const bookWithHighlights = contentMap.get("Book with Highlights");
+            const bookWithoutHighlights = contentMap.get("Book without Highlights");
+            
+            chai.expect(bookWithHighlights).to.not.be.undefined;
+            chai.expect(bookWithoutHighlights).to.not.be.undefined;
+            chai.expect(bookWithoutHighlights?.size).to.equal(0);
+        });
+
+        it('getBookDetailsFromBookTitle should return correct book details', async function () {
+            const details1 = await service.getBookDetailsFromBookTitle("Book with Highlights");
+            chai.expect(details1).to.deep.include({
+                title: "Book with Highlights",
+                author: "Author 1",
+                description: "Description 1",
+                percentRead: 100,
+                isbn: "1234567890"
+            });
+
+            const details2 = await service.getBookDetailsFromBookTitle("Book without Highlights");
+            chai.expect(details2).to.deep.include({
+                title: "Book without Highlights",
+                author: "Author 2",
+                description: "Description 2",
+                percentRead: 50,
+                isbn: "0987654321"
+            });
+
+            const nonExistentBook = await service.getBookDetailsFromBookTitle("Non-existent Book");
+			chai.expect(nonExistentBook).to.deep.equal({
+				title: "Unknown Title",
+				author: "Unknown Author"
+			});
+        });
+    });
 });

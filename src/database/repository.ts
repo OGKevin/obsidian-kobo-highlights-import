@@ -201,6 +201,52 @@ export class Repository {
         }
     }
 
+    async getAllBookDetails(): Promise<BookDetails[]> {
+        const statement = this.db.prepare(
+            `SELECT DISTINCT 
+                Title,
+                Attribution as Author,
+                Description,
+                Publisher,
+                DateLastRead,
+                ReadStatus,
+                ___PercentRead,
+                ISBN,
+                Series,
+                SeriesNumber,
+                TimeSpentReading
+            FROM content 
+            WHERE Title IS NOT NULL 
+            ORDER BY Title ASC;`
+        );
+
+        const books: BookDetails[] = [];
+        
+        while (statement.step()) {
+            const row = statement.get();
+            if (row[0] == null || row[1] == null) {
+                continue; // Skip entries without title or author
+            }
+
+            books.push({
+                title: row[0].toString(),
+                author: row[1].toString(),
+                description: row[2]?.toString(),
+                publisher: row[3]?.toString(),
+                dateLastRead: row[4] ? new Date(row[4].toString()) : undefined,
+                readStatus: row[5] ? +row[5].toString() : 0,
+                percentRead: row[6] ? +row[6].toString() : 0,
+                isbn: row[7]?.toString(),
+                series: row[8]?.toString(),
+                seriesNumber: row[9] ? +row[9].toString() : undefined,
+                timeSpentReading: row[10] ? +row[10].toString() : 0,
+            });
+        }
+
+        statement.free();
+        return books;
+    }
+
     private parseContentStatement(statement: Statement): Content[] {
         const contents: Content[] = []
 

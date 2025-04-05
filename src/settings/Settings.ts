@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
     includeCallouts: true,
     highlightCallout: "quote",
     annotationCallout: "note",
+    importAllBooks: false,
 }
 
 export interface KoboHighlightsImporterSettings {
@@ -23,6 +24,7 @@ export interface KoboHighlightsImporterSettings {
     includeCallouts: boolean,
     highlightCallout: string,
     annotationCallout: string,
+    importAllBooks: boolean,
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -42,6 +44,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
         this.add_enable_callouts();
         this.add_highlight_callouts_format();
         this.add_annotation_callouts_format();
+        this.add_import_all_books();
     }
 
     add_destination_folder(): void {
@@ -164,6 +167,26 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.annotationCallout)
                     .onChange(async (toggle) => {
                         this.plugin.settings.annotationCallout = toggle;
+                        await this.plugin.saveSettings();
+                    });
+            });
+    }
+
+    add_import_all_books(): void {
+        const desc = document.createDocumentFragment();
+        desc.append(
+            "When enabled, import information for all books from your Kobo device, not just books with highlights.",
+            desc.createEl("br"),
+            "This will include reading progress, status, and other metadata for every book."
+        );
+
+        new Setting(this.containerEl)
+            .setName("Import all books")
+            .setDesc(desc)
+            .addToggle((cb) => {
+                cb.setValue(this.plugin.settings.importAllBooks)
+                    .onChange(async (toggle) => {
+                        this.plugin.settings.importAllBooks = toggle;
                         await this.plugin.saveSettings();
                     });
             });
