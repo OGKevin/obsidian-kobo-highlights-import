@@ -1,5 +1,35 @@
 # Changelog
 
+## [4.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/3.0.0...4.0.0) (2025-04-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update builtin-modules to 5.0.0
+* **deps:** Update release-please to 17.0.0
+
+### Features
+
+* add "import all books" ([#369](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/369)) ([3b463af](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/3b463afcf4fdad3c28214e5fb25bcc3b2d5ec3df))
+* **deps:** update @types/node to 22.14.1 ([96ce8c0](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/96ce8c02ecb4b731ab4016e16701a8bf55b6ea90))
+* **deps:** Update builtin-modules to 5.0.0 ([244269e](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/244269e76c6f737e5a90620b35a7a9d80c832d0d))
+* **deps:** update chai to 5.2.0 ([fb2ab6b](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/fb2ab6b6db710dfd9f4a059d1e3d9d0e679f62e0))
+* **deps:** update eslint to 9.25.0 ([6944145](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/6944145cfe3869836ad985853f4a2bed1303e47a))
+* **deps:** update obsidian to 1.8.7 ([909b048](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/909b04810596cfa1a97a373c29c8883cfc628e38))
+* **deps:** Update release-please to 17.0.0 ([2406dd4](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/2406dd4bf0969f0e67345abd3d840980582d9708))
+* **deps:** update typescript to 5.8.3 ([c5ac9a9](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/c5ac9a93dc78dc91c01225ba9947412862e6fd45))
+* **deps:** update typescript-eslint monorepo to 8.27.0 ([a955104](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/a9551046ff16d32f47d2bf6bc470719fbbed41db))
+* **deps:** update typescript-eslint monorepo to 8.30.1 ([0971de8](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/0971de827eb967f3ee0d6ddec65eae8b6916f300))
+* **deps:** update uuid to 11.1.0 ([2ff58ab](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/2ff58ab81dd755397f557b2a893a039123b25b27))
+
+
+### Bug Fixes
+
+* **deps:** update @types/chai to 5.2.1 ([3615578](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/3615578889d072b9e3fc220237b32b4566450449))
+* **deps:** update @types/node to 22.13.11 ([99736b5](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/99736b56539e41f5aaa7eb905227a21883520e10))
+* **deps:** update esbuild to 0.25.2 ([6235218](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/6235218436165d8dc06ba52f55476818cf6417ab))
+* **deps:** update eslint to 9.20.1 ([4995dfc](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/4995dfc89d32fc084d89c4d377613b9332498b03))
+
 ## [3.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/2.0.0...3.0.0) (2025-02-09)
 
 
