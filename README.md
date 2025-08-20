@@ -4,12 +4,13 @@ This plugin aims to make highlight import from Kobo devices easier.
 
 - [Obsidian Kobo Highlight Importer](#obsidian-kobo-highlight-importer)
 	- [How to use](#how-to-use)
-	- [Templating](#templating)
-		- [Variables](#variables)
-	- [Highlight markers](#highlight-markers)
-	- [Helping Screenshots](#helping-screenshots)
-	- [Obsidian Callouts](#obsidian-callouts)
-	- [Contributing](#contributing)
+        - [Templating](#templating)
+                - [Variables](#variables)
+        - [Highlight markers](#highlight-markers)
+        - [Simple highlight list](#simple-highlight-list)
+        - [Helping Screenshots](#helping-screenshots)
+        - [Obsidian Callouts](#obsidian-callouts)
+        - [Contributing](#contributing)
 
 ## How to use
 
@@ -83,6 +84,10 @@ The plugin uses comments as highlight markers, to enable support for keeping exi
 
 %%END-<MARKER IDENTIFIER>%%`
 ```
+
+## Simple highlight list
+
+If you prefer a cleaner output without the surrounding markers, enable the **Generate simple highlight list** setting. When turned on, the plugin only writes the highlights (and any callouts, annotations, or dates) without the `%%START-...%%` and `%%END-...%%` sections.
 
 ![](./README_assets/IMG_0078.png)
 ![](./README_assets/IMG_0079.png)
