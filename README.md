@@ -3,14 +3,14 @@
 This plugin aims to make highlight import from Kobo devices easier.
 
 - [Obsidian Kobo Highlight Importer](#obsidian-kobo-highlight-importer)
-	- [How to use](#how-to-use)
-        - [Templating](#templating)
-                - [Variables](#variables)
-        - [Highlight markers](#highlight-markers)
-        - [Simple highlight list](#simple-highlight-list)
-        - [Helping Screenshots](#helping-screenshots)
-        - [Obsidian Callouts](#obsidian-callouts)
-        - [Contributing](#contributing)
+  - [How to use](#how-to-use)
+  - [Templating](#templating)
+    - [Variables](#variables)
+  - [Highlight markers](#highlight-markers)
+  - [Simple highlight list](#simple-highlight-list)
+  - [Helping Screenshots](#helping-screenshots)
+  - [Obsidian Callouts](#obsidian-callouts)
+  - [Contributing](#contributing)
 
 ## How to use
 
