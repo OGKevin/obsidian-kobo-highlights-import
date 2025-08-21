@@ -82,6 +82,7 @@ export class HighlightService {
         includeCallouts: boolean,
         highlightCallout: string,
         annotationCallout: string,
+        generateSimpleHighlightList = false,
     ): Map<bookTitle, Map<chapter, bookmark[]>> {
         const m = new Map<string, Map<string, bookmark[]>>()
 
@@ -90,10 +91,13 @@ export class HighlightService {
                 throw new Error("bookTitle must be set")
             }
 
-            // Start annotation marker
-            let text = `%%START-${x.bookmark.bookmarkId}%%\n\n`;
-            text += `${typeWhateverYouWantPlaceholder}\n\n`
-            text += `%%START-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n`
+            let text = ""
+            if (!generateSimpleHighlightList) {
+                // Start annotation marker
+                text += `%%START-${x.bookmark.bookmarkId}%%\n\n`
+                text += `${typeWhateverYouWantPlaceholder}\n\n`
+                text += `%%START-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n`
+            }
 
             let higlightContent = ""
 
@@ -120,10 +124,12 @@ export class HighlightService {
 
             text += higlightContent
 
-            // End annotation marker
-            text += `\n%%END-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n\n`
-            text += `${typeWhateverYouWantPlaceholder}\n\n`
-            text += `%%END-${x.bookmark.bookmarkId}%%\n`;
+            if (!generateSimpleHighlightList) {
+                // End annotation marker
+                text += `\n%%END-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n\n`
+                text += `${typeWhateverYouWantPlaceholder}\n\n`
+                text += `%%END-${x.bookmark.bookmarkId}%%\n`
+            }
 
             const existingBook = m.get(x.content.bookTitle)
             const highlight: bookmark = { bookmarkId: x.bookmark.bookmarkId, fullContent: text, highlightContent: higlightContent }

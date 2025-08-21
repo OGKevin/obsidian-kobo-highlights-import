@@ -12,6 +12,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
     includeCallouts: true,
     highlightCallout: "quote",
     annotationCallout: "note",
+    generateSimpleHighlightList: false,
     importAllBooks: false,
 }
 
@@ -24,6 +25,7 @@ export interface KoboHighlightsImporterSettings {
     includeCallouts: boolean,
     highlightCallout: string,
     annotationCallout: string,
+    generateSimpleHighlightList: boolean,
     importAllBooks: boolean,
 }
 
@@ -44,6 +46,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
         this.add_enable_callouts();
         this.add_highlight_callouts_format();
         this.add_annotation_callouts_format();
+        this.add_generate_simple_highlight_list();
         this.add_import_all_books();
     }
 
@@ -167,6 +170,19 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.annotationCallout)
                     .onChange(async (toggle) => {
                         this.plugin.settings.annotationCallout = toggle;
+                        await this.plugin.saveSettings();
+                    });
+            });
+    }
+
+    add_generate_simple_highlight_list(): void {
+        new Setting(this.containerEl)
+            .setName("Generate simple highlight list")
+            .setDesc("When enabled, only generate highlights without metadata markers.")
+            .addToggle((cb) => {
+                cb.setValue(this.plugin.settings.generateSimpleHighlightList)
+                    .onChange(async (toggle) => {
+                        this.plugin.settings.generateSimpleHighlightList = toggle;
                         await this.plugin.saveSettings();
                     });
             });

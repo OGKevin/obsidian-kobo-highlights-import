@@ -55,7 +55,8 @@ export class ExtractHighlightsModal extends Modal {
             this.settings.dateFormat,
             this.settings.includeCallouts,
             this.settings.highlightCallout,
-            this.settings.annotationCallout
+            this.settings.annotationCallout,
+            this.settings.generateSimpleHighlightList
         )
         
         const allBooksContent = new Map<string, Map<string, bookmark[]>>()
