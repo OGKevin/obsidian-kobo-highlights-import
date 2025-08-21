@@ -12,7 +12,7 @@ describe('HighlightService', async function () {
         let service: HighlightService
 
         before(async function () {
-            const repo = {} as Repository
+            const repo = <Repository>{}
             repo.getContentByContentId = () => Promise.resolve({
                 bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
                 title: "Chapter Eight: Holden",
@@ -598,7 +598,7 @@ This is an exising note, added to the highlight.
         let service: HighlightService
 
         before(async function () {
-            const repo = {} as Repository
+            const repo = <Repository>{}
             repo.getContentByContentId = () => Promise.resolve(null);
             repo.getContentLikeContentId = () => Promise.resolve(null);
             service = new HighlightService(repo)
@@ -696,39 +696,39 @@ ${typeWhateverYouWantPlaceholder}
         const bookmarkMap = new Map<string, Bookmark>([
             [
                 "e7f8f92d-38ca-4556-bab8-a4d902e9c430",
-                {
+                <Bookmark>{
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "e7f8f92d-38ca-4556-bab8-a4d902e9c430",
                     note: '',
                     dateCreated: new Date('2022-08-05T20:46:41+00:00')
-                } as Bookmark
+                }
             ],
             [
                 "d40c9071-993f-4f1f-ae53-594847d9fd27",
-                {
+                <Bookmark>{
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "d40c9071-993f-4f1f-ae53-594847d9fd27",
                     note: '',
                     dateCreated: new Date('2022-08-05T20:46:41+00:00')
-                } as Bookmark
+                }
             ],
             [
                 "3408844d-65a6-4d23-9d99-8f189ca07d0b",
-                {
+                <Bookmark>{
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "3408844d-65a6-4d23-9d99-8f189ca07d0b",
                     note: '',
                     dateCreated: new Date('2022-08-05T20:46:41+00:00')
-                } as Bookmark
+                }
             ],
             [
                 "c0d92aca-e4bb-476a-8131-ee0c0c21ced5",
-                {
+                <Bookmark>{
                     text: "“I guess I can’t be. How do you prove a negative?”",
                     contentId: "c0d92aca-e4bb-476a-8131-ee0c0c21ced5",
                     note: '',
                     dateCreated: new Date('2022-08-05T20:46:41+00:00')
-                } as Bookmark
+                }
             ],
         ])
 
@@ -736,7 +736,7 @@ ${typeWhateverYouWantPlaceholder}
         let service: HighlightService
 
         before(async function () {
-            repo = {} as Repository
+            repo = <Repository>{}
             repo.getContentByContentId = (contentId) => Promise.resolve(contentMap.get(contentId) ?? null)
             repo.getTotalBookmark = () => Promise.resolve(contentMap.size);
             const bookmarks = new Array<Bookmark>()
@@ -802,7 +802,7 @@ ${typeWhateverYouWantPlaceholder}
         ];
 
         before(async function () {
-            repo = {} as Repository;
+            repo = <Repository>{};
             
             repo.getAllBookDetails = () => Promise.resolve(bookDetails);
             repo.getBookDetailsByBookTitle = (title) => {
