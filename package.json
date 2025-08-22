@@ -27,7 +27,7 @@
 		"builtin-modules": "5.0.0",
 		"chai": "5.2.2",
 		"esbuild": "0.25.9",
-		"eslint": "9.25.1",
+		"eslint": "9.33.0",
 		"globals": "^16.3.0",
 		"mocha": "11.1.0",
 		"nyc": "17.1.0",
