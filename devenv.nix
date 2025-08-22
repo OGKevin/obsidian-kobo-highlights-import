@@ -10,11 +10,8 @@
   # https://devenv.sh/packages/
   packages = with pkgs; [
     git
-    vault
-    nodejs-slim
-    awscli2
     conform
-		nodejs_22
+    nodejs
   ];
 
   languages.javascript = {
