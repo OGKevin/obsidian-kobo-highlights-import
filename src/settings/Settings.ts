@@ -177,8 +177,8 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 
     add_generate_simple_highlight_list(): void {
         new Setting(this.containerEl)
-            .setName("Generate simple highlight list")
-            .setDesc("When enabled, only generate highlights without metadata markers.")
+            .setName("Disable highlight markers")
+            .setDesc("When enabled, do not generate metadata markers around highlights.")
             .addToggle((cb) => {
                 cb.setValue(this.plugin.settings.generateSimpleHighlightList)
                     .onChange(async (toggle) => {
