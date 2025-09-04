@@ -1,5 +1,41 @@
 # Changelog
 
+## [4.1.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.0.0...4.1.0) (2025-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **docker-image:** Update mcr.microsoft.com/vscode/devcontainers/javascript-node Docker tag to v24 ([#388](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/388))
+* **github-action:** Update node to 22.18.0 ([#389](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/389))
+* **deps:** Update chai to 6.0.1 ([#387](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/387))
+* **github-action:** Update actions/checkout action to v5 ([#386](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/386))
+
+### Features
+
+* add setting for simple highlight list ([#374](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/374)) ([01243fb](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/01243fb2bad354731a0fe17b3e9cfcc0d7441b2d))
+* **deps:** update @types/node to 22.18.0 ([#394](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/394)) ([c66dd3d](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/c66dd3defda78531fd736bd2efa565401865aa6e))
+* **deps:** Update chai to 6.0.1 ([#387](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/387)) ([9d60bec](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/9d60becc8ec2352ca44150d03aa7b48d25d9ad27))
+* **deps:** update eslint monorepo to 9.34.0 ([#393](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/393)) ([aff21d6](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/aff21d665b873a529fd38654d01590b721111702))
+* **deps:** update eslint to 9.33.0 ([#382](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/382)) ([666d843](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/666d843d6422e9496e5bc6f6908d7fb598dcd9c3))
+* **deps:** update mocha to 11.7.1 ([#383](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/383)) ([cdfa49d](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/cdfa49ddb19d6f7fea77d92f50f99c1df1ddc9a4))
+* **deps:** update release-please to 17.1.2 ([#384](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/384)) ([34c9b74](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/34c9b742dd3ca99ffc35f02e39509d6ed1ef0bb2))
+* **docker-image:** Update mcr.microsoft.com/vscode/devcontainers/javascript-node Docker tag to v24 ([#388](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/388)) ([7f2b9d2](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/7f2b9d25941022d948fc25038d7aa60d8bdbe4e8))
+* **github-action:** Update node to 22.18.0 ([#389](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/389)) ([428529c](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/428529c4f8a88d960e5221c993a6771948a282bf))
+
+
+### Bug Fixes
+
+* **deps:** update @types/better-sqlite3 to 7.6.13 ([#377](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/377)) ([a31bffb](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/a31bffb6fb1b3e97e63eb714746a4b3da1189870))
+* **deps:** update chai to 5.2.2 ([#378](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/378)) ([bcb903e](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/bcb903e3044d401031d1c9de9063d26d030aac8d))
+* **deps:** update esbuild to 0.25.9 ([#379](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/379)) ([3681c39](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/3681c39c47624fc1fdb82e49cc7f1e051d1d8239))
+* **deps:** update eslint to 9.25.1 ([#380](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/380)) ([89f1ef5](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/89f1ef5de7c607b196fd9bc3948acde83bde954d))
+* **deps:** update mocha to 11.7.2 ([#395](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/395)) ([571bede](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/571bede224aebac8e1b59320501a947c7732f7bb))
+
+
+### Continuous Integration
+
+* **github-action:** Update actions/checkout action to v5 ([#386](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/386)) ([5b06a45](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/5b06a459461ef059926c8777e54adbc4e38ed1a5))
+
 ## [4.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/3.0.0...4.0.0) (2025-04-20)
 
 
