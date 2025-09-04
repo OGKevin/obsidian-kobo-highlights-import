@@ -240,6 +240,33 @@ ${typeWhateverYouWantPlaceholder}
 %%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
 				);
 			});
+
+			it("fromMaptoMarkdown simple highlight list", async function () {
+				const map = service
+					.convertToMap(
+						[highlight],
+						false,
+						"",
+						false,
+						"[!quote]",
+						"[!note]",
+						true,
+					)
+					.get(highlight.content.bookTitle ?? "");
+
+				if (!map) {
+					chai.assert.isNotNull(map);
+					return;
+				}
+
+				const markdown = service.fromMapToMarkdown(map);
+				chai.assert.deepEqual(
+					markdown,
+					`## Chapter Eight: Holden
+
+> “I guess I can’t be. How do you prove a negative?”`,
+				);
+			});
 		});
 
 		describe("Sample Bookmark with annotation", async function () {
@@ -469,6 +496,36 @@ ${typeWhateverYouWantPlaceholder}
 ${typeWhateverYouWantPlaceholder}
 
 %%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
+				);
+			});
+
+			it("fromMaptoMarkdown simple highlight list", async function () {
+				const map = service
+					.convertToMap(
+						[highlight],
+						true,
+						"",
+						true,
+						"quote",
+						"note",
+						true,
+					)
+					.get(highlight.content.bookTitle ?? "");
+
+				if (!map) {
+					chai.assert.isNotNull(map);
+					return;
+				}
+
+				const markdown = service.fromMapToMarkdown(map);
+				chai.assert.deepEqual(
+					markdown,
+					`## Chapter Eight: Holden
+
+> [!quote]
+> “I guess I can’t be. How do you prove a negative?”
+>> [!note]
+> This is a great note! — [[` + dateCreatedText + `]]`,
 				);
 			});
 		});
