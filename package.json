@@ -44,7 +44,7 @@
 		"moment": "2.30.1",
 		"sanitize-filename-ts": "1.0.2",
 		"sql.js": "1.8.0",
-		"uuid": "^11.0.0"
+		"uuid": "^12.0.0"
 	},
 	"engines": {
 		"node": ">=20.0.0 <23.0.0"
