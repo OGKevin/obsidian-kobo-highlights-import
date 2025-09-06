@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2025-09-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Update uuid to 12.0.0 ([#401](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/401))
+* **github-action:** Update actions/setup-node action ([#397](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/397))
+
+### Features
+
+* **deps:** update eslint monorepo to 9.35.0 ([#400](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/400)) ([6a27077](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/6a27077942dc98c40d801515d37cf3d17f5a47f2))
+* **deps:** Update uuid to 12.0.0 ([#401](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/401)) ([e785b99](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/e785b9917e3f01f13aefa3e9e348f6992f1928ce))
+
+
+### Bug Fixes
+
+* **deps:** update @types/node to 22.18.1 ([#399](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/399)) ([a08e83b](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/a08e83b5c12b4109c38f978f579f012ff7e4c43f))
+
+
+### Continuous Integration
+
+* **github-action:** Update actions/setup-node action ([#397](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/397)) ([cc09ca0](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/cc09ca0bd19ab3ab0e3553496ceaac8a23efcb7a))
+
 ## [4.1.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.0.0...4.1.0) (2025-09-04)
 
 
