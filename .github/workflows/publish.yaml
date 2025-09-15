@@ -18,11 +18,11 @@ jobs:
         run: |
           npm install
           npm run build
-          mkdir ${{ env.PLUGIN_NAME }}
-          cp main.js manifest.json ${{ env.PLUGIN_NAME }}
-          zip -r ${{ env.PLUGIN_NAME }}.zip ${{ env.PLUGIN_NAME }}
+          mkdir "${{ env.PLUGIN_NAME }}"
+          cp main.js manifest.json "${{ env.PLUGIN_NAME }}"
+          zip -r "${{ env.PLUGIN_NAME }}.zip" "${{ env.PLUGIN_NAME }}"
           ls
-          echo "::set-output name=tag_name::$(git tag --sort version:refname | tail -n 1)"
+          echo "tag_name=$(git tag --sort version:refname | tail -n 1)" >> "$GITHUB_OUTPUT"
       - name: Upload zip file
         id: upload-zip
         uses: sekwah41/upload-release-assets@v1.1.0
