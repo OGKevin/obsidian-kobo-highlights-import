@@ -1,83 +1,68 @@
-import { BookDetails, ReadStatus } from "../database/interfaces"
+import { Eta } from "eta";
+import { BookDetails, ReadStatus, Bookmark } from "../database/interfaces";
+import { chapter } from "../database/Highlight";
+
+const eta = new Eta({ autoEscape: false, autoTrim: false });
 
 export const defaultTemplate = `
 ---
-title: "{{Title}}"
-author: {{Author}}
-publisher: {{Publisher}}
-dateLastRead: {{DateLastRead}}
-readStatus: {{ReadStatus}}
-percentRead: {{PercentRead}}
-isbn: {{ISBN}}
-series: {{Series}}
-seriesNumber: {{SeriesNumber}}
-timeSpentReading: {{TimeSpentReading}}
+title: "<%= it.bookDetails.title %>"
+author: <%= it.bookDetails.author %>
+publisher: <%= it.bookDetails.publisher ?? '' %>
+dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
+readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
+percentRead: <%= it.bookDetails.percentRead ?? '' %>
+isbn: <%= it.bookDetails.isbn ?? '' %>
+series: <%= it.bookDetails.series ?? '' %>
+seriesNumber: <%= it.bookDetails.seriesNumber ?? '' %>
+timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 ---
 
-# {{Title}}
+# <%= it.bookDetails.title %>
 
 ## Description
 
-{{Description}}
+<%= it.bookDetails.description ?? '' %>
 
 ## Highlights
 
-{{highlights}}
-`
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+## <%= chapterName.trim() %>
+
+<% highlights.forEach((highlight) => { -%>
+<%= highlight.text %>
+
+<% if (highlight.note) { -%>
+**Note:** <%= highlight.note %>
+
+<% } -%>
+<% if (highlight.dateCreated) { -%>
+*Created: <%= highlight.dateCreated.toISOString() %>*
+
+<% } -%>
+<% }) -%>
+<% }) %>
+`;
 
 export function applyTemplateTransformations(
 	rawTemplate: string,
-	highlights: string,
+	chapters: Map<chapter, Bookmark[]>,
 	bookDetails: BookDetails,
 ): string {
-	return rawTemplate
-		.replace(
-			/{{\s*Title\s*}}/gi,
-			bookDetails.title,
-		)
-		.replace(
-			/{{\s*Author\s*}}/gi,
-			bookDetails.author,
-		)
-		.replace(
-			/{{\s*Publisher\s*}}/gi,
-			bookDetails.publisher ?? '',
-		)
-		.replace(
-			/{{\s*DateLastRead\s*}}/gi,
-			bookDetails.dateLastRead?.toISOString() ?? '',
-		)
-		.replace(
-			/{{\s*ReadStatus\s*}}/gi,
-			ReadStatus[bookDetails.readStatus ?? ReadStatus.Unknown],
-		)
-		.replace(
-			/{{\s*PercentRead\s*}}/gi,
-			bookDetails.percentRead?.toString() ?? '',
-		)
-		.replace(
-			/{{\s*ISBN\s*}}/gi,
-			bookDetails.isbn ?? '',
-		)
-		.replace(
-			/{{\s*Series\s*}}/gi,
-			bookDetails.series ?? '',
-		)
-		.replace(
-			/{{\s*SeriesNumber\s*}}/gi,
-			bookDetails.seriesNumber?.toString() ?? '',
-		)
-		.replace(
-			/{{\s*TimeSpentReading\s*}}/gi,
-			bookDetails.timeSpentReading?.toString() ?? '',
-		)
-		.replace(
-			/{{\s*Description\s*}}/gi,
-			bookDetails.description ?? '',
-		)
-		.replace(
-			/{{\s*highlights\s*}}/gi,
-			highlights,
-		)
-		.trim()
+	const chaptersArr = Array.from(chapters.entries());
+	const rendered = eta.renderString(rawTemplate, {
+		bookDetails,
+		chapters: chaptersArr,
+		ReadStatus,
+	});
+
+	if (rendered === null) {
+		console.error(
+			"Template rendering failed: eta.renderString returned null.",
+		);
+
+		return "Error: Template rendering failed. Check console for details.";
+	}
+
+	return rendered.trim();
 }
