@@ -17,7 +17,7 @@ export const typeWhateverYouWantPlaceholder = `%% Here you can type whatever you
 export class HighlightService {
     repo: Repository
 
-    unkonwnBookTitle = 'Unknown Title'
+    unknownBookTitle = 'Unknown Title'
     unknownAuthor = 'Unknown Author'
 
     constructor(repo: Repository) {
@@ -29,7 +29,7 @@ export class HighlightService {
         
         if (details == null) {
             return {
-                title: this.unkonwnBookTitle,
+                title: this.unknownBookTitle,
                 author: this.unknownAuthor
             }
         }
@@ -45,10 +45,10 @@ export class HighlightService {
         const start = existingContent.indexOf(startSearch)
         const end = existingContent.indexOf(endSearch) + endSearch.length + 1 // Add length of search term to include it in substring extraction
         // Return the extracted substring
-        return this.upateHighlightFromExtractedFile(bookmark, existingContent.substring(start, end))
+        return this.updateHighlightFromExtractedFile(bookmark, existingContent.substring(start, end))
     }
 
-    upateHighlightFromExtractedFile(bookmark: bookmark, existingContent: string): string {
+    updateHighlightFromExtractedFile(bookmark: bookmark, existingContent: string): string {
         const startSearch = `%%START-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
         const endSearch = `%%END-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
 
@@ -99,30 +99,30 @@ export class HighlightService {
                 text += `%%START-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n`
             }
 
-            let higlightContent = ""
+            let highlightContent = ""
 
             if (includeCallouts) {
-                higlightContent += `> [!` + highlightCallout + `]\n`
+                highlightContent += `> [!` + highlightCallout + `]\n`
             }
 
-            higlightContent += `> ${x.bookmark.text}`
+            highlightContent += `> ${x.bookmark.text}`
 
             if (x.bookmark.note) {
-                higlightContent += `\n`
+                highlightContent += `\n`
 
                 if (includeCallouts) {
-                    higlightContent += `>> [!` + annotationCallout + `]`
-                    higlightContent += `\n> ${x.bookmark.note}`;
+                    highlightContent += `>> [!` + annotationCallout + `]`
+                    highlightContent += `\n> ${x.bookmark.note}`;
                 } else {
-                    higlightContent += `\n${x.bookmark.note}`;
+                    highlightContent += `\n${x.bookmark.note}`;
                 }
             }
 
             if (includeDate) {
-                higlightContent += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
+                highlightContent += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
             }
 
-            text += higlightContent
+            text += highlightContent
 
             if (!generateSimpleHighlightList) {
                 // End annotation marker
@@ -132,7 +132,7 @@ export class HighlightService {
             }
 
             const existingBook = m.get(x.content.bookTitle)
-            const highlight: bookmark = { bookmarkId: x.bookmark.bookmarkId, fullContent: text, highlightContent: higlightContent }
+            const highlight: bookmark = { bookmarkId: x.bookmark.bookmarkId, fullContent: text, highlightContent: highlightContent }
             if (existingBook) {
                 const existingChapter = existingBook.get(x.content.title)
 
@@ -177,10 +177,10 @@ export class HighlightService {
                 return {
                     bookmark: bookmark,
                     content: {
-                        title: this.unkonwnBookTitle,
+                        title: this.unknownBookTitle,
                         contentId: bookmark.contentId,
                         chapterIdBookmarked: 'false',
-                        bookTitle: this.unkonwnBookTitle,
+                        bookTitle: this.unknownBookTitle,
                     }
                 }
             }
