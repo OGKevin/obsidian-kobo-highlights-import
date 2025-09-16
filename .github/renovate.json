@@ -1,7 +1,4 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": [
-		"github>OGKevin/renovate-config",
-		":automergePatch"
-	]
+	"extends": ["github>OGKevin/renovate-config", ":automergePatch"]
 }

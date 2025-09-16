@@ -1,14 +1,14 @@
 name: "pre-commit"
 on:
-  pull_request:
-    branches: ["master"]
+    pull_request:
+        branches: ["master"]
 jobs:
-  conform:
-    runs-on: ubuntu-latest
-    if: "!startsWith(github.head_ref, 'renovate/')"
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 2
-      - name: Conform Action
-        uses: siderolabs/conform@v0.1.0-alpha.29
+    conform:
+        runs-on: ubuntu-latest
+        if: "!startsWith(github.head_ref, 'renovate/')"
+        steps:
+            - uses: actions/checkout@v5
+              with:
+                  fetch-depth: 2
+            - name: Conform Action
+              uses: siderolabs/conform@v0.1.0-alpha.29

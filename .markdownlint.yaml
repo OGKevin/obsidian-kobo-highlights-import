@@ -1,0 +1,26 @@
+# markdownlint configuration file
+# See https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+
+# Allow unordered list indentation (MD007)
+MD007: false
+
+# Disable line length checking (auto-generated changelogs have long URLs)
+MD013: false
+
+# Allow duplicate headings in changelogs (each version can have same section names)
+MD024: false
+
+# Allow inconsistent list marker spacing (MD030)
+MD030: false
+
+# Allow inline HTML (used in some documentation)
+MD033: false
+
+# Allow fenced code blocks without language specification
+MD040: false
+
+# Allow images without alt text for screenshots/illustrations
+MD045: false
+
+# Ignore link fragment validation (may be generated content)
+MD051: false

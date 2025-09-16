@@ -1,32 +1,22 @@
 {
-  "compilerOptions": {
-    "outDir": "./lib",
-    "rootDir": "./src",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
-    "inlineSourceMap": true,
-    "inlineSources": true,
-    "module": "CommonJS",
-    "target": "ES6",
-    "allowJs": true,
-    "noImplicitAny": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "isolatedModules": true,
-    "strict": true,
-    "lib": [
-      "DOM",
-      "ES5",
-      "ES6",
-      "ES7"
-    ]
-  },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "node_modules/*",
-    "**/*.test.ts"
-  ]
+	"compilerOptions": {
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"baseUrl": ".",
+		"inlineSourceMap": true,
+		"inlineSources": true,
+		"module": "CommonJS",
+		"target": "ES6",
+		"allowJs": true,
+		"noImplicitAny": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"isolatedModules": true,
+		"strict": true,
+		"lib": ["DOM", "ES5", "ES6", "ES7"]
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules/*", "**/*.test.ts"]
 }

@@ -3,12 +3,12 @@
 This plugin aims to make highlight import from Kobo devices easier.
 
 - [Obsidian Kobo Highlight Importer](#obsidian-kobo-highlight-importer)
-  - [How to use](#how-to-use)
-  - [Templating](#templating)
-    - [Variables](#variables)
-    - [Template Syntax](#template-syntax)
-  - [Helping Screenshots](#helping-screenshots)
-  - [Contributing](#contributing)
+    - [How to use](#how-to-use)
+    - [Templating](#templating)
+        - [Variables](#variables)
+        - [Template Syntax](#template-syntax)
+    - [Helping Screenshots](#helping-screenshots)
+    - [Contributing](#contributing)
 
 ## How to use
 
@@ -72,14 +72,15 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 The following variables are available in your template:
 
-| Variable      | Type / Structure                        | Description                                                                 |
-|---------------|-----------------------------------------|-----------------------------------------------------------------------------|
-| `bookDetails` | Object                                  | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description` |
-| `chapters`    | Array of `[chapterName, highlights]`    | Each `highlights` is an array of bookmarks for that chapter                 |
-| `ReadStatus`  | Enum mapping                            | Maps read status values to their string labels                              |
-| `highlight`   | Object                                  | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
+| Variable      | Type / Structure                     | Description                                                                                                                                                                                                                                                                                                                    |
+| ------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bookDetails` | Object                               | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description`                                                                                                                                                            |
+| `chapters`    | Array of `[chapterName, highlights]` | Each `highlights` is an array of bookmarks for that chapter                                                                                                                                                                                                                                                                    |
+| `ReadStatus`  | Enum mapping                         | Maps read status values to their string labels                                                                                                                                                                                                                                                                                 |
+| `highlight`   | Object                               | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
 
-#### Example usage:
+#### Example usage
+
 ```eta
 <% it.chapters.forEach(([chapterName, highlights]) => { -%>
 ## <%= chapterName %>
@@ -95,7 +96,8 @@ The following variables are available in your template:
 <% }) %>
 ```
 
-#### Date formatting examples:
+#### Date formatting examples
+
 ```eta
 <!-- YYYY-MM-DD format -->
 *Created: <%= h.dateCreated.getFullYear() %>-<%= String(h.dateCreated.getMonth() + 1).padStart(2, '0') %>-<%= String(h.dateCreated.getDate()).padStart(2, '0') %>*

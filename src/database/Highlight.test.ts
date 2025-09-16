@@ -1,4 +1,4 @@
-import { expect, assert } from 'chai';
+import { expect, assert } from "chai";
 import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 import { HighlightService } from "./Highlight";
@@ -81,14 +81,16 @@ describe("HighlightService", async function () {
 
 				expect(map.size).to.equal(1);
 				expect(map.has("Nemesis Games")).to.be.true;
-				
+
 				const bookMap = map.get("Nemesis Games");
 				expect(bookMap?.size).to.equal(1);
 				expect(bookMap?.has("Chapter Eight: Holden")).to.be.true;
-				
+
 				const highlights = bookMap?.get("Chapter Eight: Holden");
 				expect(highlights).to.have.length(1);
-				expect(highlights?.[0].bookmarkId).to.equal("c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe");
+				expect(highlights?.[0].bookmarkId).to.equal(
+					"c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
+				);
 			});
 		});
 
@@ -157,7 +159,7 @@ describe("HighlightService", async function () {
 			repo.getContentLikeContentId = () => Promise.resolve(null);
 			service = new HighlightService(repo);
 		});
-		
+
 		describe("Sample Bookmark linked to missing content", async function () {
 			let highlight: Highlight;
 			let dateCreatedText: string;
