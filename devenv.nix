@@ -21,6 +21,7 @@
 
   pre-commit.hooks = {
     eslint.enable = true;
+    yamllint.enable = true;
     actionlint.enable = true;
     conform.enable = true;
   };

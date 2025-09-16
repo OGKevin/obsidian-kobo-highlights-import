@@ -1,0 +1,11 @@
+extends: default
+ignore: |
+  node_modules/
+rules:
+  line-length: disable
+  document-start: disable
+  comments:
+    min-spaces-from-content: 1
+  truthy:
+    ignore:
+      - .github
