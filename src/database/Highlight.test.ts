@@ -1,9 +1,10 @@
 import { expect, assert } from "chai";
-import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
 import { HighlightService } from "./Highlight";
 import { Bookmark, Content, Highlight } from "./interfaces";
 import { Repository } from "./repository";
+
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 describe("HighlightService", async function () {
 	describe("Sample Content", async function () {
@@ -24,7 +25,6 @@ describe("HighlightService", async function () {
 
 		describe("Sample Bookmark with no annotation", async function () {
 			let highlight: Highlight;
-			let dateCreatedText: string;
 
 			before(async function () {
 				const dateCreated = new Date(
@@ -39,7 +39,6 @@ describe("HighlightService", async function () {
 					dateCreated,
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
 			});
 
 			it("createHighlightFromBookmark", async function () {
@@ -55,7 +54,6 @@ describe("HighlightService", async function () {
 					dateCreated,
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
 
 				assert.deepEqual(highlight, {
 					content: {
@@ -96,7 +94,6 @@ describe("HighlightService", async function () {
 
 		describe("Sample Bookmark with annotation", async function () {
 			let highlight: Highlight;
-			let dateCreatedText: string;
 
 			before(async function () {
 				const dateCreated = new Date(
@@ -111,7 +108,6 @@ describe("HighlightService", async function () {
 					dateCreated,
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
 			});
 
 			it("createHighlightFromBookmark", async function () {
@@ -127,7 +123,6 @@ describe("HighlightService", async function () {
 					dateCreated,
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
 
 				assert.deepEqual(highlight, {
 					content: {
@@ -162,7 +157,6 @@ describe("HighlightService", async function () {
 
 		describe("Sample Bookmark linked to missing content", async function () {
 			let highlight: Highlight;
-			let dateCreatedText: string;
 
 			before(async function () {
 				const dateCreated = new Date(
@@ -177,7 +171,6 @@ describe("HighlightService", async function () {
 					dateCreated,
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
 			});
 
 			it("createHighlightFromBookmark with missing content", async function () {
@@ -406,7 +399,7 @@ describe("HighlightService", async function () {
 
 			// Add books without highlights
 			const allBooks = await service.getAllBooks();
-			for (const [bookTitle, bookDetails] of allBooks) {
+			for (const [bookTitle, _] of allBooks) {
 				if (!contentMap.has(bookTitle)) {
 					contentMap.set(bookTitle, service.createEmptyContentMap());
 				}

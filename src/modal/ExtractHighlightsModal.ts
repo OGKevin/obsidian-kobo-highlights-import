@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import { App, Modal, normalizePath, Notice } from "obsidian";
 import { sanitize } from "sanitize-filename-ts";
 import SqlJs from "sql.js";
@@ -56,7 +55,7 @@ export class ExtractHighlightsModal extends Modal {
 			// Add books without highlights
 			const allBooks = await service.getAllBooks();
 
-			for (const [bookTitle, bookDetails] of allBooks) {
+			for (const [bookTitle, _] of allBooks) {
 				if (!allBooksContent.has(bookTitle)) {
 					allBooksContent.set(
 						bookTitle,
@@ -84,20 +83,9 @@ export class ExtractHighlightsModal extends Modal {
 			const fileName = normalizePath(
 				`${this.settings.storageFolder}/${sanitizedBookName}.md`,
 			);
-			// Check if file already exists
-			let existingFile;
-			try {
-				existingFile = await this.app.vault.adapter.read(fileName);
-			} catch (error) {
-				console.warn(
-					"Attempted to read file, but it does not already exist.",
-				);
-			}
 
 			const details =
 				await service.getBookDetailsFromBookTitle(bookTitle);
-
-			// Write file
 
 			await this.app.vault.adapter.write(
 				fileName,
@@ -136,7 +124,7 @@ export class ExtractHighlightsModal extends Modal {
 		this.inputFileEl.type = "file";
 		this.inputFileEl.accept = ".sqlite";
 		this.inputFileEl.addEventListener("change", (ev) => {
-			const file = (<any>ev).target?.files[0];
+			const file = (ev.target as HTMLInputElement)?.files?.[0];
 			if (!file) {
 				console.error("No file selected");
 				return;
