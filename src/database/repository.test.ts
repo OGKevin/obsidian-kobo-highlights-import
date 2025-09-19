@@ -4,6 +4,8 @@ import SqlJs, { Database } from "sql.js";
 import { binary } from "../binaries/sql-wasm";
 import { Repository } from "./repository";
 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 describe("Repository", async function () {
 	let db: Database;
 	let repo: Repository;

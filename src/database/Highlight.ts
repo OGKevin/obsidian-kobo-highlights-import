@@ -1,4 +1,3 @@
-import moment from "moment";
 import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
 import { Repository } from "./repository";
 
