@@ -1,162 +1,182 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 import { App, Modal, normalizePath, Notice } from "obsidian";
-import { sanitize } from 'sanitize-filename-ts';
-import SqlJs from 'sql.js';
+import { sanitize } from "sanitize-filename-ts";
+import SqlJs from "sql.js";
 import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
 import { Bookmark } from "src/database/interfaces";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
-import { applyTemplateTransformations } from 'src/template/template';
-import { getTemplateContents } from 'src/template/templateContents';
+import { applyTemplateTransformations } from "src/template/template";
+import { getTemplateContents } from "src/template/templateContents";
 
 export class ExtractHighlightsModal extends Modal {
-    goButtonEl!: HTMLButtonElement;
-    inputFileEl!: HTMLInputElement
+	goButtonEl!: HTMLButtonElement;
+	inputFileEl!: HTMLInputElement;
 
-    settings: KoboHighlightsImporterSettings
+	settings: KoboHighlightsImporterSettings;
 
-    fileBuffer: ArrayBuffer | null | undefined
+	fileBuffer: ArrayBuffer | null | undefined;
 
-    nrOfBooksExtracted: number
+	nrOfBooksExtracted: number;
 
-    constructor(
-        app: App, settings: KoboHighlightsImporterSettings) {
-        super(app);
-        this.settings = settings
-        this.nrOfBooksExtracted = 0
-    }
+	constructor(app: App, settings: KoboHighlightsImporterSettings) {
+		super(app);
+		this.settings = settings;
+		this.nrOfBooksExtracted = 0;
+	}
 
-    private async fetchHighlights() {
-        if (!this.fileBuffer) {
-            throw new Error('No sqlite DB file selected...')
-        }
+	private async fetchHighlights() {
+		if (!this.fileBuffer) {
+			throw new Error("No sqlite DB file selected...");
+		}
 
-        const SQLEngine = await SqlJs({
-            wasmBinary: binary
-        })
+		const SQLEngine = await SqlJs({
+			wasmBinary: binary,
+		});
 
-        const db = new SQLEngine.Database(new Uint8Array(this.fileBuffer))
+		const db = new SQLEngine.Database(new Uint8Array(this.fileBuffer));
 
-        const service: HighlightService = new HighlightService(
-            new Repository(
-                db
-            )
-        )
+		const service: HighlightService = new HighlightService(
+			new Repository(db),
+		);
 
-        const content = service.convertToMap(
-            await service.getAllHighlight(this.settings.sortByChapterProgress)
-        )
-        
-        const allBooksContent = new Map<string, Map<string, Bookmark[]>>()
-        
-        // Add all books with highlights
-        for (const [bookTitle, chapters] of content) {
-            allBooksContent.set(bookTitle, chapters);
-        }
-        
-        if (this.settings.importAllBooks) {
-            // Add books without highlights
-            const allBooks = await service.getAllBooks();
+		const content = service.convertToMap(
+			await service.getAllHighlight(this.settings.sortByChapterProgress),
+		);
 
-            for (const [bookTitle, bookDetails] of allBooks) {
-                if (!allBooksContent.has(bookTitle)) {
-                    allBooksContent.set(bookTitle, service.createEmptyContentMap())
-                }
-            }
-        }
-        
-        this.nrOfBooksExtracted = allBooksContent.size;
-        await this.writeBooks(service, allBooksContent);
-    }
+		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
 
-    private async writeBooks(service: HighlightService, content: Map<string, Map<string, Bookmark[]>>) {
-        const template = await getTemplateContents(this.app, this.settings.templatePath)
+		// Add all books with highlights
+		for (const [bookTitle, chapters] of content) {
+			allBooksContent.set(bookTitle, chapters);
+		}
 
-        for (const [bookTitle, chapters] of content) {
+		if (this.settings.importAllBooks) {
+			// Add books without highlights
+			const allBooks = await service.getAllBooks();
 
-            const sanitizedBookName = sanitize(bookTitle)
-            const fileName = normalizePath(`${this.settings.storageFolder}/${sanitizedBookName}.md`)
-            // Check if file already exists
-            let existingFile;
-            try {
-                existingFile = await this.app.vault.adapter.read(fileName)
-            } catch (error) {
-                console.warn("Attempted to read file, but it does not already exist.")
-            }
+			for (const [bookTitle, bookDetails] of allBooks) {
+				if (!allBooksContent.has(bookTitle)) {
+					allBooksContent.set(
+						bookTitle,
+						service.createEmptyContentMap(),
+					);
+				}
+			}
+		}
 
-            const details = await service.getBookDetailsFromBookTitle(bookTitle)
-         
-            // Write file
+		this.nrOfBooksExtracted = allBooksContent.size;
+		await this.writeBooks(service, allBooksContent);
+	}
 
-            await this.app.vault.adapter.write(
-                fileName,
-                applyTemplateTransformations(template, chapters, details)
-            )
-        }
-    }
+	private async writeBooks(
+		service: HighlightService,
+		content: Map<string, Map<string, Bookmark[]>>,
+	) {
+		const template = await getTemplateContents(
+			this.app,
+			this.settings.templatePath,
+		);
 
-    onOpen() {
-        const { contentEl } = this;
+		for (const [bookTitle, chapters] of content) {
+			const sanitizedBookName = sanitize(bookTitle);
+			const fileName = normalizePath(
+				`${this.settings.storageFolder}/${sanitizedBookName}.md`,
+			);
+			// Check if file already exists
+			let existingFile;
+			try {
+				existingFile = await this.app.vault.adapter.read(fileName);
+			} catch (error) {
+				console.warn(
+					"Attempted to read file, but it does not already exist.",
+				);
+			}
 
-        this.goButtonEl = contentEl.createEl('button');
-        this.goButtonEl.textContent = 'Extract'
-        this.goButtonEl.disabled = true;
-        this.goButtonEl.setAttr('style', 'background-color: red; color: white')
-        this.goButtonEl.addEventListener('click', () => {
-            new Notice('Extracting highlights...')
-            this.fetchHighlights()
-                .then(() => {
-                    new Notice('Extracted highlights from ' + this.nrOfBooksExtracted + ' books!')
-                    this.close()
-                }).catch(e => {
-                    console.log(e)
-                    new Notice('Something went wrong... Check console for more details.')
-                })
-        }
-        )
+			const details =
+				await service.getBookDetailsFromBookTitle(bookTitle);
 
-        this.inputFileEl = contentEl.createEl('input');
-        this.inputFileEl.type = 'file'
-        this.inputFileEl.accept = '.sqlite'
-        this.inputFileEl.addEventListener("change", (ev) => {
-            const file = (<any>ev).target?.files[0];
-            if (!file) {
-              console.error("No file selected");
-              return;
-            }
-          
-            // Convert File to ArrayBuffer
-            const reader = new FileReader();
-            reader.onload = () => {
-              this.fileBuffer = reader.result as ArrayBuffer;  // Store the ArrayBuffer
-              this.goButtonEl.disabled = false;
-              this.goButtonEl.setAttr("style", "background-color: green; color: black");
-              new Notice("Ready to extract!");
-            };
-          
-            reader.onerror = (error) => {
-              console.error("FileReader error:", error);
-              new Notice("Error reading file");
-            };
-          
-            reader.readAsArrayBuffer(file);
-          });
+			// Write file
 
-        const heading = contentEl.createEl('h2')
-        heading.textContent = 'Sqlite file location'
+			await this.app.vault.adapter.write(
+				fileName,
+				applyTemplateTransformations(template, chapters, details),
+			);
+		}
+	}
 
-        const description = contentEl.createEl('p')
-        description.innerHTML = 'Please select your <em>KoboReader.sqlite</em> file from a connected device'
+	onOpen() {
+		const { contentEl } = this;
 
-        contentEl.appendChild(heading)
-        contentEl.appendChild(description)
-        contentEl.appendChild(this.inputFileEl)
-        contentEl.appendChild(this.goButtonEl)
-    }
+		this.goButtonEl = contentEl.createEl("button");
+		this.goButtonEl.textContent = "Extract";
+		this.goButtonEl.disabled = true;
+		this.goButtonEl.setAttr("style", "background-color: red; color: white");
+		this.goButtonEl.addEventListener("click", () => {
+			new Notice("Extracting highlights...");
+			this.fetchHighlights()
+				.then(() => {
+					new Notice(
+						"Extracted highlights from " +
+							this.nrOfBooksExtracted +
+							" books!",
+					);
+					this.close();
+				})
+				.catch((e) => {
+					console.log(e);
+					new Notice(
+						"Something went wrong... Check console for more details.",
+					);
+				});
+		});
 
-    onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-    }
+		this.inputFileEl = contentEl.createEl("input");
+		this.inputFileEl.type = "file";
+		this.inputFileEl.accept = ".sqlite";
+		this.inputFileEl.addEventListener("change", (ev) => {
+			const file = (<any>ev).target?.files[0];
+			if (!file) {
+				console.error("No file selected");
+				return;
+			}
+
+			// Convert File to ArrayBuffer
+			const reader = new FileReader();
+			reader.onload = () => {
+				this.fileBuffer = reader.result as ArrayBuffer; // Store the ArrayBuffer
+				this.goButtonEl.disabled = false;
+				this.goButtonEl.setAttr(
+					"style",
+					"background-color: green; color: black",
+				);
+				new Notice("Ready to extract!");
+			};
+
+			reader.onerror = (error) => {
+				console.error("FileReader error:", error);
+				new Notice("Error reading file");
+			};
+
+			reader.readAsArrayBuffer(file);
+		});
+
+		const heading = contentEl.createEl("h2");
+		heading.textContent = "Sqlite file location";
+
+		const description = contentEl.createEl("p");
+		description.innerHTML =
+			"Please select your <em>KoboReader.sqlite</em> file from a connected device";
+
+		contentEl.appendChild(heading);
+		contentEl.appendChild(description);
+		contentEl.appendChild(this.inputFileEl);
+		contentEl.appendChild(this.goButtonEl);
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
 }

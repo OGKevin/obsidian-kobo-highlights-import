@@ -20,10 +20,26 @@
   };
 
   pre-commit.hooks = {
-    eslint.enable = true;
-    yamllint.enable = true;
     actionlint.enable = true;
     conform.enable = true;
+    eslint.enable = true;
+    markdownlint = {
+      enable = true;
+      settings = {
+        configuration = {
+          MD007 = false;
+          MD013 = false;
+          MD024 = false;
+          MD030 = false;
+          MD033 = false;
+          MD040 = false;
+          MD045 = false;
+          MD051 = false;
+        };
+      };
+    };
+    prettier.enable = true;
+    yamllint.enable = true;
   };
 
   # https://devenv.sh/scripts/

@@ -10,41 +10,47 @@ import { FlatCompat } from "@eslint/eslintrc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+	baseDirectory: __dirname,
+	recommendedConfig: js.configs.recommended,
+	allConfig: js.configs.all,
 });
 
-export default defineConfig([globalIgnores(["**/node_modules", "**/build"]), {
-    extends: compat.extends(
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended",
-    ),
+export default defineConfig([
+	globalIgnores(["**/node_modules", "**/build"]),
+	{
+		extends: compat.extends(
+			"eslint:recommended",
+			"plugin:@typescript-eslint/eslint-recommended",
+			"plugin:@typescript-eslint/recommended",
+		),
 
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
-    },
+		plugins: {
+			"@typescript-eslint": typescriptEslint,
+		},
 
-    languageOptions: {
-        globals: {
-            ...globals.node,
-        },
+		languageOptions: {
+			globals: {
+				...globals.node,
+			},
 
-        parser: tsParser,
-        ecmaVersion: 5,
-        sourceType: "module",
-    },
+			parser: tsParser,
+			ecmaVersion: 5,
+			sourceType: "module",
+		},
 
-    rules: {
-        "no-unused-vars": 2,
+		rules: {
+			"no-unused-vars": 2,
 
-        "@typescript-eslint/no-unused-vars": ["error", {
-            args: "none",
-        }],
+			"@typescript-eslint/no-unused-vars": [
+				"error",
+				{
+					args: "none",
+				},
+			],
 
-        "@typescript-eslint/ban-ts-comment": 2,
-        "no-prototype-builtins": 2,
-        "@typescript-eslint/no-empty-function": 1,
-    },
-}]);
+			"@typescript-eslint/ban-ts-comment": 2,
+			"no-prototype-builtins": 2,
+			"@typescript-eslint/no-empty-function": 1,
+		},
+	},
+]);
