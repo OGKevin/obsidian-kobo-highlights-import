@@ -12,7 +12,7 @@ describe("Repository", async function () {
 
 	before(async function () {
 		const SQLEngine = await SqlJs({
-			wasmBinary: binary,
+			wasmBinary: binary.buffer,
 		});
 
 		db = new SQLEngine.Database(readFileSync("KoboReader.sqlite"));

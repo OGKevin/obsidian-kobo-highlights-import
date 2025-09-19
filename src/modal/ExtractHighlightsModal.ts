@@ -31,7 +31,7 @@ export class ExtractHighlightsModal extends Modal {
 		}
 
 		const SQLEngine = await SqlJs({
-			wasmBinary: binary,
+			wasmBinary: binary.buffer,
 		});
 
 		const db = new SQLEngine.Database(new Uint8Array(this.fileBuffer));
