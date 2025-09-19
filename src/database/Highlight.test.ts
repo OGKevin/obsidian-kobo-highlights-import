@@ -1,7 +1,7 @@
-import chai from 'chai';
+import { expect, assert } from 'chai';
 import moment from "moment";
 import { v4 as uuidv4 } from "uuid";
-import { HighlightService, typeWhateverYouWantPlaceholder } from "./Highlight";
+import { HighlightService } from "./Highlight";
 import { Bookmark, Content, Highlight } from "./interfaces";
 import { Repository } from "./repository";
 
@@ -13,7 +13,6 @@ describe("HighlightService", async function () {
 			const repo = {} as Repository;
 			repo.getContentByContentId = () =>
 				Promise.resolve({
-					bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
 					title: "Chapter Eight: Holden",
 					contentId:
 						"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
@@ -43,229 +42,53 @@ describe("HighlightService", async function () {
 				dateCreatedText = moment(dateCreated).format("");
 			});
 
-			it("fromMaptoMarkdown with date", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?” — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
+			it("createHighlightFromBookmark", async function () {
+				const dateCreated = new Date(
+					Date.UTC(2022, 7, 5, 20, 46, 41, 0),
 				);
+				const bookmark: Bookmark = {
+					bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
+					text: "“I guess I can’t be. How do you prove a negative?”",
+					contentId:
+						"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+					note: "",
+					dateCreated,
+				};
+				highlight = await service.createHighlightFromBookmark(bookmark);
+				dateCreatedText = moment(dateCreated).format("");
+
+				assert.deepEqual(highlight, {
+					content: {
+						title: "Chapter Eight: Holden",
+						contentId:
+							"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+						bookTitle: "Nemesis Games",
+						chapterIdBookmarked: "true",
+					},
+					bookmark: {
+						bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
+						text: "“I guess I can’t be. How do you prove a negative?”",
+						contentId:
+							"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+						note: "",
+						dateCreated,
+					},
+				});
 			});
 
-			it("fromMaptoMarkdown without date", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						false,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
+			it("convertToMap creates correct structure", async function () {
+				const map = service.convertToMap([highlight]);
 
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with callouts", async function () {
-				const map = service
-					.convertToMap([highlight], false, "", true, "quote", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with callouts and date", async function () {
-				const map = service
-					.convertToMap([highlight], true, "", true, "quote", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?” — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with custom callouts", async function () {
-				const map = service
-					.convertToMap([highlight], false, "", true, "bug", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!bug]
-> “I guess I can’t be. How do you prove a negative?”
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with custom callouts and date", async function () {
-				const map = service
-					.convertToMap([highlight], true, "", true, "bug", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!bug]
-> “I guess I can’t be. How do you prove a negative?” — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown simple highlight list", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						false,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-						true,
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-> “I guess I can’t be. How do you prove a negative?”`,
-				);
+				expect(map.size).to.equal(1);
+				expect(map.has("Nemesis Games")).to.be.true;
+				
+				const bookMap = map.get("Nemesis Games");
+				expect(bookMap?.size).to.equal(1);
+				expect(bookMap?.has("Chapter Eight: Holden")).to.be.true;
+				
+				const highlights = bookMap?.get("Chapter Eight: Holden");
+				expect(highlights).to.have.length(1);
+				expect(highlights?.[0].bookmarkId).to.equal("c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe");
 			});
 		});
 
@@ -289,253 +112,7 @@ ${typeWhateverYouWantPlaceholder}
 				dateCreatedText = moment(dateCreated).format("");
 			});
 
-			it("fromMaptoMarkdown with date", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-
-This is a great note! — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown without date", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						false,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-
-This is a great note!
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with callouts", async function () {
-				const map = service
-					.convertToMap([highlight], false, "", true, "quote", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
->> [!note]
-> This is a great note!
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with callouts and date", async function () {
-				const map = service
-					.convertToMap([highlight], true, "", true, "quote", "note")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
->> [!note]
-> This is a great note! — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with custom callouts", async function () {
-				const map = service
-					.convertToMap([highlight], false, "", true, "quote", "bug")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
->> [!bug]
-> This is a great note!
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown with custom callouts and date", async function () {
-				const map = service
-					.convertToMap([highlight], true, "", true, "quote", "bug")
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
->> [!bug]
-> This is a great note! — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-
-			it("fromMaptoMarkdown simple highlight list", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						true,
-						"quote",
-						"note",
-						true,
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-> [!quote]
-> “I guess I can’t be. How do you prove a negative?”
->> [!note]
-> This is a great note! — [[` + dateCreatedText + `]]`,
-				);
-			});
-		});
-
-		describe("Sample Bookmark with annotation, with existing highlights and added notes", async function () {
-			let highlight: Highlight;
-			let dateCreatedText: string;
-			let existingFile: string;
-
-			before(async function () {
+			it("createHighlightFromBookmark", async function () {
 				const dateCreated = new Date(
 					Date.UTC(2022, 7, 5, 20, 46, 41, 0),
 				);
@@ -549,152 +126,24 @@ ${typeWhateverYouWantPlaceholder}
 				};
 				highlight = await service.createHighlightFromBookmark(bookmark);
 				dateCreatedText = moment(dateCreated).format("");
-				existingFile =
-					`## Chapter Eight: Holden
 
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-
-This is a great note! — [[` +
-					dateCreatedText +
-					`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-This is an exising note, added to the highlight.
-
-^325d95
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`;
-			});
-
-			it("fromMaptoMarkdown with existing file", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map, existingFile);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-
-This is a great note! — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-This is an exising note, added to the highlight.
-
-^325d95
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
-			});
-		});
-
-		describe("Sample Bookmark with annotation, with outdated existing highlights and added notes", async function () {
-			let highlight: Highlight;
-			let dateCreatedText: string;
-			let existingFile: string;
-
-			before(async function () {
-				const dateCreated = new Date(
-					Date.UTC(2022, 7, 5, 20, 46, 41, 0),
-				);
-				const bookmark: Bookmark = {
-					bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
-					text: "“I guess I can’t be. How do you prove a negative?”",
-					contentId:
-						"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
-					note: "This is a great note!",
-					dateCreated,
-				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
-				dateCreatedText = moment(dateCreated).format("");
-				existingFile =
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be.”
-
-This is a great note! — [[` +
-					dateCreatedText +
-					`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-This is an exising note, added to the highlight.
-
-^325d95
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`;
-			});
-
-			it("fromMaptoMarkdown with existing file", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map, existingFile);
-				chai.assert.deepEqual(
-					markdown,
-					`## Chapter Eight: Holden
-
-%%START-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-> “I guess I can’t be. How do you prove a negative?”
-
-This is a great note! — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%
-
-This is an exising note, added to the highlight.
-
-^325d95
-
-%%END-c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe%%`,
-				);
+				assert.deepEqual(highlight, {
+					content: {
+						title: "Chapter Eight: Holden",
+						contentId:
+							"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+						bookTitle: "Nemesis Games",
+						chapterIdBookmarked: "true",
+					},
+					bookmark: {
+						bookmarkId: "c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
+						text: "“I guess I can’t be. How do you prove a negative?”",
+						contentId:
+							"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+						note: "This is a great note!",
+						dateCreated,
+					},
+				});
 			});
 		});
 	});
@@ -708,6 +157,7 @@ This is an exising note, added to the highlight.
 			repo.getContentLikeContentId = () => Promise.resolve(null);
 			service = new HighlightService(repo);
 		});
+		
 		describe("Sample Bookmark linked to missing content", async function () {
 			let highlight: Highlight;
 			let dateCreatedText: string;
@@ -728,46 +178,10 @@ This is an exising note, added to the highlight.
 				dateCreatedText = moment(dateCreated).format("");
 			});
 
-			it("fromMaptoMarkdown with date", async function () {
-				const map = service
-					.convertToMap(
-						[highlight],
-						true,
-						"",
-						false,
-						"[!quote]",
-						"[!note]",
-					)
-					.get(highlight.content.bookTitle ?? "");
-
-				if (!map) {
-					chai.assert.isNotNull(map);
-					return;
-				}
-
-				const markdown = service.fromMapToMarkdown(map);
-				chai.assert.deepEqual(
-					markdown,
-					`## Unknown Title
-
-%%START-` +
-						highlight.bookmark.bookmarkId +
-						`%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%START-EXTRACTED-HIGHLIGHT-${highlight.bookmark.bookmarkId}%%
-> “I guess I can’t be. How do you prove a negative?” — [[` +
-						dateCreatedText +
-						`]]
-%%END-EXTRACTED-HIGHLIGHT-${highlight.bookmark.bookmarkId}%%
-
-${typeWhateverYouWantPlaceholder}
-
-%%END-` +
-						highlight.bookmark.bookmarkId +
-						`%%`,
-				);
+			it("createHighlightFromBookmark with missing content", async function () {
+				expect(highlight.content.bookTitle).to.equal("Unknown Title");
+				expect(highlight.content.title).to.equal("Unknown Title");
+				expect(highlight.bookmark.bookmarkId).to.not.be.empty;
 			});
 		});
 	});
@@ -879,20 +293,20 @@ ${typeWhateverYouWantPlaceholder}
 		it("getAllHighlight", async function () {
 			const all = await service.getAllHighlight();
 			const total = await repo.getTotalBookmark();
-			chai.expect(all).length(total);
+			expect(all).length(total);
 		});
 
 		for (const [id, content] of contentMap) {
 			it(`createHighlightFromBookmark ${id}`, async function () {
 				const bookmark = await repo.getBookmarkById(id);
 				if (!bookmark) {
-					chai.assert.isNotNull(bookmark);
+					assert.isNotNull(bookmark);
 					return;
 				}
 
 				const highlight =
 					await service.createHighlightFromBookmark(bookmark);
-				chai.assert.deepEqual(highlight, {
+				assert.deepEqual(highlight, {
 					content: content,
 					bookmark: bookmark,
 				});
@@ -965,35 +379,28 @@ ${typeWhateverYouWantPlaceholder}
 
 		it("getAllBooks should return all books with correct details", async function () {
 			const books = await service.getAllBooks();
-			chai.expect(books.size).to.equal(2);
+			expect(books.size).to.equal(2);
 
 			const bookWithHighlights = books.get("Book with Highlights");
 			const bookWithoutHighlights = books.get("Book without Highlights");
 
-			chai.expect(bookWithHighlights).to.not.be.undefined;
-			chai.expect(bookWithoutHighlights).to.not.be.undefined;
+			expect(bookWithHighlights).to.not.be.undefined;
+			expect(bookWithoutHighlights).to.not.be.undefined;
 
-			chai.expect(bookWithHighlights?.author).to.equal("Author 1");
-			chai.expect(bookWithHighlights?.percentRead).to.equal(100);
-			chai.expect(bookWithoutHighlights?.author).to.equal("Author 2");
-			chai.expect(bookWithoutHighlights?.percentRead).to.equal(50);
+			expect(bookWithHighlights?.author).to.equal("Author 1");
+			expect(bookWithHighlights?.percentRead).to.equal(100);
+			expect(bookWithoutHighlights?.author).to.equal("Author 2");
+			expect(bookWithoutHighlights?.percentRead).to.equal(50);
 		});
 
 		it("convertToMap should handle books with and without highlights correctly", async function () {
 			const highlights = await service.getAllHighlight();
-			const contentMap = service.convertToMap(
-				highlights,
-				false,
-				"",
-				false,
-				"quote",
-				"note",
-			);
+			const contentMap = service.convertToMap(highlights);
 
 			// Verify initial state with only books containing highlights
-			chai.expect(contentMap.size).to.equal(1);
-			chai.expect(contentMap.has("Book with Highlights")).to.be.true;
-			chai.expect(contentMap.has("Book without Highlights")).to.be.false;
+			expect(contentMap.size).to.equal(1);
+			expect(contentMap.has("Book with Highlights")).to.be.true;
+			expect(contentMap.has("Book without Highlights")).to.be.false;
 
 			// Add books without highlights
 			const allBooks = await service.getAllBooks();
@@ -1004,23 +411,23 @@ ${typeWhateverYouWantPlaceholder}
 			}
 
 			// Verify final state with all books
-			chai.expect(contentMap.size).to.equal(2);
+			expect(contentMap.size).to.equal(2);
 
 			const bookWithHighlights = contentMap.get("Book with Highlights");
 			const bookWithoutHighlights = contentMap.get(
 				"Book without Highlights",
 			);
 
-			chai.expect(bookWithHighlights).to.not.be.undefined;
-			chai.expect(bookWithoutHighlights).to.not.be.undefined;
-			chai.expect(bookWithoutHighlights?.size).to.equal(0);
+			expect(bookWithHighlights).to.not.be.undefined;
+			expect(bookWithoutHighlights).to.not.be.undefined;
+			expect(bookWithoutHighlights?.size).to.equal(0);
 		});
 
 		it("getBookDetailsFromBookTitle should return correct book details", async function () {
 			const details1 = await service.getBookDetailsFromBookTitle(
 				"Book with Highlights",
 			);
-			chai.expect(details1).to.deep.include({
+			expect(details1).to.deep.include({
 				title: "Book with Highlights",
 				author: "Author 1",
 				description: "Description 1",
@@ -1031,7 +438,7 @@ ${typeWhateverYouWantPlaceholder}
 			const details2 = await service.getBookDetailsFromBookTitle(
 				"Book without Highlights",
 			);
-			chai.expect(details2).to.deep.include({
+			expect(details2).to.deep.include({
 				title: "Book without Highlights",
 				author: "Author 2",
 				description: "Description 2",
@@ -1041,7 +448,7 @@ ${typeWhateverYouWantPlaceholder}
 
 			const nonExistentBook =
 				await service.getBookDetailsFromBookTitle("Non-existent Book");
-			chai.expect(nonExistentBook).to.deep.equal({
+			expect(nonExistentBook).to.deep.equal({
 				title: "Unknown Title",
 				author: "Unknown Author",
 			});

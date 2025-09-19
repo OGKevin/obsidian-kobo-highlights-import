@@ -4,16 +4,11 @@ import { sanitize } from 'sanitize-filename-ts';
 import SqlJs from 'sql.js';
 import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
+import { Bookmark } from "src/database/interfaces";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
 import { applyTemplateTransformations } from 'src/template/template';
 import { getTemplateContents } from 'src/template/templateContents';
-
-type bookmark = {
-    bookmarkId: string
-    fullContent: string
-    highlightContent: string
-}
 
 export class ExtractHighlightsModal extends Modal {
     goButtonEl!: HTMLButtonElement;
@@ -50,16 +45,10 @@ export class ExtractHighlightsModal extends Modal {
         )
 
         const content = service.convertToMap(
-            await service.getAllHighlight(this.settings.sortByChapterProgress),
-            this.settings.includeCreatedDate,
-            this.settings.dateFormat,
-            this.settings.includeCallouts,
-            this.settings.highlightCallout,
-            this.settings.annotationCallout,
-            this.settings.generateSimpleHighlightList
+            await service.getAllHighlight(this.settings.sortByChapterProgress)
         )
         
-        const allBooksContent = new Map<string, Map<string, bookmark[]>>()
+        const allBooksContent = new Map<string, Map<string, Bookmark[]>>()
         
         // Add all books with highlights
         for (const [bookTitle, chapters] of content) {
@@ -81,7 +70,7 @@ export class ExtractHighlightsModal extends Modal {
         await this.writeBooks(service, allBooksContent);
     }
 
-    private async writeBooks(service: HighlightService, content: Map<string, Map<string, bookmark[]>>) {
+    private async writeBooks(service: HighlightService, content: Map<string, Map<string, Bookmark[]>>) {
         const template = await getTemplateContents(this.app, this.settings.templatePath)
 
         for (const [bookTitle, chapters] of content) {
@@ -96,14 +85,13 @@ export class ExtractHighlightsModal extends Modal {
                 console.warn("Attempted to read file, but it does not already exist.")
             }
 
-            const markdown = service.fromMapToMarkdown(chapters, existingFile)
             const details = await service.getBookDetailsFromBookTitle(bookTitle)
          
             // Write file
 
             await this.app.vault.adapter.write(
                 fileName,
-                applyTemplateTransformations(template, markdown, details)
+                applyTemplateTransformations(template, chapters, details)
             )
         }
     }

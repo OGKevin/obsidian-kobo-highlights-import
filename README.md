@@ -6,10 +6,8 @@ This plugin aims to make highlight import from Kobo devices easier.
   - [How to use](#how-to-use)
   - [Templating](#templating)
     - [Variables](#variables)
-  - [Highlight markers](#highlight-markers)
-  - [Disable highlight markers](#disable-highlight-markers)
+    - [Template Syntax](#template-syntax)
   - [Helping Screenshots](#helping-screenshots)
-  - [Obsidian Callouts](#obsidian-callouts)
   - [Contributing](#contributing)
 
 ## How to use
@@ -26,71 +24,90 @@ Once installed, the steps to import your highlights directly into the vault are:
 
 ## Templating
 
+The plugin uses [Eta.js](https://eta.js.org/) for templating. You can fully customize the output using Eta's template syntax. See the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax) for details.
+
 The default template is:
 
-```markdown
+```eta
 ---
-title: {{Title}}
-author: {{Author}}
-publisher: {{Publisher}}
-dateLastRead: {{DateLastRead}}
-readStatus: {{ReadStatus}}
-percentRead: {{PercentRead}}
-isbn: {{ISBN}}
-series: {{Series}}
-seriesNumber: {{SeriesNumber}}
-timeSpentReading: {{TimeSpentReading}}
+title: "<%= it.bookDetails.title %>"
+author: <%= it.bookDetails.author %>
+publisher: <%= it.bookDetails.publisher ?? '' %>
+dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
+readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
+percentRead: <%= it.bookDetails.percentRead ?? '' %>
+isbn: <%= it.bookDetails.isbn ?? '' %>
+series: <%= it.bookDetails.series ?? '' %>
+seriesNumber: <%= it.bookDetails.seriesNumber ?? '' %>
+timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 ---
 
-# {{Title}}
+# <%= it.bookDetails.title %>
 
 ## Description
 
-{{Description}}
+<%= it.bookDetails.description ?? '' %>
 
 ## Highlights
 
-{{highlights}}
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+## <%= chapterName.trim() %>
+
+<% highlights.forEach((highlight) => { -%>
+<%= highlight.text %>
+
+<% if (highlight.note) { -%>
+**Note:** <%= highlight.note %>
+
+<% } -%>
+<% if (highlight.dateCreated) { -%>
+*Created: <%= highlight.dateCreated.toISOString() %>*
+
+<% } -%>
+<% }) -%>
+<% }) %>
 ```
 
 ### Variables
 
-| Tag              | Description                                      | Example                |
-| ---------------- | ------------------------------------------------ | ---------------------- |
-| highlights       | Will get replaced with the extracted highlights. | `{{highlights}}`       |
-| title            | The title of the book.                           | `{{title}}`            |
-| author           | The author of the book.                          | `{{author}}`           |
-| pulbisher        | The publisher of the book                        | `{{publihser}}`        |
-| dateLastRead     | The date the book was last read in ISO format.   | `{{dateLastRead}}`     |
-| readStatus       | Can be: Unopened, Reading, Read.                 | `{{readStatus}}`       |
-| isbn             | The ISBN of the book.                            | `{{isbn}}`             |
-| series           | The series of which the book is a part of.       | `{{series}}`           |
-| seriesNumber     | The position of the book in the series.          | `{{seriesNumber}}`     |
-| timeSpentReading | The time spent reading the book.                 | `{{timeSpentReading}}` |
+The following variables are available in your template:
 
-## Highlight markers
-The plugin uses comments as highlight markers, to enable support for keeping existing highlights. All content between these markers will be transferred to the updated file. 
+| Variable      | Type / Structure                        | Description                                                                 |
+|---------------|-----------------------------------------|-----------------------------------------------------------------------------|
+| `bookDetails` | Object                                  | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description` |
+| `chapters`    | Array of `[chapterName, highlights]`    | Each `highlights` is an array of bookmarks for that chapter                 |
+| `ReadStatus`  | Enum mapping                            | Maps read status values to their string labels                              |
+| `highlight`   | Object                                  | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
 
-```
-%%START-<MARKER IDENTIFIER>%%
-
-%% Here you can type whatever you want, it will not be overwritten by the plugin. %%
-
-%%START-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
-...highlight
-%%END-EXTRACTED-HIGHLIGHT-<MARKER IDENTIFIER>%%
-
-%% Here you can type whatever you want, it will not be overwritten by the plugin. $$
-
-%%END-<MARKER IDENTIFIER>%%`
+#### Example usage:
+```eta
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+## <%= chapterName %>
+<% highlights.forEach(h => { -%>
+<%= h.text %>
+<% if (h.note) { -%>
+**Note:** <%= h.note %>
+<% } -%>
+<% if (h.dateCreated) { -%>
+*Created: <%= h.dateCreated.toISOString() %>*
+<% } -%>
+<% }) -%>
+<% }) %>
 ```
 
-## Disable highlight markers
+#### Date formatting examples:
+```eta
+<!-- YYYY-MM-DD format -->
+*Created: <%= h.dateCreated.getFullYear() %>-<%= String(h.dateCreated.getMonth() + 1).padStart(2, '0') %>-<%= String(h.dateCreated.getDate()).padStart(2, '0') %>*
 
-If you prefer a cleaner output without the surrounding markers, enable the **Disable highlight markers** setting. When turned on, the plugin only writes the highlights (and any callouts, annotations, or dates) without the `%%START-...%%` and `%%END-...%%` sections.
+<!-- Localized date -->
+*Created: <%= h.dateCreated.toLocaleDateString() %>*
 
-![](./README_assets/IMG_0078.png)
-![](./README_assets/IMG_0079.png)
+<!-- Localized date and time -->
+*Created: <%= h.dateCreated.toLocaleString() %>*
+```
+
+For more advanced syntax, see the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax).
 
 ## Helping Screenshots
 
@@ -99,17 +116,6 @@ If you prefer a cleaner output without the surrounding markers, enable the **Dis
 ![](./README_assets/step3.png)
 ![](./README_assets/step4.png)
 
-## Obsidian Callouts
-
-Kobo Highlight Importer uses Obsidian callouts for the highlights and annotations imported; Which can be configured
-individually. Turning this toggle off will fallback to the standard markdown block quotes for highlights only.
-
-![](./README_assets/Callout_Settings.png)
-![](./README_assets/Callouts.png)
-
-Check the [documentation](https://help.obsidian.md/How+to/Use+callouts") to get a list of all available callouts that
-obsidian offers.
-
 ## Contributing
 
-Please feel free to test, send feedbacks using Issues and open Pull Requests to improve the process. 
+Please feel free to test, send feedbacks using Issues and open Pull Requests to improve the process.

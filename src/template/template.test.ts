@@ -1,15 +1,58 @@
-import * as chai from 'chai'
-import { applyTemplateTransformations, defaultTemplate } from './template'
+import * as chai from "chai";
+import { applyTemplateTransformations, defaultTemplate } from "./template";
+import { chapter } from "../database/Highlight";
+import { Bookmark } from "../database/interfaces";
 
-describe('template', async function () {
-	it('applyTemplateTransformations default', async function () {
-		const content = applyTemplateTransformations(defaultTemplate, 'test', {
-			title: 'test title',
-			author: 'test'
-		})
+describe("template", async function () {
+	const testDate = new Date("2023-01-01T12:00:00Z");
+	const chapters = new Map<chapter, Bookmark[]>([
+		[
+			"Chapter 1",
+			[
+				{
+					bookmarkId: "1",
+					text: "test",
+					contentId: "content1",
+					dateCreated: testDate,
+				},
+			],
+		],
 
-		chai.expect(content).deep.eq(
-			`---
+		[
+			"Chapter 2",
+			[
+				{
+					bookmarkId: "1",
+					text: "test2",
+					contentId: "content2",
+					dateCreated: testDate,
+					note: "note2",
+				},
+			],
+		],
+	]);
+
+	function normalize(s: string) {
+		return s
+			.replace(/\r\n/g, "\n")
+			.split("\n")
+			.map((line) => line.trimEnd())
+			.join("\n")
+			.trim();
+	}
+
+	it("applyTemplateTransformations default", async function () {
+		const content = applyTemplateTransformations(
+			defaultTemplate,
+			chapters,
+			{
+				title: "test title",
+				author: "test",
+			},
+		);
+		chai.expect(normalize(content)).equal(
+			normalize(
+				`---
 title: "test title"
 author: test
 publisher: 
@@ -30,13 +73,26 @@ timeSpentReading:
 
 ## Highlights
 
-test`
-		)
-	})
+## Chapter 1
+
+test
+
+*Created: 2023-01-01T12:00:00.000Z*
+
+## Chapter 2
+
+test2
+
+**Note:** note2
+
+*Created: 2023-01-01T12:00:00.000Z*`,
+			),
+		);
+	});
 
 	const templates = new Map<string, string[]>([
 		[
-			'default',
+			"default",
 			[
 				defaultTemplate,
 				`---
@@ -60,39 +116,97 @@ timeSpentReading:
 
 ## Highlights
 
-test`
-			]
+## Chapter 1
+
+test
+
+*Created: 2023-01-01T12:00:00.000Z*
+
+## Chapter 2
+
+test2
+
+**Note:** note2
+
+*Created: 2023-01-01T12:00:00.000Z*`,
+			],
 		],
 		[
-			'with front matter',
+			"with front matter",
 			[
 				`
 ---
 tag: [tags]
-title: {{title}}
+title: <%= it.bookDetails.title %>
 ---
-# {{title}}
+# <%= it.bookDetails.title %>
 
-{{highlights}}`,
+<% it.chapters.forEach(([chapterName, highlights]) => { %>
+<%- highlights.forEach(h => { -%>
+<%= h.text %>
+<% }) %>
+<% }) %>`,
 				`---
 tag: [tags]
 title: test title
 ---
 # test title
 
-test`
-			]
-		]
-	])
+test
+
+test2
+`,
+			],
+		],
+		[
+			"with date formatting",
+			[
+				`
+---
+title: "<%= it.bookDetails.title %>"
+---
+
+# <%= it.bookDetails.title %>
+
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+## <%= chapterName %>
+
+<% highlights.forEach(h => { -%>
+<%= h.text %>
+
+*Created: <%= h.dateCreated.getFullYear() %>-<%= String(h.dateCreated.getMonth() + 1).padStart(2, '0') %>-<%= String(h.dateCreated.getDate()).padStart(2, '0') %>*
+
+<% }) -%>
+<% }) %>`,
+				`---
+title: "test title"
+---
+
+# test title
+
+## Chapter 1
+
+test
+
+*Created: 2023-01-01*
+
+## Chapter 2
+
+test2
+
+*Created: 2023-01-01*
+`,
+			],
+		],
+	]);
 
 	for (const [title, t] of templates) {
 		it(`applyTemplateTransformations ${title}`, async function () {
-			const content = applyTemplateTransformations(t[0], 'test', {
-				title: 'test title',
-				author: 'test'
-			})
-
-			chai.expect(content).deep.eq(t[1])
-		})
+			const content = applyTemplateTransformations(t[0], chapters, {
+				title: "test title",
+				author: "test",
+			});
+			chai.expect(normalize(content)).equal(normalize(t[1]));
+		});
 	}
-})
+});

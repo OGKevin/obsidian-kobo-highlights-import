@@ -3,20 +3,10 @@ import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
 import { Repository } from "./repository";
 
 type bookTitle = string
-type chapter = string
-type bookmark = {
-    bookmarkId: string
-    // This contains the whole block, from START- to END-
-    fullContent: string
-    // This contains only the content inside START-EXTRACTED and END-EXTRACTED
-    highlightContent: string
-}
-
-export const typeWhateverYouWantPlaceholder = `%% Here you can type whatever you want, it will not be overwritten by the plugin. %%`
+export type chapter = string
 
 export class HighlightService {
     repo: Repository
-
     unknownBookTitle = 'Unknown Title'
     unknownAuthor = 'Unknown Author'
 
@@ -37,112 +27,27 @@ export class HighlightService {
         return details;
     }
 
-    extractExistingHighlight(bookmark: bookmark, existingContent: string): string {
-        // Define search terms
-        const startSearch = `%%START-${bookmark.bookmarkId}%%`
-        const endSearch = `%%END-${bookmark.bookmarkId}%%`
-        // Find substring indices
-        const start = existingContent.indexOf(startSearch)
-        const end = existingContent.indexOf(endSearch) + endSearch.length + 1 // Add length of search term to include it in substring extraction
-        // Return the extracted substring
-        return this.updateHighlightFromExtractedFile(bookmark, existingContent.substring(start, end))
-    }
-
-    updateHighlightFromExtractedFile(bookmark: bookmark, existingContent: string): string {
-        const startSearch = `%%START-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
-        const endSearch = `%%END-EXTRACTED-HIGHLIGHT-${bookmark.bookmarkId}%%`
-
-        const start = existingContent.indexOf(startSearch) + startSearch.length + 1
-        const end = existingContent.indexOf(endSearch) - 1 // Add length of search term to include it in substring extraction
-
-        return existingContent.replace(existingContent.substring(start, end), bookmark.highlightContent)
-    }
-
-    fromMapToMarkdown(chapters: Map<chapter, bookmark[]>, existingFileContents?: string): string {
-        let markdown = "";
-        for (const [chapter, highlights] of chapters) {
-            markdown += `## ${chapter.trim()}\n\n`
-            markdown += highlights.map((highlight) => {
-                if (existingFileContents?.includes(highlight.bookmarkId)) {
-                    return this.extractExistingHighlight(highlight, existingFileContents)
-                } else {
-                    return highlight.fullContent
-                }
-            }).join('\n\n').trim()
-            markdown += `\n\n`
-        }
-
-        return markdown.trim()
-    }
-
     convertToMap(
         arr: Highlight[],
-        includeDate: boolean,
-        dateFormat: string,
-        includeCallouts: boolean,
-        highlightCallout: string,
-        annotationCallout: string,
-        generateSimpleHighlightList = false,
-    ): Map<bookTitle, Map<chapter, bookmark[]>> {
-        const m = new Map<string, Map<string, bookmark[]>>()
+    ): Map<bookTitle, Map<chapter, Bookmark[]>> {
+        const m = new Map<string, Map<string, Bookmark[]>>()
 
         arr.forEach(x => {
             if (!x.content.bookTitle) {
                 throw new Error("bookTitle must be set")
             }
 
-            let text = ""
-            if (!generateSimpleHighlightList) {
-                // Start annotation marker
-                text += `%%START-${x.bookmark.bookmarkId}%%\n\n`
-                text += `${typeWhateverYouWantPlaceholder}\n\n`
-                text += `%%START-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n`
-            }
-
-            let highlightContent = ""
-
-            if (includeCallouts) {
-                highlightContent += `> [!` + highlightCallout + `]\n`
-            }
-
-            highlightContent += `> ${x.bookmark.text}`
-
-            if (x.bookmark.note) {
-                highlightContent += `\n`
-
-                if (includeCallouts) {
-                    highlightContent += `>> [!` + annotationCallout + `]`
-                    highlightContent += `\n> ${x.bookmark.note}`;
-                } else {
-                    highlightContent += `\n${x.bookmark.note}`;
-                }
-            }
-
-            if (includeDate) {
-                highlightContent += ` — [[${moment(x.bookmark.dateCreated).format(dateFormat)}]]`
-            }
-
-            text += highlightContent
-
-            if (!generateSimpleHighlightList) {
-                // End annotation marker
-                text += `\n%%END-EXTRACTED-HIGHLIGHT-${x.bookmark.bookmarkId}%%\n\n`
-                text += `${typeWhateverYouWantPlaceholder}\n\n`
-                text += `%%END-${x.bookmark.bookmarkId}%%\n`
-            }
-
             const existingBook = m.get(x.content.bookTitle)
-            const highlight: bookmark = { bookmarkId: x.bookmark.bookmarkId, fullContent: text, highlightContent: highlightContent }
             if (existingBook) {
                 const existingChapter = existingBook.get(x.content.title)
 
                 if (existingChapter) {
-                    existingChapter.push(highlight)
+                    existingChapter.push(x.bookmark)
                 } else {
-                    existingBook.set(x.content.title, [highlight])
+                    existingBook.set(x.content.title, [x.bookmark])
                 }
             } else {
-                m.set(x.content.bookTitle, new Map<string, bookmark[]>().set(x.content.title, [highlight]))
+                m.set(x.content.bookTitle, new Map<string, Bookmark[]>().set(x.content.title, [x.bookmark]))
             }
         })
 
@@ -245,7 +150,7 @@ export class HighlightService {
     }
 
     // Create an empty content map for books without highlights
-    createEmptyContentMap(): Map<chapter, bookmark[]> {
-        return new Map<chapter, bookmark[]>();
+    createEmptyContentMap(): Map<chapter, Bookmark[]> {
+        return new Map<chapter, Bookmark[]>();
     }
 }
