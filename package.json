@@ -1,6 +1,7 @@
 {
 	"name": "obsidian-kobo-highlights-importer-plugin",
 	"version": "4.1.0",
+	"type": "module",
 	"description": "Import highlights from your Kobo device",
 	"main": "src/main.js",
 	"scripts": {
