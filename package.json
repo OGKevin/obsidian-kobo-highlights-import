@@ -30,7 +30,7 @@
 		"esbuild": "0.25.10",
 		"eslint": "9.36.0",
 		"globals": "^16.3.0",
-		"mocha": "11.7.3",
+		"mocha": "11.7.4",
 		"nyc": "17.1.0",
 		"obsidian": "1.8.7",
 		"release-please": "^17.0.0",
