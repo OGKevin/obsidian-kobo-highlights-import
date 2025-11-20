@@ -8,7 +8,7 @@ jobs:
     npm:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
             - name: Setup SOPS
               uses: nhedger/setup-sops@v2
               with:
