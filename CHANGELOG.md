@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2025-11-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* add eta templating engine and update template logic
+
+### Features
+
+* add eta templating engine and update template logic ([53a8641](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/53a86412ee566a14e6501ed57b61316321189c3d))
+
+
+### Bug Fixes
+
+* **deps:** update @eslint/eslintrc to 3.3.3 ([#449](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/449)) ([fb6cf46](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/fb6cf46208ba084e184ef1918440017845c5ef41))
+
 ## [4.1.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.0.0...4.1.0) (2025-09-04)
 
 ### ⚠ BREAKING CHANGES
