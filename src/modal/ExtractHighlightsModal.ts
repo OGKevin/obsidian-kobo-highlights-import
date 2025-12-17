@@ -40,8 +40,13 @@ export class ExtractHighlightsModal extends Modal {
 			new Repository(db),
 		);
 
+		// Apply ContentType filter if configured
+		const contentTypeFilter = this.settings.contentTypeFilter.length > 0
+			? this.settings.contentTypeFilter
+			: undefined;
+
 		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress),
+			await service.getAllHighlight(this.settings.sortByChapterProgress, contentTypeFilter),
 		);
 
 		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();

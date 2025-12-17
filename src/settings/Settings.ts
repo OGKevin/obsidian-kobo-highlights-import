@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
+	contentTypeFilter: [],
 };
 
 export interface KoboHighlightsImporterSettings {
@@ -15,6 +16,7 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
+	contentTypeFilter: string[];
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -33,6 +35,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
+		this.add_content_type_filter();
 	}
 
 	add_destination_folder(): void {
@@ -102,6 +105,30 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					},
 				);
+			});
+	}
+
+	add_content_type_filter(): void {
+		const desc = document.createDocumentFragment();
+		desc.append(
+			"Filter highlights by content type. Leave empty to include all content types.",
+			desc.createEl("br"),
+			"Enter content types separated by commas (e.g., 'Book, Magazine, Newspaper').",
+		);
+
+		new Setting(this.containerEl)
+			.setName("Content type filter")
+			.setDesc(desc)
+			.addText((cb) => {
+				cb.setPlaceholder("e.g., Book, Magazine")
+					.setValue(this.plugin.settings.contentTypeFilter.join(", "))
+					.onChange((newValue) => {
+						this.plugin.settings.contentTypeFilter = newValue
+							.split(",")
+							.map((type) => type.trim())
+							.filter((type) => type.length > 0);
+						this.plugin.saveSettings();
+					});
 			});
 	}
 }

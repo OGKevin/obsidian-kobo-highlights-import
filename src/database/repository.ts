@@ -8,17 +8,42 @@ export class Repository {
 		this.db = db;
 	}
 
-	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
-		let res;
-		if (sortByChapterProgress) {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
-			);
-		} else {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`,
-			);
+	async getAllBookmark(sortByChapterProgress?: boolean, contentTypeFilter?: string[]): Promise<Bookmark[]> {
+		let query = `select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null`;
+
+		// Add ContentType filter if specified
+		if (contentTypeFilter && contentTypeFilter.length > 0) {
+			const placeholders = contentTypeFilter.map((_, i) => `$type${i}`).join(", ");
+			query = `select b.BookmarkID, b.Text, b.ContentID, b.annotation, b.DateCreated, b.ChapterProgress
+				from Bookmark b
+				join content c on b.ContentID = c.ContentID
+				where b.Text is not null and c.ContentType in (${placeholders})`;
 		}
+
+		// Add ordering
+		if (sortByChapterProgress) {
+			query += ` order by ChapterProgress ASC, DateCreated ASC;`;
+		} else {
+			query += ` order by DateCreated ASC;`;
+		}
+
+		let res;
+		if (contentTypeFilter && contentTypeFilter.length > 0) {
+			const params: Record<string, string> = {};
+			contentTypeFilter.forEach((type, i) => {
+				params[`$type${i}`] = type;
+			});
+			const statement = this.db.prepare(query, params);
+			const rows: any[] = [];
+			while (statement.step()) {
+				rows.push(statement.get());
+			}
+			statement.free();
+			res = rows.length > 0 ? [{ values: rows }] : [{ values: undefined }];
+		} else {
+			res = this.db.exec(query);
+		}
+
 		const bookmarks: Bookmark[] = [];
 
 		if (res[0].values == undefined) {
@@ -55,12 +80,42 @@ export class Repository {
 		return bookmarks;
 	}
 
-	async getTotalBookmark(): Promise<number> {
-		const res = this.db.exec(
-			`select count(*) from Bookmark where Text is not null;`,
-		);
+	async getTotalBookmark(contentTypeFilter?: string[]): Promise<number> {
+		let query = `select count(*) from Bookmark where Text is not null`;
 
-		return +res[0].values[0].toString();
+		// Add ContentType filter if specified
+		if (contentTypeFilter && contentTypeFilter.length > 0) {
+			const placeholders = contentTypeFilter.map((_, i) => `$type${i}`).join(", ");
+			query = `select count(*) from Bookmark b
+				join content c on b.ContentID = c.ContentID
+				where b.Text is not null and c.ContentType in (${placeholders})`;
+		}
+
+		if (contentTypeFilter && contentTypeFilter.length > 0) {
+			const params: Record<string, string> = {};
+			contentTypeFilter.forEach((type, i) => {
+				params[`$type${i}`] = type;
+			});
+			const statement = this.db.prepare(query, params);
+			statement.step();
+			const result = statement.get();
+			statement.free();
+
+			if (!result || !Array.isArray(result) || result.length === 0 || result[0] == null) {
+				return 0;
+			}
+
+			return +result[0].toString();
+		} else {
+			const res = this.db.exec(query);
+			const result = res[0]?.values?.[0];
+
+			if (!result || !Array.isArray(result) || result.length === 0 || result[0] == null) {
+				return 0;
+			}
+
+			return +result[0].toString();
+		}
 	}
 
 	async getBookmarkById(id: string): Promise<Bookmark | null> {
@@ -264,6 +319,24 @@ export class Repository {
 
 		statement.free();
 		return books;
+	}
+
+	async getUniqueContentTypes(): Promise<string[]> {
+		const statement = this.db.prepare(
+			`select DISTINCT ContentType from content where ContentType is not null order by ContentType ASC;`,
+		);
+
+		const contentTypes: string[] = [];
+
+		while (statement.step()) {
+			const row = statement.get();
+			if (row[0] != null) {
+				contentTypes.push(row[0].toString());
+			}
+		}
+
+		statement.free();
+		return contentTypes;
 	}
 
 	private parseContentStatement(statement: Statement): Content[] {
