@@ -35,8 +35,6 @@ export class Repository {
 			return bookmarks;
 		}
 
-		console.log("Query returned", res[0].values.length, "bookmarks");
-		console.log("First few bookmarks:", res[0].values.slice(0, 3));
 
 		res[0].values.forEach((row) => {
 			if (!(row[0] && row[1] && row[2] && row[4])) {
