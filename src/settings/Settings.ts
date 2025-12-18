@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
-	contentTypeFilter: [],
+	importArticles: false,
 };
 
 export interface KoboHighlightsImporterSettings {
@@ -16,7 +16,7 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
-	contentTypeFilter: string[];
+	importArticles: boolean;
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -35,7 +35,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
-		this.add_content_type_filter();
+		this.add_import_articles();
 	}
 
 	add_destination_folder(): void {
@@ -108,27 +108,22 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 			});
 	}
 
-	add_content_type_filter(): void {
+	add_import_articles(): void {
 		const desc = document.createDocumentFragment();
 		desc.append(
-			"Filter highlights by content type. Leave empty to include all content types.",
-			desc.createEl("br"),
-			"Enter content types separated by commas (e.g., 'Book, Magazine, Newspaper').",
+			"Import all Instapaper articles",
 		);
 
 		new Setting(this.containerEl)
-			.setName("Content type filter")
+			.setName("Import Instapaper articles")
 			.setDesc(desc)
-			.addText((cb) => {
-				cb.setPlaceholder("e.g., Book, Magazine")
-					.setValue(this.plugin.settings.contentTypeFilter.join(", "))
-					.onChange((newValue) => {
-						this.plugin.settings.contentTypeFilter = newValue
-							.split(",")
-							.map((type) => type.trim())
-							.filter((type) => type.length > 0);
-						this.plugin.saveSettings();
-					});
+			.addToggle((cb) => {
+				cb.setValue(this.plugin.settings.importArticles).onChange(
+					async (toggle) => {
+						this.plugin.settings.importArticles = toggle;
+						await this.plugin.saveSettings();
+					},
+				);
 			});
 	}
 }

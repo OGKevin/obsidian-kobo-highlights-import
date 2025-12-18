@@ -40,13 +40,8 @@ export class ExtractHighlightsModal extends Modal {
 			new Repository(db),
 		);
 
-		// Apply ContentType filter if configured
-		const contentTypeFilter = this.settings.contentTypeFilter.length > 0
-			? this.settings.contentTypeFilter
-			: undefined;
-
 		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress, contentTypeFilter),
+			await service.getAllHighlight(this.settings.sortByChapterProgress, this.settings.importArticles),
 		);
 
 		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
@@ -58,7 +53,7 @@ export class ExtractHighlightsModal extends Modal {
 
 		if (this.settings.importAllBooks) {
 			// Add books without highlights
-			const allBooks = await service.getAllBooks();
+			const allBooks = await service.getAllBooks(this.settings.importArticles);
 
 			for (const [bookTitle, _] of allBooks) {
 				if (!allBooksContent.has(bookTitle)) {
