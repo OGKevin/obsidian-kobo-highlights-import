@@ -35,7 +35,9 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
-		this.add_import_articles();
+		if (this.plugin.settings.importAllBooks) {
+			this.add_import_articles();
+		}
 	}
 
 	add_destination_folder(): void {
@@ -90,19 +92,23 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 	add_import_all_books(): void {
 		const desc = document.createDocumentFragment();
 		desc.append(
-			"When enabled, import information for all books from your Kobo device, not just books with highlights.",
+			"When enabled, import information for all books and articles from your Kobo device, not just items with highlights.",
 			desc.createEl("br"),
-			"This will include reading progress, status, and other metadata for every book.",
+			"This will include reading progress, status, and other metadata for every book and Instapaper article.",
 		);
 
 		new Setting(this.containerEl)
-			.setName("Import all books")
+			.setName("Import all books and articles")
 			.setDesc(desc)
 			.addToggle((cb) => {
 				cb.setValue(this.plugin.settings.importAllBooks).onChange(
 					async (toggle) => {
 						this.plugin.settings.importAllBooks = toggle;
+						if (toggle) {
+							this.plugin.settings.importArticles = true;
+						}
 						await this.plugin.saveSettings();
+						this.display();
 					},
 				);
 			});
