@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2026-01-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* add eta templating engine and update template logic
+
+### Features
+
+* add eta templating engine and update template logic ([53a8641](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/53a86412ee566a14e6501ed57b61316321189c3d))
+
+
+### Bug Fixes
+
+* **deps:** update @types/node to 24.10.6 ([#465](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/465)) ([b93b7c8](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/b93b7c8ee1d71dd0cb4730e9148b1074353f5cbe))
+* **deps:** update @types/node to 24.10.7 ([#466](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/466)) ([7d9388a](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/7d9388acf0cf96d14e20637dcc526db012ab6ebc))
+* **deps:** update @types/node to 24.10.8 ([#467](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/467)) ([ee21f23](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/ee21f23ab00c46e533d9cab0fef01d5d7a49a2d6))
+* **deps:** update @types/node to 24.10.9 ([#469](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/469)) ([61105a3](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/61105a33b1f030513e58baf076b33cda8999a756))
+* **deps:** update obsidian to 1.11.4 ([#464](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/464)) ([970252f](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/970252f99bf66afce7a98132722f49b61e482913))
+
 ## [4.1.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.0.0...4.1.0) (2025-09-04)
 
 ### ⚠ BREAKING CHANGES
