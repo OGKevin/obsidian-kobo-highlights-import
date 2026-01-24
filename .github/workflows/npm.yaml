@@ -7,6 +7,10 @@ on:
 jobs:
     npm:
         runs-on: ubuntu-latest
+        permissions:
+            id-token: write
+            contents: read
+            attestations: write
         steps:
             - uses: actions/checkout@v6
             - name: Setup SOPS
@@ -30,3 +34,15 @@ jobs:
               run: npm run test
             - name: Run build
               run: npm run build
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: main-js-build
+                  path: main.js
+                  retention-days: 7
+
+            - name: Generate artifact attestation
+              if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+              uses: actions/attest-build-provenance@v3
+              with:
+                  subject-path: main.js
