@@ -8,17 +8,20 @@ export class Repository {
 		this.db = db;
 	}
 
-	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
-		let res;
-		if (sortByChapterProgress) {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
-			);
-		} else {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`,
-			);
-		}
+	async getAllBookmark(): Promise<Bookmark[]> {
+		const res = this.db.exec(
+			`SELECT 
+				b.BookmarkID, 
+				b.Text, 
+				b.ContentID, 
+				b.annotation, 
+				b.DateCreated, 
+				b.ChapterProgress
+			FROM Bookmark b
+			LEFT JOIN content c ON b.ContentID = c.ContentID
+			WHERE b.Text IS NOT NULL
+			ORDER BY c.BookTitle ASC, c.___FileOffset ASC, b.ChapterProgress ASC;`,
+		);
 		const bookmarks: Bookmark[] = [];
 
 		if (res[0].values == undefined) {

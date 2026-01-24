@@ -5,14 +5,12 @@ import { FolderSuggestor } from "./suggestors/FolderSuggestor";
 
 export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	storageFolder: "",
-	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
 };
 
 export interface KoboHighlightsImporterSettings {
 	storageFolder: string;
-	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
 }
@@ -31,7 +29,6 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 
 		this.add_destination_folder();
 		this.add_template_path();
-		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
 	}
 
@@ -62,25 +59,6 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 						this.plugin.settings.templatePath = newTemplatePath;
 						this.plugin.saveSettings();
 					});
-			});
-	}
-
-	add_sort_by_chapter_progress(): void {
-		const desc = document.createDocumentFragment();
-		desc.append(
-			"Turn on to sort highlights by chapter progess. If turned off, highlights are sorted by creation date and time.",
-		);
-
-		new Setting(this.containerEl)
-			.setName("Sort by chapter progress")
-			.setDesc(desc)
-			.addToggle((cb) => {
-				cb.setValue(
-					this.plugin.settings.sortByChapterProgress,
-				).onChange((toggle) => {
-					this.plugin.settings.sortByChapterProgress = toggle;
-					this.plugin.saveSettings();
-				});
 			});
 	}
 
