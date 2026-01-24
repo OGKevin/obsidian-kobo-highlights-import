@@ -56,26 +56,15 @@ export class HighlightService {
 		return m;
 	}
 
-	async getAllHighlight(
-		sortByChapterProgress?: boolean,
-	): Promise<Highlight[]> {
+	async getAllHighlight(): Promise<Highlight[]> {
 		const highlights: Highlight[] = [];
 
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
+		const bookmarks = await this.repo.getAllBookmark();
 		for (const bookmark of bookmarks) {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort(function (a, b): number {
-			if (!a.content.bookTitle || !b.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
-
-			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
-				a.content.contentId.localeCompare(b.content.contentId)
-			);
-		});
+		return highlights;
 	}
 
 	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {

@@ -26,6 +26,29 @@ describe("Repository", async function () {
 	it("getAllBookmark", async function () {
 		chai.expect(await repo.getAllBookmark()).length.above(0);
 	});
+
+	it("getAllBookmark should be ordered by FileOffset and ChapterProgress", async function () {
+		const bookmarks = await repo.getAllBookmark();
+		chai.expect(bookmarks).length.above(0);
+
+		const negotiatedMarriageBookmarks = bookmarks.filter((b) =>
+			b.contentId.includes("053b483c-267a-4601-8619-29e619c6e9d3"),
+		);
+
+		if (negotiatedMarriageBookmarks.length >= 2) {
+			const chapterNumbers = negotiatedMarriageBookmarks.map((b) => {
+				const match = b.contentId.match(/!!c(\d+)\.xhtml/);
+				return match ? parseInt(match[1]) : 0;
+			});
+
+			for (let i = 1; i < chapterNumbers.length; i++) {
+				chai.expect(chapterNumbers[i]).to.be.at.least(
+					chapterNumbers[i - 1],
+				);
+			}
+		}
+	});
+
 	it("getBookmarkById null", async function () {
 		chai.expect(await repo.getBookmarkById("")).is.null;
 	});
@@ -56,7 +79,7 @@ describe("Repository", async function () {
 		});
 		chai.expect(
 			await repo.getAllContentByBookTitle(
-				titles.at(Math.floor(Math.random() * titles.length)) ?? "",
+				titles[Math.floor(Math.random() * titles.length)] ?? "",
 			),
 		).length.above(0);
 	});
