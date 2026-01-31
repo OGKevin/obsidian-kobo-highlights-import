@@ -3,10 +3,10 @@ import { sanitize } from "sanitize-filename-ts";
 import SqlJs from "sql.js";
 import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
-import { Bookmark } from "src/database/interfaces";
+import { ChapterWithHighlights } from "src/database/interfaces";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
-import { applyTemplateTransformations } from "src/template/template";
+import { applyHierarchicalTemplateTransformations } from "src/template/template";
 import { getTemplateContents } from "src/template/templateContents";
 
 export class ExtractHighlightsModal extends Modal {
@@ -40,13 +40,26 @@ export class ExtractHighlightsModal extends Modal {
 			new Repository(db),
 		);
 
-		const content = service.convertToMap(await service.getAllHighlight());
+		const highlights = await service.getAllHighlight();
 
-		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
+		const allBooksContent = new Map<string, ChapterWithHighlights[]>();
 
-		// Add all books with highlights
-		for (const [bookTitle, chapters] of content) {
-			allBooksContent.set(bookTitle, chapters);
+		// Group highlights by book and build hierarchical structure
+		const bookTitles = new Set<string>();
+		for (const highlight of highlights) {
+			if (highlight.content.bookTitle) {
+				bookTitles.add(highlight.content.bookTitle);
+			}
+		}
+
+		for (const bookTitle of bookTitles) {
+			const hierarchicalChapters = await service.buildHierarchicalChapters(
+				bookTitle,
+				highlights,
+			);
+			if (hierarchicalChapters.length > 0) {
+				allBooksContent.set(bookTitle, hierarchicalChapters);
+			}
 		}
 
 		if (this.settings.importAllBooks) {
@@ -55,10 +68,7 @@ export class ExtractHighlightsModal extends Modal {
 
 			for (const [bookTitle, _] of allBooks) {
 				if (!allBooksContent.has(bookTitle)) {
-					allBooksContent.set(
-						bookTitle,
-						service.createEmptyContentMap(),
-					);
+					allBooksContent.set(bookTitle, []);
 				}
 			}
 		}
@@ -69,7 +79,7 @@ export class ExtractHighlightsModal extends Modal {
 
 	private async writeBooks(
 		service: HighlightService,
-		content: Map<string, Map<string, Bookmark[]>>,
+		content: Map<string, ChapterWithHighlights[]>,
 	) {
 		const template = await getTemplateContents(
 			this.app,
@@ -87,7 +97,7 @@ export class ExtractHighlightsModal extends Modal {
 
 			await this.app.vault.adapter.write(
 				fileName,
-				applyTemplateTransformations(template, chapters, details),
+				applyHierarchicalTemplateTransformations(template, chapters, details),
 			);
 		}
 	}
