@@ -1,8 +1,5 @@
-import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
+import { BookDetails, Bookmark, Content, Highlight, ChapterWithHighlights } from "./interfaces";
 import { Repository } from "./repository";
-
-type bookTitle = string;
-export type chapter = string;
 
 export class HighlightService {
 	repo: Repository;
@@ -26,56 +23,15 @@ export class HighlightService {
 		return details;
 	}
 
-	convertToMap(arr: Highlight[]): Map<bookTitle, Map<chapter, Bookmark[]>> {
-		const m = new Map<string, Map<string, Bookmark[]>>();
-
-		arr.forEach((x) => {
-			if (!x.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
-
-			const existingBook = m.get(x.content.bookTitle);
-			if (existingBook) {
-				const existingChapter = existingBook.get(x.content.title);
-
-				if (existingChapter) {
-					existingChapter.push(x.bookmark);
-				} else {
-					existingBook.set(x.content.title, [x.bookmark]);
-				}
-			} else {
-				m.set(
-					x.content.bookTitle,
-					new Map<string, Bookmark[]>().set(x.content.title, [
-						x.bookmark,
-					]),
-				);
-			}
-		});
-
-		return m;
-	}
-
-	async getAllHighlight(
-		sortByChapterProgress?: boolean,
-	): Promise<Highlight[]> {
+	async getAllHighlight(): Promise<Highlight[]> {
 		const highlights: Highlight[] = [];
 
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
+		const bookmarks = await this.repo.getAllBookmark();
 		for (const bookmark of bookmarks) {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort(function (a, b): number {
-			if (!a.content.bookTitle || !b.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
-
-			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
-				a.content.contentId.localeCompare(b.content.contentId)
-			);
-		});
+		return highlights;
 	}
 
 	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
@@ -173,8 +129,54 @@ export class HighlightService {
 		return this.repo.getAllContentByBookTitle(bookTitle);
 	}
 
-	// Create an empty content map for books without highlights
-	createEmptyContentMap(): Map<chapter, Bookmark[]> {
-		return new Map<chapter, Bookmark[]>();
+	/**
+	 * Builds a hierarchical chapter structure for a book by matching highlights to TOC entries.
+	 * The structure preserves the book's table of contents order and depth levels.
+	 * Only chapters with highlights are included in the result.
+	 * 
+	 * @param bookTitle - The title of the book to build hierarchy for
+	 * @param highlights - All highlights, will be filtered to match this book
+	 * @returns Array of chapters with their hierarchical depth and associated highlights
+	 */
+	async buildHierarchicalChapters(bookTitle: string, highlights: Highlight[]): Promise<ChapterWithHighlights[]> {
+		const toc = await this.repo.getTocByBookTitle(bookTitle);
+		const result: ChapterWithHighlights[] = [];
+		
+		const tocMap = new Map<string, Content>();
+		for (const entry of toc) {
+			const strippedId = this.repo.stripContentIdSuffix(entry.contentId);
+			tocMap.set(strippedId, entry);
+		}
+
+		const highlightsByToc = new Map<string, Bookmark[]>();
+		for (const highlight of highlights) {
+			if (highlight.content.bookTitle !== bookTitle) {
+				continue;
+			}
+			
+			const strippedContentId = this.repo.stripContentIdSuffix(highlight.bookmark.contentId);
+			const tocEntry = tocMap.get(strippedContentId);
+			
+			if (tocEntry) {
+				const key = tocEntry.contentId;
+				if (!highlightsByToc.has(key)) {
+					highlightsByToc.set(key, []);
+				}
+				highlightsByToc.get(key)?.push(highlight.bookmark);
+			}
+		}
+
+		for (const tocEntry of toc) {
+			const highlights = highlightsByToc.get(tocEntry.contentId) || [];
+			if (highlights.length > 0) {
+				result.push({
+					title: tocEntry.title,
+					depth: tocEntry.depth || 1,
+					highlights: highlights,
+				});
+			}
+		}
+
+		return result;
 	}
 }
