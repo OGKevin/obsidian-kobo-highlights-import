@@ -1,8 +1,5 @@
-import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
+import { BookDetails, Bookmark, ChapterEntry } from "./interfaces";
 import { Repository } from "./repository";
-
-type bookTitle = string;
-export type chapter = string;
 
 export class HighlightService {
 	repo: Repository;
@@ -26,138 +23,6 @@ export class HighlightService {
 		return details;
 	}
 
-	convertToMap(arr: Highlight[]): Map<bookTitle, Map<chapter, Bookmark[]>> {
-		const m = new Map<string, Map<string, Bookmark[]>>();
-
-		arr.forEach((x) => {
-			if (!x.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
-
-			const existingBook = m.get(x.content.bookTitle);
-			if (existingBook) {
-				const existingChapter = existingBook.get(x.content.title);
-
-				if (existingChapter) {
-					existingChapter.push(x.bookmark);
-				} else {
-					existingBook.set(x.content.title, [x.bookmark]);
-				}
-			} else {
-				m.set(
-					x.content.bookTitle,
-					new Map<string, Bookmark[]>().set(x.content.title, [
-						x.bookmark,
-					]),
-				);
-			}
-		});
-
-		return m;
-	}
-
-	async getAllHighlight(
-		sortByChapterProgress?: boolean,
-	): Promise<Highlight[]> {
-		const highlights: Highlight[] = [];
-
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
-		for (const bookmark of bookmarks) {
-			highlights.push(await this.createHighlightFromBookmark(bookmark));
-		}
-
-		return highlights.sort(function (a, b): number {
-			if (!a.content.bookTitle || !b.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
-
-			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
-				a.content.contentId.localeCompare(b.content.contentId)
-			);
-		});
-	}
-
-	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
-		let content = await this.repo.getContentByContentId(bookmark.contentId);
-
-		if (content == null) {
-			content = await this.repo.getContentLikeContentId(
-				bookmark.contentId,
-			);
-			if (content == null) {
-				console.warn(
-					`bookmark seems to link to a non existing content: ${bookmark.contentId}`,
-				);
-				return {
-					bookmark: bookmark,
-					content: {
-						title: this.unknownBookTitle,
-						contentId: bookmark.contentId,
-						chapterIdBookmarked: "false",
-						bookTitle: this.unknownBookTitle,
-					},
-				};
-			}
-		}
-
-		if (content.chapterIdBookmarked == null) {
-			return {
-				bookmark: bookmark,
-				content: await this.findRightContentForBookmark(
-					bookmark,
-					content,
-				),
-			};
-		}
-
-		return {
-			bookmark: bookmark,
-			content: content,
-		};
-	}
-
-	private async findRightContentForBookmark(
-		bookmark: Bookmark,
-		originalContent: Content,
-	): Promise<Content> {
-		if (!originalContent.bookTitle) {
-			throw new Error("bookTitle field must be set");
-		}
-
-		const contents =
-			await this.repo.getAllContentByBookTitleOrderedByContentId(
-				originalContent.bookTitle,
-			);
-		const potential =
-			await this.repo.getFirstContentLikeContentIdWithBookmarkIdNotNull(
-				originalContent.contentId,
-			);
-		if (potential) {
-			return potential;
-		}
-
-		let foundContent: Content | null = null;
-
-		for (const c of contents) {
-			if (c.chapterIdBookmarked) {
-				foundContent = c;
-			}
-
-			if (c.contentId === bookmark.contentId && foundContent) {
-				return foundContent;
-			}
-		}
-
-		if (foundContent) {
-			console.warn(
-				`was not able to find chapterIdBookmarked for book ${originalContent.bookTitle}`,
-			);
-		}
-
-		return originalContent;
-	}
-
 	async getAllBooks(): Promise<Map<string, BookDetails>> {
 		const books = await this.repo.getAllBookDetails();
 		const bookMap = new Map<string, BookDetails>();
@@ -169,12 +34,108 @@ export class HighlightService {
 		return bookMap;
 	}
 
-	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
-		return this.repo.getAllContentByBookTitle(bookTitle);
-	}
+	/**
+	 * Build a map of book title → ordered chapter entries with depth-based hierarchy.
+	 *
+	 * Uses ContentType=899 TOC entries ordered by VolumeIndex.
+	 * Matches bookmarks to TOC entries by stripping the trailing "-N" suffix.
+	 * Only emits TOC headings that have highlights or are ancestors of highlighted sections.
+	 */
+	async buildBookHighlightMap(
+		bookmarks: Bookmark[],
+	): Promise<Map<string, ChapterEntry[]>> {
+		const result = new Map<string, ChapterEntry[]>();
 
-	// Create an empty content map for books without highlights
-	createEmptyContentMap(): Map<chapter, Bookmark[]> {
-		return new Map<chapter, Bookmark[]>();
+		// Group bookmarks by volumeId (book's ContentID)
+		const bookmarksByBook = new Map<string, Bookmark[]>();
+		for (const bm of bookmarks) {
+			const key = bm.volumeId || "";
+			const arr = bookmarksByBook.get(key) ?? [];
+			arr.push(bm);
+			bookmarksByBook.set(key, arr);
+		}
+
+		for (const [volumeId, bms] of bookmarksByBook) {
+			const bookTitle = volumeId
+				? ((await this.repo.getBookTitleByContentId(volumeId)) ??
+					this.unknownBookTitle)
+				: this.unknownBookTitle;
+
+			const toc = volumeId
+				? await this.repo.getTocEntriesByBookId(volumeId)
+				: [];
+
+			if (toc.length === 0) {
+				// No 899 entries: put all highlights under "Uncategorized"
+				result.set(bookTitle, [
+					{
+						title: "Uncategorized",
+						depth: 1,
+						highlights: bms,
+					},
+				]);
+				continue;
+			}
+
+			// Build matchId → TOC index map
+			const matchIndex = new Map<string, number>();
+			for (let i = 0; i < toc.length; i++) {
+				if (!matchIndex.has(toc[i].matchId)) {
+					matchIndex.set(toc[i].matchId, i);
+				}
+			}
+
+			// Assign highlights to TOC entries
+			const assigned = new Map<number, Bookmark[]>();
+			const uncategorized: Bookmark[] = [];
+			for (const bm of bms) {
+				const idx = matchIndex.get(bm.contentId);
+				if (idx !== undefined) {
+					const arr = assigned.get(idx) ?? [];
+					arr.push(bm);
+					assigned.set(idx, arr);
+				} else {
+					uncategorized.push(bm);
+				}
+			}
+
+			// Determine which headings are needed (ancestors of highlighted sections)
+			const headingNeeded = new Set<number>();
+			for (const i of assigned.keys()) {
+				headingNeeded.add(i);
+				// Walk backwards to find and mark ancestor headings
+				let needDepth = toc[i].depth;
+				for (let j = i - 1; j >= 0; j--) {
+					if (toc[j].depth < needDepth) {
+						headingNeeded.add(j);
+						needDepth = toc[j].depth;
+						if (needDepth <= 1) break;
+					}
+				}
+			}
+
+			// Build ordered ChapterEntry array
+			const chapters: ChapterEntry[] = [];
+			for (let i = 0; i < toc.length; i++) {
+				if (!headingNeeded.has(i) || !toc[i].title) continue;
+				chapters.push({
+					title: toc[i].title,
+					depth: toc[i].depth,
+					highlights: assigned.get(i) ?? [],
+				});
+			}
+
+			if (uncategorized.length > 0) {
+				chapters.push({
+					title: "Uncategorized",
+					depth: 1,
+					highlights: uncategorized,
+				});
+			}
+
+			result.set(bookTitle, chapters);
+		}
+
+		return result;
 	}
 }
