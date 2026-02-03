@@ -1,15 +1,397 @@
 import { expect } from "chai";
-import { HighlightService } from "./Highlight";
-import { Bookmark } from "./interfaces";
+import {
+	HighlightService,
+	groupBookmarksByVolume,
+	buildTocMatchIndex,
+	assignBookmarksToTocEntries,
+	findRequiredHeadings,
+	buildChapterEntries,
+} from "./Highlight";
+import { Bookmark, TocEntry } from "./interfaces";
 import { Repository, stripSuffix, extractDepth } from "./repository";
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
+describe("groupBookmarksByVolume", function () {
+	it("groups bookmarks by volumeId", function () {
+		const bookmarks: Bookmark[] = [
+			{
+				bookmarkId: "bm1",
+				text: "Text 1",
+				contentId: "c1",
+				volumeId: "book-a",
+				dateCreated: new Date(),
+			},
+			{
+				bookmarkId: "bm2",
+				text: "Text 2",
+				contentId: "c2",
+				volumeId: "book-b",
+				dateCreated: new Date(),
+			},
+			{
+				bookmarkId: "bm3",
+				text: "Text 3",
+				contentId: "c3",
+				volumeId: "book-a",
+				dateCreated: new Date(),
+			},
+		];
+
+		const result = groupBookmarksByVolume(bookmarks);
+
+		expect(result.size).to.equal(2);
+		expect(result.get("book-a")).to.have.length(2);
+		expect(result.get("book-b")).to.have.length(1);
+	});
+
+	it("groups empty volumeId under empty string key", function () {
+		const bookmarks: Bookmark[] = [
+			{
+				bookmarkId: "bm1",
+				text: "Text 1",
+				contentId: "c1",
+				volumeId: "",
+				dateCreated: new Date(),
+			},
+			{
+				bookmarkId: "bm2",
+				text: "Text 2",
+				contentId: "c2",
+				volumeId: "book-a",
+				dateCreated: new Date(),
+			},
+		];
+
+		const result = groupBookmarksByVolume(bookmarks);
+
+		expect(result.size).to.equal(2);
+		expect(result.get("")).to.have.length(1);
+		expect(result.get("book-a")).to.have.length(1);
+	});
+
+	it("returns empty map for empty input", function () {
+		const result = groupBookmarksByVolume([]);
+		expect(result.size).to.equal(0);
+	});
+});
+
+describe("buildTocMatchIndex", function () {
+	it("builds index mapping matchId to position", function () {
+		const toc: TocEntry[] = [
+			{
+				title: "Ch1",
+				matchId: "match-a",
+				contentId: "c1",
+				depth: 1,
+				volumeIndex: 0,
+			},
+			{
+				title: "Ch2",
+				matchId: "match-b",
+				contentId: "c2",
+				depth: 1,
+				volumeIndex: 1,
+			},
+			{
+				title: "Ch3",
+				matchId: "match-c",
+				contentId: "c3",
+				depth: 1,
+				volumeIndex: 2,
+			},
+		];
+
+		const result = buildTocMatchIndex(toc);
+
+		expect(result.size).to.equal(3);
+		expect(result.get("match-a")).to.equal(0);
+		expect(result.get("match-b")).to.equal(1);
+		expect(result.get("match-c")).to.equal(2);
+	});
+
+	it("keeps only first occurrence for duplicate matchIds", function () {
+		const toc: TocEntry[] = [
+			{
+				title: "Ch1",
+				matchId: "match-a",
+				contentId: "c1",
+				depth: 1,
+				volumeIndex: 0,
+			},
+			{
+				title: "Ch2",
+				matchId: "match-a",
+				contentId: "c2",
+				depth: 2,
+				volumeIndex: 1,
+			},
+		];
+
+		const result = buildTocMatchIndex(toc);
+
+		expect(result.size).to.equal(1);
+		expect(result.get("match-a")).to.equal(0);
+	});
+
+	it("returns empty map for empty input", function () {
+		const result = buildTocMatchIndex([]);
+		expect(result.size).to.equal(0);
+	});
+});
+
+describe("assignBookmarksToTocEntries", function () {
+	it("assigns bookmarks to matching TOC entries", function () {
+		const bookmarks: Bookmark[] = [
+			{
+				bookmarkId: "bm1",
+				text: "Text 1",
+				contentId: "match-a",
+				volumeId: "book",
+				dateCreated: new Date(),
+			},
+			{
+				bookmarkId: "bm2",
+				text: "Text 2",
+				contentId: "match-b",
+				volumeId: "book",
+				dateCreated: new Date(),
+			},
+		];
+		const matchIndex = new Map([
+			["match-a", 0],
+			["match-b", 1],
+		]);
+
+		const result = assignBookmarksToTocEntries(bookmarks, matchIndex);
+
+		expect(result.assigned.size).to.equal(2);
+		expect(result.assigned.get(0)).to.have.length(1);
+		expect(result.assigned.get(1)).to.have.length(1);
+		expect(result.uncategorized).to.have.length(0);
+	});
+
+	it("puts unmatched bookmarks in uncategorized", function () {
+		const bookmarks: Bookmark[] = [
+			{
+				bookmarkId: "bm1",
+				text: "Text 1",
+				contentId: "unknown",
+				volumeId: "book",
+				dateCreated: new Date(),
+			},
+		];
+		const matchIndex = new Map([["match-a", 0]]);
+
+		const result = assignBookmarksToTocEntries(bookmarks, matchIndex);
+
+		expect(result.assigned.size).to.equal(0);
+		expect(result.uncategorized).to.have.length(1);
+	});
+
+	it("assigns multiple bookmarks to same TOC entry", function () {
+		const bookmarks: Bookmark[] = [
+			{
+				bookmarkId: "bm1",
+				text: "Text 1",
+				contentId: "match-a",
+				volumeId: "book",
+				dateCreated: new Date(),
+			},
+			{
+				bookmarkId: "bm2",
+				text: "Text 2",
+				contentId: "match-a",
+				volumeId: "book",
+				dateCreated: new Date(),
+			},
+		];
+		const matchIndex = new Map([["match-a", 0]]);
+
+		const result = assignBookmarksToTocEntries(bookmarks, matchIndex);
+
+		expect(result.assigned.get(0)).to.have.length(2);
+	});
+});
+
+describe("findRequiredHeadings", function () {
+	const toc: TocEntry[] = [
+		{
+			title: "Part 1",
+			matchId: "p1",
+			contentId: "c1",
+			depth: 1,
+			volumeIndex: 0,
+		},
+		{
+			title: "Ch 1",
+			matchId: "ch1",
+			contentId: "c2",
+			depth: 2,
+			volumeIndex: 1,
+		},
+		{
+			title: "Sec 1",
+			matchId: "s1",
+			contentId: "c3",
+			depth: 3,
+			volumeIndex: 2,
+		},
+		{
+			title: "Part 2",
+			matchId: "p2",
+			contentId: "c4",
+			depth: 1,
+			volumeIndex: 3,
+		},
+		{
+			title: "Ch 2",
+			matchId: "ch2",
+			contentId: "c5",
+			depth: 2,
+			volumeIndex: 4,
+		},
+	];
+
+	it("includes assigned index and its ancestors", function () {
+		const assignedIndices = new Set([2]); // Sec 1 at depth 3
+
+		const result = findRequiredHeadings(toc, assignedIndices);
+
+		expect(result.has(0)).to.be.true; // Part 1 (depth 1)
+		expect(result.has(1)).to.be.true; // Ch 1 (depth 2)
+		expect(result.has(2)).to.be.true; // Sec 1 (depth 3)
+		expect(result.has(3)).to.be.false; // Part 2 (not ancestor)
+		expect(result.has(4)).to.be.false; // Ch 2 (not ancestor)
+	});
+
+	it("handles multiple assigned indices from different branches", function () {
+		const assignedIndices = new Set([2, 4]); // Sec 1 and Ch 2
+
+		const result = findRequiredHeadings(toc, assignedIndices);
+
+		expect(result.has(0)).to.be.true; // Part 1 (ancestor of Sec 1)
+		expect(result.has(1)).to.be.true; // Ch 1 (ancestor of Sec 1)
+		expect(result.has(2)).to.be.true; // Sec 1 (assigned)
+		expect(result.has(3)).to.be.true; // Part 2 (ancestor of Ch 2)
+		expect(result.has(4)).to.be.true; // Ch 2 (assigned)
+	});
+
+	it("returns empty set for empty input", function () {
+		const result = findRequiredHeadings(toc, new Set());
+		expect(result.size).to.equal(0);
+	});
+
+	it("handles top-level entry with no ancestors", function () {
+		const assignedIndices = new Set([0]); // Part 1 at depth 1
+
+		const result = findRequiredHeadings(toc, assignedIndices);
+
+		expect(result.size).to.equal(1);
+		expect(result.has(0)).to.be.true;
+	});
+});
+
+describe("buildChapterEntries", function () {
+	const toc: TocEntry[] = [
+		{
+			title: "Part 1",
+			matchId: "p1",
+			contentId: "c1",
+			depth: 1,
+			volumeIndex: 0,
+		},
+		{
+			title: "Ch 1",
+			matchId: "ch1",
+			contentId: "c2",
+			depth: 2,
+			volumeIndex: 1,
+		},
+		{
+			title: "",
+			matchId: "empty",
+			contentId: "c3",
+			depth: 2,
+			volumeIndex: 2,
+		},
+		{
+			title: "Ch 2",
+			matchId: "ch2",
+			contentId: "c4",
+			depth: 2,
+			volumeIndex: 3,
+		},
+	];
+
+	it("builds chapter entries for required indices", function () {
+		const requiredIndices = new Set([0, 1]);
+		const assigned = new Map([[1, [createBookmark("bm1")]]]);
+
+		const result = buildChapterEntries(toc, requiredIndices, assigned, []);
+
+		expect(result).to.have.length(2);
+		expect(result[0].title).to.equal("Part 1");
+		expect(result[0].depth).to.equal(1);
+		expect(result[0].highlights).to.have.length(0);
+		expect(result[1].title).to.equal("Ch 1");
+		expect(result[1].highlights).to.have.length(1);
+	});
+
+	it("skips entries without title", function () {
+		const requiredIndices = new Set([0, 2]); // index 2 has empty title
+		const assigned = new Map<number, Bookmark[]>();
+
+		const result = buildChapterEntries(toc, requiredIndices, assigned, []);
+
+		expect(result).to.have.length(1);
+		expect(result[0].title).to.equal("Part 1");
+	});
+
+	it("appends uncategorized entries at the end", function () {
+		const requiredIndices = new Set([0]);
+		const assigned = new Map<number, Bookmark[]>();
+		const uncategorized = [createBookmark("bm1"), createBookmark("bm2")];
+
+		const result = buildChapterEntries(
+			toc,
+			requiredIndices,
+			assigned,
+			uncategorized,
+		);
+
+		expect(result).to.have.length(2);
+		expect(result[1].title).to.equal("Uncategorized");
+		expect(result[1].depth).to.equal(1);
+		expect(result[1].highlights).to.have.length(2);
+	});
+
+	it("does not add Uncategorized if empty", function () {
+		const requiredIndices = new Set([0]);
+		const assigned = new Map<number, Bookmark[]>();
+
+		const result = buildChapterEntries(toc, requiredIndices, assigned, []);
+
+		expect(result).to.have.length(1);
+		expect(result.find((c) => c.title === "Uncategorized")).to.be.undefined;
+	});
+});
+
+function createBookmark(id: string): Bookmark {
+	return {
+		bookmarkId: id,
+		text: `Text for ${id}`,
+		contentId: `content-${id}`,
+		volumeId: "book",
+		dateCreated: new Date(),
+	};
+}
+
 describe("stripSuffix", function () {
 	it("removes trailing digits after dash", function () {
-		expect(stripSuffix("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4-2")).to.equal(
-			"book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4",
-		);
+		expect(
+			stripSuffix("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4-2"),
+		).to.equal("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4");
 	});
 
 	it("removes single digit suffix", function () {
@@ -19,9 +401,9 @@ describe("stripSuffix", function () {
 	});
 
 	it("leaves string unchanged when no suffix", function () {
-		expect(stripSuffix("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4")).to.equal(
-			"book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4",
-		);
+		expect(
+			stripSuffix("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4"),
+		).to.equal("book.epub!OPS!xhtml/Chapter01.xhtml#chapter01_4");
 	});
 
 	it("leaves string unchanged when dash not followed by digits", function () {
@@ -41,15 +423,21 @@ describe("extractDepth", function () {
 	});
 
 	it("extracts multi-digit depth", function () {
-		expect(extractDepth("book.epub!xhtml/Chapter01.xhtml#ch01_4-2")).to.equal(2);
+		expect(
+			extractDepth("book.epub!xhtml/Chapter01.xhtml#ch01_4-2"),
+		).to.equal(2);
 	});
 
 	it("extracts deep level", function () {
-		expect(extractDepth("book.epub!Text/wahl.html#sigil_toc_id_6-4")).to.equal(4);
+		expect(
+			extractDepth("book.epub!Text/wahl.html#sigil_toc_id_6-4"),
+		).to.equal(4);
 	});
 
 	it("defaults to 1 when no suffix", function () {
-		expect(extractDepth("book.epub!xhtml/Chapter01.xhtml#ch01_4")).to.equal(1);
+		expect(extractDepth("book.epub!xhtml/Chapter01.xhtml#ch01_4")).to.equal(
+			1,
+		);
 	});
 
 	it("defaults to 1 when dash not followed by digits", function () {

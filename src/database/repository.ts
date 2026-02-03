@@ -325,9 +325,7 @@ export class Repository {
 		return entries;
 	}
 
-	async getBookTitleByContentId(
-		contentId: string,
-	): Promise<string | null> {
+	async getBookTitleByContentId(contentId: string): Promise<string | null> {
 		const statement = this.db.prepare(
 			`SELECT Title FROM content WHERE ContentID = $id AND BookID IS NULL LIMIT 1`,
 			{ $id: contentId },

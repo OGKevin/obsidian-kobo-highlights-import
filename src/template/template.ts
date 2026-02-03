@@ -1,9 +1,5 @@
 import { Eta } from "eta";
-import {
-	BookDetails,
-	ChapterEntry,
-	ReadStatus,
-} from "../database/interfaces";
+import { BookDetails, ChapterEntry, ReadStatus } from "../database/interfaces";
 
 const eta = new Eta({ autoEscape: false, autoTrim: false });
 
