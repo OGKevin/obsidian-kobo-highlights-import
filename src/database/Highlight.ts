@@ -30,11 +30,9 @@ export class HighlightService {
 		const m = new Map<string, Map<string, Bookmark[]>>();
 
 		arr.forEach((x) => {
-			if (!x.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
+			const bookTitle = x.content.bookTitle || x.content.title || this.unknownBookTitle;
 
-			const existingBook = m.get(x.content.bookTitle);
+			const existingBook = m.get(bookTitle);
 			if (existingBook) {
 				const existingChapter = existingBook.get(x.content.title);
 
@@ -45,7 +43,7 @@ export class HighlightService {
 				}
 			} else {
 				m.set(
-					x.content.bookTitle,
+					bookTitle,
 					new Map<string, Bookmark[]>().set(x.content.title, [
 						x.bookmark,
 					]),
@@ -66,13 +64,12 @@ export class HighlightService {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort(function (a, b): number {
-			if (!a.content.bookTitle || !b.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
+		return highlights.sort((a, b): number => {
+			const aBookTitle = a.content.bookTitle || a.content.title || this.unknownBookTitle;
+			const bBookTitle = b.content.bookTitle || b.content.title || this.unknownBookTitle;
 
 			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
+				aBookTitle.localeCompare(bBookTitle) ||
 				a.content.contentId.localeCompare(b.content.contentId)
 			);
 		});
@@ -121,13 +118,15 @@ export class HighlightService {
 		bookmark: Bookmark,
 		originalContent: Content,
 	): Promise<Content> {
+		const bookTitle = originalContent.bookTitle || originalContent.title || this.unknownBookTitle;
+
 		if (!originalContent.bookTitle) {
-			throw new Error("bookTitle field must be set");
+			originalContent.bookTitle = bookTitle;
 		}
 
 		const contents =
 			await this.repo.getAllContentByBookTitleOrderedByContentId(
-				originalContent.bookTitle,
+				bookTitle,
 			);
 		const potential =
 			await this.repo.getFirstContentLikeContentIdWithBookmarkIdNotNull(
