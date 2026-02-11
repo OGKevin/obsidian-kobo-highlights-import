@@ -12,11 +12,18 @@ export interface Content {
 	contentId: string;
 	chapterIdBookmarked?: string;
 	bookTitle?: string;
+	depth?: number;
 }
 
 export interface Highlight {
 	bookmark: Bookmark;
 	content: Content;
+}
+
+export interface ChapterWithHighlights {
+	title: string;
+	depth: number;
+	highlights: Bookmark[];
 }
 
 export interface BookDetails {

@@ -74,22 +74,6 @@ describe("HighlightService", async function () {
 				});
 			});
 
-			it("convertToMap creates correct structure", async function () {
-				const map = service.convertToMap([highlight]);
-
-				expect(map.size).to.equal(1);
-				expect(map.has("Nemesis Games")).to.be.true;
-
-				const bookMap = map.get("Nemesis Games");
-				expect(bookMap?.size).to.equal(1);
-				expect(bookMap?.has("Chapter Eight: Holden")).to.be.true;
-
-				const highlights = bookMap?.get("Chapter Eight: Holden");
-				expect(highlights).to.have.length(1);
-				expect(highlights?.[0].bookmarkId).to.equal(
-					"c5b2637d-ddaf-4f15-9a81-dd701e0ad8fe",
-				);
-			});
 		});
 
 		describe("Sample Bookmark with annotation", async function () {
@@ -367,7 +351,22 @@ describe("HighlightService", async function () {
 					contentId: "content1",
 					bookTitle: "Book with Highlights",
 					chapterIdBookmarked: "chapter1",
+					depth: 1,
 				});
+			repo.getTocByBookTitle = () =>
+				Promise.resolve([
+					{
+						title: "Chapter 1",
+						contentId: "content1-1",
+						bookTitle: "Book with Highlights",
+						chapterIdBookmarked: "chapter1",
+						depth: 1,
+					},
+				]);
+			repo.stripContentIdSuffix = (id) => {
+				const match = id.match(/^(.+)-(\d+)$/);
+				return match ? match[1] : id;
+			};
 
 			service = new HighlightService(repo);
 		});
@@ -388,35 +387,6 @@ describe("HighlightService", async function () {
 			expect(bookWithoutHighlights?.percentRead).to.equal(50);
 		});
 
-		it("convertToMap should handle books with and without highlights correctly", async function () {
-			const highlights = await service.getAllHighlight();
-			const contentMap = service.convertToMap(highlights);
-
-			// Verify initial state with only books containing highlights
-			expect(contentMap.size).to.equal(1);
-			expect(contentMap.has("Book with Highlights")).to.be.true;
-			expect(contentMap.has("Book without Highlights")).to.be.false;
-
-			// Add books without highlights
-			const allBooks = await service.getAllBooks();
-			for (const [bookTitle, _] of allBooks) {
-				if (!contentMap.has(bookTitle)) {
-					contentMap.set(bookTitle, service.createEmptyContentMap());
-				}
-			}
-
-			// Verify final state with all books
-			expect(contentMap.size).to.equal(2);
-
-			const bookWithHighlights = contentMap.get("Book with Highlights");
-			const bookWithoutHighlights = contentMap.get(
-				"Book without Highlights",
-			);
-
-			expect(bookWithHighlights).to.not.be.undefined;
-			expect(bookWithoutHighlights).to.not.be.undefined;
-			expect(bookWithoutHighlights?.size).to.equal(0);
-		});
 
 		it("getBookDetailsFromBookTitle should return correct book details", async function () {
 			const details1 = await service.getBookDetailsFromBookTitle(
@@ -446,6 +416,30 @@ describe("HighlightService", async function () {
 			expect(nonExistentBook).to.deep.equal({
 				title: "Unknown Title",
 				author: "Unknown Author",
+			});
+		});
+
+		it("buildHierarchicalChapters with mocked repository", async function () {
+			const highlights = await service.getAllHighlight();
+			const hierarchical = await service.buildHierarchicalChapters(
+				"Book with Highlights",
+				highlights,
+			);
+
+			expect(hierarchical.length).to.be.above(0);
+			
+			hierarchical.forEach((chapter) => {
+				expect(chapter.title).to.be.a("string");
+				expect(chapter.depth).to.be.a("number");
+				expect(chapter.depth).to.be.at.least(1);
+				expect(chapter.highlights).to.be.an("array");
+				expect(chapter.highlights.length).to.be.above(0);
+				
+				chapter.highlights.forEach((highlight) => {
+					expect(highlight.bookmarkId).to.be.a("string");
+					expect(highlight.text).to.be.a("string");
+					expect(highlight.contentId).to.be.a("string");
+				});
 			});
 		});
 	});
