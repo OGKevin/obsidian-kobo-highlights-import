@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2026-02-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* add eta templating engine and update template logic
+
+### Features
+
+* add eta templating engine and update template logic ([53a8641](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/53a86412ee566a14e6501ed57b61316321189c3d))
+
+
+### Bug Fixes
+
+* **deps:** update @types/node to 24.10.10 ([#478](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/478)) ([b470e52](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/b470e525db451de832f004660eee9e34ca81f4af))
+* **deps:** update @types/node to 24.10.11 ([#479](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/479)) ([1e9992e](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/1e9992eb787eeba1c2aecd171760d5f15ca44f16))
+* **deps:** update @types/node to 24.10.12 ([#484](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/484)) ([7cc9ba0](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/7cc9ba03ebe1f2f0ab1bde95c665e683aa178ac5))
+* **deps:** update @types/node to 24.10.13 ([#485](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/485)) ([5be3d94](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/5be3d94dda7d76d19abfe2bedcbaae0b118792d8))
+* **deps:** update esbuild to 0.27.3 ([#480](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/480)) ([ce54ba7](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/ce54ba702d5d1b8995a8e133a03c4ff1023357ef))
+* **deps:** update eta to 4.5.1 ([#481](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/481)) ([2228c4b](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/2228c4b18f32dc3ac20b58bec3338d327fed3da8))
+* **deps:** update release-please to 17.2.1 ([#487](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/487)) ([9ed4097](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/9ed409733b09bc3c9a318d10233a7a58c054d7ba))
+
 ## [4.1.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.0.0...4.1.0) (2025-09-04)
 
 ### ⚠ BREAKING CHANGES
