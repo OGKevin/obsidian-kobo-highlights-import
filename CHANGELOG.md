@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/5.0.0...5.0.1) (2026-02-20)
+
+
+### Bug Fixes
+
+* **deps:** update eslint monorepo to 9.39.3 ([#492](https://github.com/OGKevin/obsidian-kobo-highlights-import/issues/492)) ([371a379](https://github.com/OGKevin/obsidian-kobo-highlights-import/commit/371a37938c574246335e6592b6f40f740fce35c5))
+
 ## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2026-02-19)
 
 
