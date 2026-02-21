@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
+	importArticles: false,
 };
 
 export interface KoboHighlightsImporterSettings {
@@ -15,6 +16,7 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
+	importArticles: boolean;
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -33,6 +35,9 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
+		if (this.plugin.settings.importAllBooks) {
+			this.add_import_articles();
+		}
 	}
 
 	add_destination_folder(): void {
@@ -87,18 +92,41 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 	add_import_all_books(): void {
 		const desc = document.createDocumentFragment();
 		desc.append(
-			"When enabled, import information for all books from your Kobo device, not just books with highlights.",
+			"When enabled, import information for all books and articles from your Kobo device, not just items with highlights.",
 			desc.createEl("br"),
-			"This will include reading progress, status, and other metadata for every book.",
+			"This will include reading progress, status, and other metadata for every book and Instapaper article.",
 		);
 
 		new Setting(this.containerEl)
-			.setName("Import all books")
+			.setName("Import all books and articles")
 			.setDesc(desc)
 			.addToggle((cb) => {
 				cb.setValue(this.plugin.settings.importAllBooks).onChange(
 					async (toggle) => {
 						this.plugin.settings.importAllBooks = toggle;
+						if (toggle) {
+							this.plugin.settings.importArticles = true;
+						}
+						await this.plugin.saveSettings();
+						this.display();
+					},
+				);
+			});
+	}
+
+	add_import_articles(): void {
+		const desc = document.createDocumentFragment();
+		desc.append(
+			"Import all Instapaper articles",
+		);
+
+		new Setting(this.containerEl)
+			.setName("Import Instapaper articles")
+			.setDesc(desc)
+			.addToggle((cb) => {
+				cb.setValue(this.plugin.settings.importArticles).onChange(
+					async (toggle) => {
+						this.plugin.settings.importArticles = toggle;
 						await this.plugin.saveSettings();
 					},
 				);

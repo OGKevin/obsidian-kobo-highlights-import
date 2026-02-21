@@ -25,6 +25,7 @@ export interface BookDetails {
 	description?: string;
 	publisher?: string;
 	dateLastRead?: Date;
+	lastTimeStartedReading?: Date;
 	readStatus?: ReadStatus;
 	percentRead?: number;
 	isbn?: string;

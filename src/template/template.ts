@@ -10,6 +10,7 @@ title: "<%= it.bookDetails.title %>"
 author: <%= it.bookDetails.author %>
 publisher: <%= it.bookDetails.publisher ?? '' %>
 dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
+lastTimeStartedReading: <%= it.bookDetails.lastTimeStartedReading?.toISOString() ?? '' %>
 readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
 percentRead: <%= it.bookDetails.percentRead ?? '' %>
 isbn: <%= it.bookDetails.isbn ?? '' %>

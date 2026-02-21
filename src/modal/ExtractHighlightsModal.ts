@@ -41,7 +41,7 @@ export class ExtractHighlightsModal extends Modal {
 		);
 
 		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress),
+			await service.getAllHighlight(this.settings.sortByChapterProgress, this.settings.importArticles),
 		);
 
 		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
@@ -53,7 +53,7 @@ export class ExtractHighlightsModal extends Modal {
 
 		if (this.settings.importAllBooks) {
 			// Add books without highlights
-			const allBooks = await service.getAllBooks();
+			const allBooks = await service.getAllBooks(this.settings.importArticles);
 
 			for (const [bookTitle, _] of allBooks) {
 				if (!allBooksContent.has(bookTitle)) {
