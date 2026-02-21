@@ -1,5 +1,36 @@
 import { Database, Statement } from "sql.js";
-import { BookDetails, Bookmark, Content } from "./interfaces";
+import { BookDetails, Bookmark, Content, TocEntry } from "./interfaces";
+
+/**
+ * Strip the trailing "-N" (digits) suffix from a ContentID.
+ * E.g. "...xhtml#chapter01_4-2" → "...xhtml#chapter01_4"
+ *      "...Cover.xhtml-1"       → "...Cover.xhtml"
+ */
+function stripSuffix(contentId: string): string {
+	const pos = contentId.lastIndexOf("-");
+	if (pos === -1) return contentId;
+	const after = contentId.substring(pos + 1);
+	if (after.length > 0 && /^\d+$/.test(after)) {
+		return contentId.substring(0, pos);
+	}
+	return contentId;
+}
+
+/**
+ * Extract depth level from trailing "-N" suffix. Returns 1 if no suffix found.
+ * E.g. "...xhtml#chapter01_4-2" → 2, "...Cover.xhtml-1" → 1
+ */
+function extractDepth(contentId: string): number {
+	const pos = contentId.lastIndexOf("-");
+	if (pos === -1) return 1;
+	const after = contentId.substring(pos + 1);
+	if (after.length > 0 && /^\d+$/.test(after)) {
+		return parseInt(after, 10) || 1;
+	}
+	return 1;
+}
+
+export { stripSuffix, extractDepth };
 
 export class Repository {
 	db: Database;
@@ -12,11 +43,11 @@ export class Repository {
 		let res;
 		if (sortByChapterProgress) {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, VolumeID from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
 			);
 		} else {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, VolumeID from Bookmark where Text is not null order by DateCreated ASC;`,
 			);
 		}
 		const bookmarks: Bookmark[] = [];
@@ -49,6 +80,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
+				volumeId: row[6]?.toString() ?? "",
 			});
 		});
 
@@ -65,7 +97,7 @@ export class Repository {
 
 	async getBookmarkById(id: string): Promise<Bookmark | null> {
 		const statement = this.db.prepare(
-			`select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
+			`select BookmarkID, Text, ContentID, annotation, DateCreated, VolumeID from Bookmark where BookmarkID = $id;`,
 			{
 				$id: id,
 			},
@@ -87,6 +119,7 @@ export class Repository {
 			contentId: row[2].toString(),
 			note: row[3]?.toString(),
 			dateCreated: new Date(row[4].toString()),
+			volumeId: row[5]?.toString() ?? "",
 		};
 	}
 
@@ -264,6 +297,47 @@ export class Repository {
 
 		statement.free();
 		return books;
+	}
+
+	async getTocEntriesByBookId(bookContentId: string): Promise<TocEntry[]> {
+		const statement = this.db.prepare(
+			`SELECT ContentID, Title, VolumeIndex
+			 FROM content
+			 WHERE BookID = $bookId
+			   AND ContentType = 899
+			 ORDER BY VolumeIndex`,
+			{ $bookId: bookContentId },
+		);
+
+		const entries: TocEntry[] = [];
+		while (statement.step()) {
+			const row = statement.get();
+			const contentId = row[0]?.toString() ?? "";
+			entries.push({
+				title: row[1]?.toString() ?? "",
+				contentId: contentId,
+				matchId: stripSuffix(contentId),
+				depth: extractDepth(contentId),
+				volumeIndex: row[2] ? +row[2].toString() : 0,
+			});
+		}
+		statement.free();
+		return entries;
+	}
+
+	async getBookTitleByContentId(contentId: string): Promise<string | null> {
+		const statement = this.db.prepare(
+			`SELECT Title FROM content WHERE ContentID = $id AND BookID IS NULL LIMIT 1`,
+			{ $id: contentId },
+		);
+
+		if (!statement.step()) {
+			statement.free();
+			return null;
+		}
+		const row = statement.get();
+		statement.free();
+		return row[0]?.toString() ?? null;
 	}
 
 	private parseContentStatement(statement: Statement): Content[] {
