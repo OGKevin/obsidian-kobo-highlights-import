@@ -30,7 +30,8 @@ export class HighlightService {
 		const m = new Map<string, Map<string, Bookmark[]>>();
 
 		arr.forEach((x) => {
-			const bookTitle = x.content.bookTitle || x.content.title || this.unknownBookTitle;
+			const bookTitle =
+				x.content.bookTitle || x.content.title || this.unknownBookTitle;
 
 			const existingBook = m.get(bookTitle);
 			if (existingBook) {
@@ -65,8 +66,10 @@ export class HighlightService {
 		}
 
 		return highlights.sort((a, b): number => {
-			const aBookTitle = a.content.bookTitle || a.content.title || this.unknownBookTitle;
-			const bBookTitle = b.content.bookTitle || b.content.title || this.unknownBookTitle;
+			const aBookTitle =
+				a.content.bookTitle || a.content.title || this.unknownBookTitle;
+			const bBookTitle =
+				b.content.bookTitle || b.content.title || this.unknownBookTitle;
 
 			return (
 				aBookTitle.localeCompare(bBookTitle) ||
@@ -118,7 +121,10 @@ export class HighlightService {
 		bookmark: Bookmark,
 		originalContent: Content,
 	): Promise<Content> {
-		const bookTitle = originalContent.bookTitle || originalContent.title || this.unknownBookTitle;
+		const bookTitle =
+			originalContent.bookTitle ||
+			originalContent.title ||
+			this.unknownBookTitle;
 
 		if (!originalContent.bookTitle) {
 			originalContent.bookTitle = bookTitle;
