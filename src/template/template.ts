@@ -1,6 +1,5 @@
 import { Eta } from "eta";
-import { BookDetails, ReadStatus, Bookmark } from "../database/interfaces";
-import { chapter } from "../database/Highlight";
+import { BookDetails, ReadStatus, ChapterWithHighlights } from "../database/interfaces";
 
 const eta = new Eta({ autoEscape: false, autoTrim: false });
 
@@ -26,10 +25,10 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 ## Highlights
 
-<% it.chapters.forEach(([chapterName, highlights]) => { -%>
-## <%= chapterName.trim() %>
+<% it.hierarchicalChapters.forEach((chapter) => { -%>
+<%= '#'.repeat(chapter.depth + 1) %> <%= chapter.title.trim() %>
 
-<% highlights.forEach((highlight) => { -%>
+<% chapter.highlights.forEach((highlight) => { -%>
 <%= highlight.text %>
 
 <% if (highlight.note) { -%>
@@ -46,13 +45,12 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 export function applyTemplateTransformations(
 	rawTemplate: string,
-	chapters: Map<chapter, Bookmark[]>,
+	hierarchicalChapters: ChapterWithHighlights[],
 	bookDetails: BookDetails,
 ): string {
-	const chaptersArr = Array.from(chapters.entries());
 	const rendered = eta.renderString(rawTemplate, {
 		bookDetails,
-		chapters: chaptersArr,
+		hierarchicalChapters,
 		ReadStatus,
 	});
 
@@ -66,3 +64,5 @@ export function applyTemplateTransformations(
 
 	return rendered.trim();
 }
+
+export const applyHierarchicalTemplateTransformations = applyTemplateTransformations;
