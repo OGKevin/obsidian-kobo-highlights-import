@@ -3,7 +3,7 @@ import { sanitize } from "sanitize-filename-ts";
 import SqlJs from "sql.js";
 import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
-import { Bookmark } from "src/database/interfaces";
+import { ChapterEntry } from "src/database/interfaces";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
 import { applyTemplateTransformations } from "src/template/template";
@@ -36,20 +36,13 @@ export class ExtractHighlightsModal extends Modal {
 
 		const db = new SQLEngine.Database(new Uint8Array(this.fileBuffer));
 
-		const service: HighlightService = new HighlightService(
-			new Repository(db),
+		const repo = new Repository(db);
+		const service: HighlightService = new HighlightService(repo);
+
+		const bookmarks = await repo.getAllBookmark(
+			this.settings.sortByChapterProgress,
 		);
-
-		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress),
-		);
-
-		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
-
-		// Add all books with highlights
-		for (const [bookTitle, chapters] of content) {
-			allBooksContent.set(bookTitle, chapters);
-		}
+		const allBooksContent = await service.buildBookHighlightMap(bookmarks);
 
 		if (this.settings.importAllBooks) {
 			// Add books without highlights
@@ -57,10 +50,7 @@ export class ExtractHighlightsModal extends Modal {
 
 			for (const [bookTitle, _] of allBooks) {
 				if (!allBooksContent.has(bookTitle)) {
-					allBooksContent.set(
-						bookTitle,
-						service.createEmptyContentMap(),
-					);
+					allBooksContent.set(bookTitle, []);
 				}
 			}
 		}
@@ -71,7 +61,7 @@ export class ExtractHighlightsModal extends Modal {
 
 	private async writeBooks(
 		service: HighlightService,
-		content: Map<string, Map<string, Bookmark[]>>,
+		content: Map<string, ChapterEntry[]>,
 	) {
 		const template = await getTemplateContents(
 			this.app,
