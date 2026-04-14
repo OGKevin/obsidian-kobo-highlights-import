@@ -339,39 +339,46 @@ export class HighlightService {
 	//
 	// Strategy:
 	//   1. Word-count weighted — if WordCount is populated for at least one
-	//      spine item, use cumulative word counts as the position numerator and
-	//      total word count as the denominator. This correctly weights long
-	//      chapters as larger contributions than short ones.
-	//   2. Uniform fallback — when WordCount is entirely absent (all NULL/0),
-	//      fall back to (chapterIndex + chapterProgress) / totalChapters, which
-	//      is the old behaviour.
+	//      chapter, use cumulative word counts as the numerator and total word
+	//      count as the denominator. Long chapters contribute proportionally
+	//      more than short ones.
+	//   2. Uniform fallback — when WordCount is absent (all NULL/0), fall back
+	//      to (chapterIndex + chapterProgress) / totalChapters.
 	//
-	// In both cases chapterProgress (Kobo's within-spine-item fraction) is used
-	// to interpolate the position within the matched chapter.
+	// IMPORTANT: we restrict to rows where chapterIdBookmarked != null (actual
+	// chapter/spine entries). Kobo's content table also contains a top-level
+	// book row (ContentType 6) that often stores the *total* book word count in
+	// WordCount. Including it would double-count every word and shift all
+	// percentages into the upper half of the 0–1 range.
 	private calcBookProgress(
 		contentId: string,
 		chapterProgress: number | undefined,
 		allContents: Content[],
 	): number | undefined {
-		const idx = allContents.findIndex((c) => c.contentId === contentId);
+		// Only consider actual chapter entries.
+		const chapters = allContents.filter(
+			(c) => c.chapterIdBookmarked != null,
+		);
+
+		const idx = chapters.findIndex((c) => c.contentId === contentId);
 		if (idx === -1) return undefined;
 
 		const cp = chapterProgress ?? 0;
-		const totalWords = allContents.reduce(
+		const totalWords = chapters.reduce(
 			(sum, c) => sum + (c.wordCount ?? 0),
 			0,
 		);
 
 		if (totalWords > 0) {
 			// Word-count weighted path.
-			const wordsBeforeChapter = allContents
+			const wordsBeforeChapter = chapters
 				.slice(0, idx)
 				.reduce((sum, c) => sum + (c.wordCount ?? 0), 0);
-			const currentChapterWords = allContents[idx].wordCount ?? 0;
+			const currentChapterWords = chapters[idx].wordCount ?? 0;
 			return (wordsBeforeChapter + cp * currentChapterWords) / totalWords;
 		} else {
 			// Uniform fallback path.
-			const total = allContents.length;
+			const total = chapters.length;
 			if (total === 0) return undefined;
 			return (idx + cp) / total;
 		}
