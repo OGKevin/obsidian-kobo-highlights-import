@@ -49,6 +49,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
+				chapterProgress: row[5] != null ? +row[5] : undefined,
 			});
 		});
 
@@ -261,6 +262,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
+				chapterProgress: row[5] != null ? +row[5] : undefined,
 			});
 		}
 

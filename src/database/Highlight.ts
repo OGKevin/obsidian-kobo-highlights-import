@@ -75,6 +75,7 @@ export class HighlightService {
 	async getHighlightsByBookTitle(
 		bookTitle: string,
 		sortByChapterProgress?: boolean,
+		sortByChapterOrder?: boolean,
 	): Promise<Highlight[]> {
 		const [bookmarks, allContents] = await Promise.all([
 			this.repo.getBookmarksByBookTitle(bookTitle, sortByChapterProgress),
@@ -98,13 +99,17 @@ export class HighlightService {
 			);
 		}
 
-		// Sort by contentId so chapters appear in book order regardless of the
-		// SQL sort used to fetch bookmarks. Highlights within the same chapter
-		// keep their relative order (stable sort) from the SQL query, so
-		// sortByChapterProgress still governs within-chapter ordering.
-		return highlights.sort((a, b) =>
-			a.content.contentId.localeCompare(b.content.contentId),
-		);
+		// If sortByChapterOrder is enabled, sort by contentId so chapters appear
+		// in book order. Highlights within the same chapter keep their relative
+		// SQL-determined order (stable sort), so sortByChapterProgress still
+		// controls within-chapter ordering independently.
+		if (sortByChapterOrder) {
+			highlights.sort((a, b) =>
+				a.content.contentId.localeCompare(b.content.contentId),
+			);
+		}
+
+		return highlights;
 	}
 
 	// In-memory equivalent of createHighlightFromBookmark + findRightContentForBookmark,
