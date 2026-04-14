@@ -220,6 +220,39 @@ export class Repository {
 		};
 	}
 
+	async getBookDetailsByIsbn(isbn: string): Promise<BookDetails | null> {
+		const statement = this.db.prepare(
+			`SELECT DISTINCT Title, Attribution as Author, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading FROM content WHERE ISBN = $isbn AND Title IS NOT NULL LIMIT 1;`,
+			{ $isbn: isbn },
+		);
+
+		if (!statement.step()) {
+			statement.free();
+			return null;
+		}
+
+		const row = statement.get();
+		statement.free();
+
+		if (row[0] == null) {
+			return null;
+		}
+
+		return {
+			title: row[0].toString(),
+			author: row[1]?.toString() ?? "Unknown Author",
+			description: row[2]?.toString(),
+			publisher: row[3]?.toString(),
+			dateLastRead: row[4] ? new Date(row[4].toString()) : undefined,
+			readStatus: row[5] ? +row[5].toString() : 0,
+			percentRead: row[6] ? +row[6].toString() : 0,
+			isbn: row[7]?.toString(),
+			series: row[8]?.toString(),
+			seriesNumber: row[9] ? +row[9].toString() : undefined,
+			timeSpentReading: row[10] ? +row[10].toString() : 0,
+		};
+	}
+
 	async getAllBookDetails(): Promise<BookDetails[]> {
 		const statement = this.db.prepare(
 			`SELECT DISTINCT 

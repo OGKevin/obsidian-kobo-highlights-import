@@ -1,4 +1,5 @@
-import { addIcon, Plugin } from "obsidian";
+import { addIcon, Notice, Plugin } from "obsidian";
+import { AppendHighlightsModal } from "./modal/AppendHighlightsModal";
 import { ExtractHighlightsModal } from "./modal/ExtractHighlightsModal";
 import {
 	DEFAULT_SETTINGS,
@@ -35,6 +36,40 @@ export default class KoboHighlightsImporter extends Plugin {
 				new ExtractHighlightsModal(this.app, this.settings).open();
 			},
 		});
+
+		this.addCommand({
+			id: "append-kobo-highlights-to-note",
+			name: "Append Kobo highlights to current note",
+			editorCallback: (editor, ctx) => {
+				if (!ctx.file) {
+					new Notice("No active file open");
+					return;
+				}
+				new AppendHighlightsModal(
+					this.app,
+					this.settings,
+					ctx.file,
+				).open();
+			},
+		});
+
+		const appendIconEl = this.addRibbonIcon(
+			"book-plus",
+			"Append Kobo highlights to current note",
+			() => {
+				const activeFile = this.app.workspace.getActiveFile();
+				if (!activeFile) {
+					new Notice("No active file open");
+					return;
+				}
+				new AppendHighlightsModal(
+					this.app,
+					this.settings,
+					activeFile,
+				).open();
+			},
+		);
+		appendIconEl.addClass("kobo-highlights-append-icon");
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(

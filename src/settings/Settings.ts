@@ -7,6 +7,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	storageFolder: "",
 	sortByChapterProgress: false,
 	templatePath: "",
+	appendTemplatePath: "",
 	importAllBooks: false,
 };
 
@@ -14,6 +15,7 @@ export interface KoboHighlightsImporterSettings {
 	storageFolder: string;
 	sortByChapterProgress: boolean;
 	templatePath: string;
+	appendTemplatePath: string;
 	importAllBooks: boolean;
 }
 
@@ -31,6 +33,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 
 		this.add_destination_folder();
 		this.add_template_path();
+		this.add_append_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
 	}
@@ -60,6 +63,24 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.templatePath)
 					.onChange((newTemplatePath) => {
 						this.plugin.settings.templatePath = newTemplatePath;
+						this.plugin.saveSettings();
+					});
+			});
+	}
+
+	add_append_template_path(): void {
+		new Setting(this.containerEl)
+			.setName("Append Template Path")
+			.setDesc(
+				"Template used when appending highlights to an existing note",
+			)
+			.addSearch((cb) => {
+				new FileSuggestor(this.app, cb.inputEl);
+				cb.setPlaceholder("Example: folder1/append-template")
+					.setValue(this.plugin.settings.appendTemplatePath)
+					.onChange((newTemplatePath) => {
+						this.plugin.settings.appendTemplatePath =
+							newTemplatePath;
 						this.plugin.saveSettings();
 					});
 			});

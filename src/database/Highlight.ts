@@ -13,6 +13,10 @@ export class HighlightService {
 		this.repo = repo;
 	}
 
+	async getBookDetailsByIsbn(isbn: string): Promise<BookDetails | null> {
+		return this.repo.getBookDetailsByIsbn(isbn);
+	}
+
 	async getBookDetailsFromBookTitle(title: string): Promise<BookDetails> {
 		const details = await this.repo.getBookDetailsByBookTitle(title);
 
@@ -54,6 +58,14 @@ export class HighlightService {
 		});
 
 		return m;
+	}
+
+	async getHighlightsByBookTitle(
+		bookTitle: string,
+		sortByChapterProgress?: boolean,
+	): Promise<Highlight[]> {
+		const all = await this.getAllHighlight(sortByChapterProgress);
+		return all.filter((h) => h.content.bookTitle === bookTitle);
 	}
 
 	async getAllHighlight(
