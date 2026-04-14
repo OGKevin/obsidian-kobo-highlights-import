@@ -37,7 +37,7 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 <% } -%>
 <% if (highlight.dateCreated) { -%>
-*<%= highlight.dateCreated.toISOString() %><% if (highlight.chapterProgress != null) { %> · <%= (highlight.chapterProgress * 100).toFixed(0) %>%<% } %>*
+*<%= highlight.dateCreated.toISOString() %><% if (highlight.bookProgress != null) { %> · <%= (highlight.bookProgress * 100).toFixed(0) %>%<% } %>*
 
 <% } -%>
 <% }) -%>
@@ -58,7 +58,7 @@ export const defaultAppendTemplate = `
 
 <% } -%>
 <% if (highlight.dateCreated) { -%>
-*<%= highlight.dateCreated.toISOString() %><% if (highlight.chapterProgress != null) { %> · <%= (highlight.chapterProgress * 100).toFixed(0) %>%<% } %>*
+*<%= highlight.dateCreated.toISOString() %><% if (highlight.bookProgress != null) { %> · <%= (highlight.bookProgress * 100).toFixed(0) %>%<% } %>*
 
 <% } -%>
 <% }) -%>

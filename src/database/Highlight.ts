@@ -109,6 +109,24 @@ export class HighlightService {
 			);
 		}
 
+		// Calculate reliable book-level progress using the sorted content list.
+		// Kobo's ChapterProgress is progress within a single EPUB spine item,
+		// which is 0→1 per chapter for multi-spine EPUBs but 0→1 for the whole
+		// book for single-spine EPUBs. bookProgress normalises across both cases.
+		const totalChapters = allContents.length;
+		if (totalChapters > 0) {
+			for (const h of highlights) {
+				const idx = allContents.findIndex(
+					(c) => c.contentId === h.content.contentId,
+				);
+				if (idx !== -1) {
+					h.bookmark.bookProgress =
+						(idx + (h.bookmark.chapterProgress ?? 0)) /
+						totalChapters;
+				}
+			}
+		}
+
 		return highlights;
 	}
 
@@ -206,7 +224,7 @@ export class HighlightService {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort((a, b) => {
+		const sorted = highlights.sort((a, b) => {
 			if (!a.content.bookTitle || !b.content.bookTitle) {
 				throw new Error("bookTitle must be set");
 			}
@@ -220,6 +238,32 @@ export class HighlightService {
 				? a.content.contentId.localeCompare(b.content.contentId)
 				: 0;
 		});
+
+		// Calculate bookProgress for every highlight. Cache per-book content
+		// queries so we only hit the DB once per unique book title.
+		const contentsByBook = new Map<string, Content[]>();
+		for (const h of sorted) {
+			if (!h.content.bookTitle) continue;
+			let contents = contentsByBook.get(h.content.bookTitle);
+			if (!contents) {
+				contents =
+					await this.repo.getAllContentByBookTitleOrderedByContentId(
+						h.content.bookTitle,
+					);
+				contentsByBook.set(h.content.bookTitle, contents);
+			}
+			const totalChapters = contents.length;
+			if (totalChapters === 0) continue;
+			const idx = contents.findIndex(
+				(c) => c.contentId === h.content.contentId,
+			);
+			if (idx !== -1) {
+				h.bookmark.bookProgress =
+					(idx + (h.bookmark.chapterProgress ?? 0)) / totalChapters;
+			}
+		}
+
+		return sorted;
 	}
 
 	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
