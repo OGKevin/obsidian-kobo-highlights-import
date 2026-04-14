@@ -1,4 +1,4 @@
-import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
+import { BookDetails, Bookmark, Content, Highlight, HighlightSort } from "./interfaces";
 import { Repository } from "./repository";
 
 type bookTitle = string;
@@ -74,11 +74,10 @@ export class HighlightService {
 	//      where M is the number of chapters, rather than issuing further DB calls.
 	async getHighlightsByBookTitle(
 		bookTitle: string,
-		sortByChapterProgress?: boolean,
-		sortByChapterOrder = true,
+		sort: HighlightSort = "date",
 	): Promise<Highlight[]> {
 		const [bookmarks, allContents] = await Promise.all([
-			this.repo.getBookmarksByBookTitle(bookTitle, sortByChapterProgress),
+			this.repo.getBookmarksByBookTitle(bookTitle, sort),
 			this.repo.getAllContentByBookTitleOrderedByContentId(bookTitle),
 		]);
 
@@ -99,12 +98,11 @@ export class HighlightService {
 			);
 		}
 
-		// If sortByChapterOrder is enabled, sort by VolumeIndex (the explicit
-		// EPUB spine index Kobo stores in the content table). This is immune to
-		// ContentID string-ordering quirks on books with non-sequential filenames.
-		// Fall back to ContentID comparison when VolumeIndex is absent.
-		// Highlights within the same chapter keep their SQL-determined order.
-		if (sortByChapterOrder) {
+		// For chapter/position sorts, order by VolumeIndex (the explicit EPUB
+		// spine index). This is immune to ContentID string-ordering quirks on
+		// books with non-sequential filenames. Within-chapter order comes from
+		// the SQL ORDER BY (DateCreated or ChapterProgress depending on sort).
+		if (sort === "chapter" || sort === "position") {
 			highlights.sort((a, b) => {
 				const aVol = a.content.volumeIndex;
 				const bVol = b.content.volumeIndex;
@@ -200,18 +198,15 @@ export class HighlightService {
 		return originalContent;
 	}
 
-	async getAllHighlight(
-		sortByChapterProgress?: boolean,
-		sortByChapterOrder?: boolean,
-	): Promise<Highlight[]> {
+	async getAllHighlight(sort: HighlightSort = "date"): Promise<Highlight[]> {
 		const highlights: Highlight[] = [];
 
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
+		const bookmarks = await this.repo.getAllBookmark(sort);
 		for (const bookmark of bookmarks) {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		const sorted = highlights.sort((a, b) => {
+		return highlights.sort((a, b) => {
 			if (!a.content.bookTitle || !b.content.bookTitle) {
 				throw new Error("bookTitle must be set");
 			}
@@ -221,7 +216,7 @@ export class HighlightService {
 			);
 			if (bookCmp !== 0) return bookCmp;
 
-			if (sortByChapterOrder) {
+			if (sort === "chapter" || sort === "position") {
 				const aVol = a.content.volumeIndex;
 				const bVol = b.content.volumeIndex;
 				if (aVol != null && bVol != null && aVol !== bVol)
@@ -230,8 +225,6 @@ export class HighlightService {
 			}
 			return 0;
 		});
-
-		return sorted;
 	}
 
 	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {

@@ -51,8 +51,7 @@ export class AppendHighlightsModal extends Modal {
 	) {
 		const highlights = await service.getHighlightsByBookTitle(
 			bookTitle,
-			this.settings.sortByChapterProgress,
-			this.settings.sortByChapterOrder,
+			this.settings.highlightSort,
 		);
 
 		if (highlights.length === 0) {
