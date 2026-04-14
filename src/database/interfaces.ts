@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-export type HighlightSort = "date" | "chapter" | "position";
 export interface Bookmark {
 	bookmarkId: string;
 	text: string;

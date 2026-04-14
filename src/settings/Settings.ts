@@ -1,23 +1,24 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import KoboHighlightsImporter from "src/main";
-import { HighlightSort } from "src/database/interfaces";
 import { FileSuggestor } from "./suggestors/FileSuggestor";
 import { FolderSuggestor } from "./suggestors/FolderSuggestor";
 
 export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	storageFolder: "",
-	highlightSort: "date",
+	sortByChapterProgress: false,
 	templatePath: "",
 	appendTemplatePath: "",
+	sortByChapterOrder: true,
 	importAllBooks: false,
 	sqlitePath: "",
 };
 
 export interface KoboHighlightsImporterSettings {
 	storageFolder: string;
-	highlightSort: HighlightSort;
+	sortByChapterProgress: boolean;
 	templatePath: string;
 	appendTemplatePath: string;
+	sortByChapterOrder: boolean;
 	importAllBooks: boolean;
 	sqlitePath: string;
 }
@@ -38,7 +39,8 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.add_sqlite_path();
 		this.add_template_path();
 		this.add_append_template_path();
-		this.add_highlight_sort();
+		this.add_sort_by_chapter_order();
+		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
 	}
 
@@ -110,24 +112,37 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 			});
 	}
 
-	add_highlight_sort(): void {
+	add_sort_by_chapter_order(): void {
 		new Setting(this.containerEl)
-			.setName("Sort highlights")
+			.setName("Sort chapters in reading order")
 			.setDesc(
-				"Date created: chronological order. " +
-				"Reading order: chapters grouped by position in the book, highlights within each chapter by date. " +
-				"Reading order (by position): same grouping, but highlights within a chapter sorted by their position in the spine item.",
+				"Sort chapters by their position in the book. " +
+				"When disabled, chapters appear in the order you first highlighted in each one.",
 			)
-			.addDropdown((cb) => {
-				cb.addOption("date", "Date created")
-					.addOption("chapter", "Reading order")
-					.addOption("position", "Reading order (by position)")
-					.setValue(this.plugin.settings.highlightSort)
-					.onChange(async (value) => {
-						this.plugin.settings.highlightSort =
-							value as HighlightSort;
-						await this.plugin.saveSettings();
-					});
+			.addToggle((cb) => {
+				cb.setValue(
+					this.plugin.settings.sortByChapterOrder,
+				).onChange(async (toggle) => {
+					this.plugin.settings.sortByChapterOrder = toggle;
+					await this.plugin.saveSettings();
+				});
+			});
+	}
+
+	add_sort_by_chapter_progress(): void {
+		new Setting(this.containerEl)
+			.setName("Sort highlights by chapter progress")
+			.setDesc(
+				"Sort highlights by their position within the chapter. " +
+				"When disabled, highlights are sorted by creation date.",
+			)
+			.addToggle((cb) => {
+				cb.setValue(
+					this.plugin.settings.sortByChapterProgress,
+				).onChange(async (toggle) => {
+					this.plugin.settings.sortByChapterProgress = toggle;
+					await this.plugin.saveSettings();
+				});
 			});
 	}
 

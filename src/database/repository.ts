@@ -1,5 +1,5 @@
 import { Database, Statement } from "sql.js";
-import { BookDetails, Bookmark, Content, HighlightSort } from "./interfaces";
+import { BookDetails, Bookmark, Content } from "./interfaces";
 
 export class Repository {
 	db: Database;
@@ -8,11 +8,10 @@ export class Repository {
 		this.db = db;
 	}
 
-	async getAllBookmark(sort: HighlightSort = "date"): Promise<Bookmark[]> {
-		const orderBy =
-			sort === "position"
-				? "ChapterProgress ASC, DateCreated ASC"
-				: "DateCreated ASC";
+	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
+		const orderBy = sortByChapterProgress
+			? "ChapterProgress ASC, DateCreated ASC"
+			: "DateCreated ASC";
 		const res = this.db.exec(
 			`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ${orderBy};`,
 		);
@@ -220,12 +219,11 @@ export class Repository {
 
 	async getBookmarksByBookTitle(
 		bookTitle: string,
-		sort: HighlightSort = "date",
+		sortByChapterProgress?: boolean,
 	): Promise<Bookmark[]> {
-		const orderBy =
-			sort === "position"
-				? "b.ChapterProgress ASC, b.DateCreated ASC"
-				: "b.DateCreated ASC";
+		const orderBy = sortByChapterProgress
+			? "b.ChapterProgress ASC, b.DateCreated ASC"
+			: "b.DateCreated ASC";
 
 		// Use EXISTS with a parameterized bind to filter bookmarks to this book,
 		// handling both exact ContentID matches and fuzzy matches (where
