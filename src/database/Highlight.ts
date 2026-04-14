@@ -109,22 +109,14 @@ export class HighlightService {
 			);
 		}
 
-		// Calculate reliable book-level progress using the sorted content list.
-		// Kobo's ChapterProgress is progress within a single EPUB spine item,
-		// which is 0→1 per chapter for multi-spine EPUBs but 0→1 for the whole
-		// book for single-spine EPUBs. bookProgress normalises across both cases.
-		const totalChapters = allContents.length;
-		if (totalChapters > 0) {
-			for (const h of highlights) {
-				const idx = allContents.findIndex(
-					(c) => c.contentId === h.content.contentId,
-				);
-				if (idx !== -1) {
-					h.bookmark.bookProgress =
-						(idx + (h.bookmark.chapterProgress ?? 0)) /
-						totalChapters;
-				}
-			}
+		// Calculate word-count-weighted book progress. Falls back to uniform
+		// chapter weighting when WordCount data is unavailable.
+		for (const h of highlights) {
+			h.bookmark.bookProgress = this.calcBookProgress(
+				h.content.contentId,
+				h.bookmark.chapterProgress,
+				allContents,
+			);
 		}
 
 		return highlights;
@@ -239,8 +231,8 @@ export class HighlightService {
 				: 0;
 		});
 
-		// Calculate bookProgress for every highlight. Cache per-book content
-		// queries so we only hit the DB once per unique book title.
+		// Calculate word-count-weighted book progress for every highlight.
+		// Cache per-book content queries so we only hit the DB once per book.
 		const contentsByBook = new Map<string, Content[]>();
 		for (const h of sorted) {
 			if (!h.content.bookTitle) continue;
@@ -252,15 +244,11 @@ export class HighlightService {
 					);
 				contentsByBook.set(h.content.bookTitle, contents);
 			}
-			const totalChapters = contents.length;
-			if (totalChapters === 0) continue;
-			const idx = contents.findIndex(
-				(c) => c.contentId === h.content.contentId,
+			h.bookmark.bookProgress = this.calcBookProgress(
+				h.content.contentId,
+				h.bookmark.chapterProgress,
+				contents,
 			);
-			if (idx !== -1) {
-				h.bookmark.bookProgress =
-					(idx + (h.bookmark.chapterProgress ?? 0)) / totalChapters;
-			}
 		}
 
 		return sorted;
@@ -344,6 +332,49 @@ export class HighlightService {
 		}
 
 		return originalContent;
+	}
+
+	// Calculates book-level progress (0–1) for a highlight given the ordered
+	// list of all content rows for its book.
+	//
+	// Strategy:
+	//   1. Word-count weighted — if WordCount is populated for at least one
+	//      spine item, use cumulative word counts as the position numerator and
+	//      total word count as the denominator. This correctly weights long
+	//      chapters as larger contributions than short ones.
+	//   2. Uniform fallback — when WordCount is entirely absent (all NULL/0),
+	//      fall back to (chapterIndex + chapterProgress) / totalChapters, which
+	//      is the old behaviour.
+	//
+	// In both cases chapterProgress (Kobo's within-spine-item fraction) is used
+	// to interpolate the position within the matched chapter.
+	private calcBookProgress(
+		contentId: string,
+		chapterProgress: number | undefined,
+		allContents: Content[],
+	): number | undefined {
+		const idx = allContents.findIndex((c) => c.contentId === contentId);
+		if (idx === -1) return undefined;
+
+		const cp = chapterProgress ?? 0;
+		const totalWords = allContents.reduce(
+			(sum, c) => sum + (c.wordCount ?? 0),
+			0,
+		);
+
+		if (totalWords > 0) {
+			// Word-count weighted path.
+			const wordsBeforeChapter = allContents
+				.slice(0, idx)
+				.reduce((sum, c) => sum + (c.wordCount ?? 0), 0);
+			const currentChapterWords = allContents[idx].wordCount ?? 0;
+			return (wordsBeforeChapter + cp * currentChapterWords) / totalWords;
+		} else {
+			// Uniform fallback path.
+			const total = allContents.length;
+			if (total === 0) return undefined;
+			return (idx + cp) / total;
+		}
 	}
 
 	async getAllBooks(): Promise<Map<string, BookDetails>> {

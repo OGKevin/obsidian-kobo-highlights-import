@@ -14,6 +14,7 @@ export interface Content {
 	contentId: string;
 	chapterIdBookmarked?: string;
 	bookTitle?: string;
+	wordCount?: number;
 }
 
 export interface Highlight {
