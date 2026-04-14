@@ -49,7 +49,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
-				chapterProgress: row[5] != null ? +row[5] : undefined,
+				spineProgress: row[5] != null ? +row[5] : undefined,
 			});
 		});
 
@@ -156,7 +156,7 @@ export class Repository {
 
 	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle from "content" where BookTitle = $bookTitle`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -170,7 +170,7 @@ export class Repository {
 		bookTitle: string,
 	): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle from "content" where BookTitle = $bookTitle order by "ContentID"`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle order by "ContentID"`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -262,7 +262,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
-				chapterProgress: row[5] != null ? +row[5] : undefined,
+				spineProgress: row[5] != null ? +row[5] : undefined,
 			});
 		}
 
@@ -359,6 +359,7 @@ export class Repository {
 				contentId: row[1]?.toString() ?? "",
 				chapterIdBookmarked: row[2]?.toString(),
 				bookTitle: row[3]?.toString(),
+				volumeIndex: row[4] != null ? +row[4] : undefined,
 			});
 		}
 

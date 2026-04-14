@@ -99,14 +99,19 @@ export class HighlightService {
 			);
 		}
 
-		// If sortByChapterOrder is enabled, sort by contentId so chapters appear
-		// in book order. Highlights within the same chapter keep their relative
-		// SQL-determined order (stable sort), so sortByChapterProgress still
-		// controls within-chapter ordering independently.
+		// If sortByChapterOrder is enabled, sort by VolumeIndex (the explicit
+		// EPUB spine index Kobo stores in the content table). This is immune to
+		// ContentID string-ordering quirks on books with non-sequential filenames.
+		// Fall back to ContentID comparison when VolumeIndex is absent.
+		// Highlights within the same chapter keep their SQL-determined order.
 		if (sortByChapterOrder) {
-			highlights.sort((a, b) =>
-				a.content.contentId.localeCompare(b.content.contentId),
-			);
+			highlights.sort((a, b) => {
+				const aVol = a.content.volumeIndex;
+				const bVol = b.content.volumeIndex;
+				if (aVol != null && bVol != null && aVol !== bVol)
+					return aVol - bVol;
+				return a.content.contentId.localeCompare(b.content.contentId);
+			});
 		}
 
 		return highlights;
@@ -216,9 +221,14 @@ export class HighlightService {
 			);
 			if (bookCmp !== 0) return bookCmp;
 
-			return sortByChapterOrder
-				? a.content.contentId.localeCompare(b.content.contentId)
-				: 0;
+			if (sortByChapterOrder) {
+				const aVol = a.content.volumeIndex;
+				const bVol = b.content.volumeIndex;
+				if (aVol != null && bVol != null && aVol !== bVol)
+					return aVol - bVol;
+				return a.content.contentId.localeCompare(b.content.contentId);
+			}
+			return 0;
 		});
 
 		return sorted;
