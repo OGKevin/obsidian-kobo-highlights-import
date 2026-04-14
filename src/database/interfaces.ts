@@ -6,7 +6,6 @@ export interface Bookmark {
 	note?: string;
 	dateCreated: Date;
 	chapterProgress?: number;
-	bookProgress?: number;
 }
 
 export interface Content {
@@ -14,7 +13,6 @@ export interface Content {
 	contentId: string;
 	chapterIdBookmarked?: string;
 	bookTitle?: string;
-	wordCount?: number;
 }
 
 export interface Highlight {

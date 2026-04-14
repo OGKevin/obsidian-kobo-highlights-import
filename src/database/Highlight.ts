@@ -109,16 +109,6 @@ export class HighlightService {
 			);
 		}
 
-		// Calculate word-count-weighted book progress. Falls back to uniform
-		// chapter weighting when WordCount data is unavailable.
-		for (const h of highlights) {
-			h.bookmark.bookProgress = this.calcBookProgress(
-				h.content.contentId,
-				h.bookmark.chapterProgress,
-				allContents,
-			);
-		}
-
 		return highlights;
 	}
 
@@ -231,26 +221,6 @@ export class HighlightService {
 				: 0;
 		});
 
-		// Calculate word-count-weighted book progress for every highlight.
-		// Cache per-book content queries so we only hit the DB once per book.
-		const contentsByBook = new Map<string, Content[]>();
-		for (const h of sorted) {
-			if (!h.content.bookTitle) continue;
-			let contents = contentsByBook.get(h.content.bookTitle);
-			if (!contents) {
-				contents =
-					await this.repo.getAllContentByBookTitleOrderedByContentId(
-						h.content.bookTitle,
-					);
-				contentsByBook.set(h.content.bookTitle, contents);
-			}
-			h.bookmark.bookProgress = this.calcBookProgress(
-				h.content.contentId,
-				h.bookmark.chapterProgress,
-				contents,
-			);
-		}
-
 		return sorted;
 	}
 
@@ -332,56 +302,6 @@ export class HighlightService {
 		}
 
 		return originalContent;
-	}
-
-	// Calculates book-level progress (0–1) for a highlight given the ordered
-	// list of all content rows for its book.
-	//
-	// Strategy:
-	//   1. Word-count weighted — if WordCount is populated for at least one
-	//      chapter, use cumulative word counts as the numerator and total word
-	//      count as the denominator. Long chapters contribute proportionally
-	//      more than short ones.
-	//   2. Uniform fallback — when WordCount is absent (all NULL/0), fall back
-	//      to (chapterIndex + chapterProgress) / totalChapters.
-	//
-	// IMPORTANT: we restrict to rows where chapterIdBookmarked != null (actual
-	// chapter/spine entries). Kobo's content table also contains a top-level
-	// book row (ContentType 6) that often stores the *total* book word count in
-	// WordCount. Including it would double-count every word and shift all
-	// percentages into the upper half of the 0–1 range.
-	private calcBookProgress(
-		contentId: string,
-		chapterProgress: number | undefined,
-		allContents: Content[],
-	): number | undefined {
-		// Only consider actual chapter entries.
-		const chapters = allContents.filter(
-			(c) => c.chapterIdBookmarked != null,
-		);
-
-		const idx = chapters.findIndex((c) => c.contentId === contentId);
-		if (idx === -1) return undefined;
-
-		const cp = chapterProgress ?? 0;
-		const totalWords = chapters.reduce(
-			(sum, c) => sum + (c.wordCount ?? 0),
-			0,
-		);
-
-		if (totalWords > 0) {
-			// Word-count weighted path.
-			const wordsBeforeChapter = chapters
-				.slice(0, idx)
-				.reduce((sum, c) => sum + (c.wordCount ?? 0), 0);
-			const currentChapterWords = chapters[idx].wordCount ?? 0;
-			return (wordsBeforeChapter + cp * currentChapterWords) / totalWords;
-		} else {
-			// Uniform fallback path.
-			const total = chapters.length;
-			if (total === 0) return undefined;
-			return (idx + cp) / total;
-		}
 	}
 
 	async getAllBooks(): Promise<Map<string, BookDetails>> {

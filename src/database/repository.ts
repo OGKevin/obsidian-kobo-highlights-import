@@ -156,7 +156,7 @@ export class Repository {
 
 	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle, WordCount from "content" where BookTitle = $bookTitle`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle from "content" where BookTitle = $bookTitle`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -170,7 +170,7 @@ export class Repository {
 		bookTitle: string,
 	): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle, WordCount from "content" where BookTitle = $bookTitle order by "ContentID"`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle from "content" where BookTitle = $bookTitle order by "ContentID"`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -354,16 +354,11 @@ export class Repository {
 
 		while (statement.step()) {
 			const row = statement.get();
-			const rawWordCount = row[4];
 			contents.push({
 				title: row[0]?.toString() ?? "",
 				contentId: row[1]?.toString() ?? "",
 				chapterIdBookmarked: row[2]?.toString(),
 				bookTitle: row[3]?.toString(),
-				wordCount:
-					rawWordCount != null && +rawWordCount > 0
-						? +rawWordCount
-						: undefined,
 			});
 		}
 
