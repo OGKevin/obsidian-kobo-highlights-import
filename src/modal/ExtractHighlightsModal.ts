@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { App, Modal, normalizePath, Notice } from "obsidian";
 import { sanitize } from "sanitize-filename-ts";
 import SqlJs from "sql.js";
@@ -14,14 +15,20 @@ export class ExtractHighlightsModal extends Modal {
 	inputFileEl!: HTMLInputElement;
 
 	settings: KoboHighlightsImporterSettings;
+	saveSettings: () => Promise<void>;
 
 	fileBuffer: ArrayBuffer | null | undefined;
 
 	nrOfBooksExtracted: number;
 
-	constructor(app: App, settings: KoboHighlightsImporterSettings) {
+	constructor(
+		app: App,
+		settings: KoboHighlightsImporterSettings,
+		saveSettings: () => Promise<void>,
+	) {
 		super(app);
 		this.settings = settings;
+		this.saveSettings = saveSettings;
 		this.nrOfBooksExtracted = 0;
 	}
 
@@ -46,13 +53,11 @@ export class ExtractHighlightsModal extends Modal {
 
 		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
 
-		// Add all books with highlights
 		for (const [bookTitle, chapters] of content) {
 			allBooksContent.set(bookTitle, chapters);
 		}
 
 		if (this.settings.importAllBooks) {
-			// Add books without highlights
 			const allBooks = await service.getAllBooks();
 
 			for (const [bookTitle, _] of allBooks) {
@@ -94,6 +99,34 @@ export class ExtractHighlightsModal extends Modal {
 		}
 	}
 
+	private enableButton() {
+		this.goButtonEl.disabled = false;
+		this.goButtonEl.setAttr(
+			"style",
+			"background-color: green; color: black",
+		);
+	}
+
+	private tryLoadStoredPath() {
+		if (!this.settings.sqlitePath) return;
+
+		try {
+			const buf = readFileSync(this.settings.sqlitePath);
+			this.fileBuffer = buf.buffer.slice(
+				buf.byteOffset,
+				buf.byteOffset + buf.byteLength,
+			);
+			this.enableButton();
+			new Notice(
+				`Loaded KoboReader.sqlite from remembered path`,
+			);
+		} catch {
+			new Notice(
+				`Could not load sqlite file from remembered path — please select it manually`,
+			);
+		}
+	}
+
 	onOpen() {
 		const { contentEl } = this;
 
@@ -130,15 +163,17 @@ export class ExtractHighlightsModal extends Modal {
 				return;
 			}
 
-			// Convert File to ArrayBuffer
+			// Save the path for future sessions (Electron extends File with .path).
+			const filePath = (file as unknown as { path: string }).path;
+			if (filePath) {
+				this.settings.sqlitePath = filePath;
+				this.saveSettings();
+			}
+
 			const reader = new FileReader();
 			reader.onload = () => {
-				this.fileBuffer = reader.result as ArrayBuffer; // Store the ArrayBuffer
-				this.goButtonEl.disabled = false;
-				this.goButtonEl.setAttr(
-					"style",
-					"background-color: green; color: black",
-				);
+				this.fileBuffer = reader.result as ArrayBuffer;
+				this.enableButton();
 				new Notice("Ready to extract!");
 			};
 
@@ -161,6 +196,9 @@ export class ExtractHighlightsModal extends Modal {
 		contentEl.appendChild(description);
 		contentEl.appendChild(this.inputFileEl);
 		contentEl.appendChild(this.goButtonEl);
+
+		// Try to auto-load from the remembered path after the UI is shown.
+		this.tryLoadStoredPath();
 	}
 
 	onClose() {

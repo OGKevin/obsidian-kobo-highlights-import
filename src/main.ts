@@ -16,24 +16,31 @@ export default class KoboHighlightsImporter extends Plugin {
 		addIcon("e-reader", EREADER_ICON_PATH);
 		await this.loadSettings();
 
+		const saveSettings = () => this.saveSettings();
+
 		// This creates an icon in the left ribbon.
 		const KoboHighlightsImporterIconEl = this.addRibbonIcon(
 			"e-reader",
 			"Import from Kobo",
 			() => {
-				// Called when the user clicks the icon.
-				new ExtractHighlightsModal(this.app, this.settings).open();
+				new ExtractHighlightsModal(
+					this.app,
+					this.settings,
+					saveSettings,
+				).open();
 			},
 		);
-		// Perform additional things with the ribbon
 		KoboHighlightsImporterIconEl.addClass("kobo-highlights-importer-icon");
 
-		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
 			id: "import-from-kobo-sqlite",
 			name: "Import from Kobo",
 			callback: () => {
-				new ExtractHighlightsModal(this.app, this.settings).open();
+				new ExtractHighlightsModal(
+					this.app,
+					this.settings,
+					saveSettings,
+				).open();
 			},
 		});
 
@@ -49,6 +56,7 @@ export default class KoboHighlightsImporter extends Plugin {
 					this.app,
 					this.settings,
 					ctx.file,
+					saveSettings,
 				).open();
 			},
 		});
@@ -66,12 +74,12 @@ export default class KoboHighlightsImporter extends Plugin {
 					this.app,
 					this.settings,
 					activeFile,
+					saveSettings,
 				).open();
 			},
 		);
 		appendIconEl.addClass("kobo-highlights-append-icon");
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(
 			new KoboHighlightsImporterSettingsTab(this.app, this),
 		);

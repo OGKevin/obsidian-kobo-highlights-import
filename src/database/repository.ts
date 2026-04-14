@@ -220,6 +220,53 @@ export class Repository {
 		};
 	}
 
+	async getBookmarksByBookTitle(
+		bookTitle: string,
+		sortByChapterProgress?: boolean,
+	): Promise<Bookmark[]> {
+		const orderBy = sortByChapterProgress
+			? "b.ChapterProgress ASC, b.DateCreated ASC"
+			: "b.DateCreated ASC";
+
+		// Use EXISTS to filter bookmarks that belong to this book, handling both
+		// exact ContentID matches and fuzzy matches (where content.ContentID
+		// contains the bookmark's ContentID as a substring).
+		const res = this.db.exec(
+			`SELECT b.BookmarkID, b.Text, b.ContentID, b.annotation, b.DateCreated, b.ChapterProgress
+			FROM Bookmark b
+			WHERE b.Text IS NOT NULL
+			AND EXISTS (
+				SELECT 1 FROM content c
+				WHERE c.BookTitle = '${bookTitle.replace(/'/g, "''")}'
+				AND (c.ContentID = b.ContentID OR c.ContentID LIKE '%' || b.ContentID || '%')
+			)
+			ORDER BY ${orderBy};`,
+		);
+
+		const bookmarks: Bookmark[] = [];
+
+		if (!res[0]) {
+			return bookmarks;
+		}
+
+		res[0].values.forEach((row) => {
+			if (!(row[0] && row[1] && row[2] && row[4])) {
+				console.warn("Skipping bookmark with invalid values", row);
+				return;
+			}
+
+			bookmarks.push({
+				bookmarkId: row[0].toString(),
+				text: row[1].toString().replace(/\s+/g, " ").trim(),
+				contentId: row[2].toString(),
+				note: row[3]?.toString(),
+				dateCreated: new Date(row[4].toString()),
+			});
+		});
+
+		return bookmarks;
+	}
+
 	async getBookDetailsByIsbn(isbn: string): Promise<BookDetails | null> {
 		const statement = this.db.prepare(
 			`SELECT DISTINCT Title, Attribution as Author, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading FROM content WHERE ISBN = $isbn AND Title IS NOT NULL LIMIT 1;`,
