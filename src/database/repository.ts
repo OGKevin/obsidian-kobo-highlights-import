@@ -228,31 +228,31 @@ export class Repository {
 			? "b.ChapterProgress ASC, b.DateCreated ASC"
 			: "b.DateCreated ASC";
 
-		// Use EXISTS to filter bookmarks that belong to this book, handling both
-		// exact ContentID matches and fuzzy matches (where content.ContentID
-		// contains the bookmark's ContentID as a substring).
-		const res = this.db.exec(
+		// Use EXISTS with a parameterized bind to filter bookmarks to this book,
+		// handling both exact ContentID matches and fuzzy matches (where
+		// content.ContentID contains the bookmark's ContentID as a substring).
+		// The ORDER BY clause uses an internally-derived string (not user input)
+		// so interpolating it is safe.
+		const statement = this.db.prepare(
 			`SELECT b.BookmarkID, b.Text, b.ContentID, b.annotation, b.DateCreated, b.ChapterProgress
 			FROM Bookmark b
 			WHERE b.Text IS NOT NULL
 			AND EXISTS (
 				SELECT 1 FROM content c
-				WHERE c.BookTitle = '${bookTitle.replace(/'/g, "''")}'
+				WHERE c.BookTitle = $bookTitle
 				AND (c.ContentID = b.ContentID OR c.ContentID LIKE '%' || b.ContentID || '%')
 			)
 			ORDER BY ${orderBy};`,
+			{ $bookTitle: bookTitle },
 		);
 
 		const bookmarks: Bookmark[] = [];
 
-		if (!res[0]) {
-			return bookmarks;
-		}
-
-		res[0].values.forEach((row) => {
+		while (statement.step()) {
+			const row = statement.get();
 			if (!(row[0] && row[1] && row[2] && row[4])) {
 				console.warn("Skipping bookmark with invalid values", row);
-				return;
+				continue;
 			}
 
 			bookmarks.push({
@@ -262,8 +262,9 @@ export class Repository {
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
 			});
-		});
+		}
 
+		statement.free();
 		return bookmarks;
 	}
 

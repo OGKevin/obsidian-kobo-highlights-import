@@ -1,3 +1,4 @@
+import { webUtils } from "electron";
 import { readFileSync } from "fs";
 import { App, Modal, normalizePath, Notice } from "obsidian";
 import { sanitize } from "sanitize-filename-ts";
@@ -163,8 +164,8 @@ export class ExtractHighlightsModal extends Modal {
 				return;
 			}
 
-			// Save the path for future sessions (Electron extends File with .path).
-			const filePath = (file as unknown as { path: string }).path;
+			// Save the path for future sessions using Electron's webUtils API.
+			const filePath = webUtils.getPathForFile(file);
 			if (filePath) {
 				this.settings.sqlitePath = filePath;
 				this.saveSettings();

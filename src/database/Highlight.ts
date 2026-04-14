@@ -98,7 +98,13 @@ export class HighlightService {
 			);
 		}
 
-		return highlights;
+		// Sort by contentId so chapters appear in book order regardless of the
+		// SQL sort used to fetch bookmarks. Highlights within the same chapter
+		// keep their relative order (stable sort) from the SQL query, so
+		// sortByChapterProgress still governs within-chapter ordering.
+		return highlights.sort((a, b) =>
+			a.content.contentId.localeCompare(b.content.contentId),
+		);
 	}
 
 	// In-memory equivalent of createHighlightFromBookmark + findRightContentForBookmark,
