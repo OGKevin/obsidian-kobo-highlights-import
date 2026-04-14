@@ -75,7 +75,7 @@ export class HighlightService {
 	async getHighlightsByBookTitle(
 		bookTitle: string,
 		sortByChapterProgress?: boolean,
-		sortByChapterOrder?: boolean,
+		sortByChapterOrder = true,
 	): Promise<Highlight[]> {
 		const [bookmarks, allContents] = await Promise.all([
 			this.repo.getBookmarksByBookTitle(bookTitle, sortByChapterProgress),
@@ -197,6 +197,7 @@ export class HighlightService {
 
 	async getAllHighlight(
 		sortByChapterProgress?: boolean,
+		sortByChapterOrder?: boolean,
 	): Promise<Highlight[]> {
 		const highlights: Highlight[] = [];
 
@@ -205,15 +206,19 @@ export class HighlightService {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort(function (a, b): number {
+		return highlights.sort((a, b) => {
 			if (!a.content.bookTitle || !b.content.bookTitle) {
 				throw new Error("bookTitle must be set");
 			}
 
-			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
-				a.content.contentId.localeCompare(b.content.contentId)
+			const bookCmp = a.content.bookTitle.localeCompare(
+				b.content.bookTitle,
 			);
+			if (bookCmp !== 0) return bookCmp;
+
+			return sortByChapterOrder
+				? a.content.contentId.localeCompare(b.content.contentId)
+				: 0;
 		});
 	}
 

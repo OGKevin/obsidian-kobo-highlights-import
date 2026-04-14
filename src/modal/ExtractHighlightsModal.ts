@@ -49,7 +49,10 @@ export class ExtractHighlightsModal extends Modal {
 		);
 
 		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress),
+			await service.getAllHighlight(
+				this.settings.sortByChapterProgress,
+				this.settings.sortByChapterOrder,
+			),
 		);
 
 		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();

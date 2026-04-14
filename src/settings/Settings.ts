@@ -8,7 +8,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	appendTemplatePath: "",
-	appendSortByChapterOrder: true,
+	sortByChapterOrder: true,
 	importAllBooks: false,
 	sqlitePath: "",
 };
@@ -18,7 +18,7 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	appendTemplatePath: string;
-	appendSortByChapterOrder: boolean;
+	sortByChapterOrder: boolean;
 	importAllBooks: boolean;
 	sqlitePath: string;
 }
@@ -115,18 +115,18 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 	add_append_sort_by_chapter_order(): void {
 		const desc = document.createDocumentFragment();
 		desc.append(
-			"When appending highlights to a note, sort chapters in reading order (by their position in the book). ",
+			"Sort chapters in reading order (by their position in the book). ",
 			"When disabled, chapters appear in the order you first highlighted in each one.",
 		);
 
 		new Setting(this.containerEl)
-			.setName("Append: sort chapters in reading order")
+			.setName("Sort chapters in reading order")
 			.setDesc(desc)
 			.addToggle((cb) => {
 				cb.setValue(
-					this.plugin.settings.appendSortByChapterOrder,
+					this.plugin.settings.sortByChapterOrder,
 				).onChange(async (toggle) => {
-					this.plugin.settings.appendSortByChapterOrder = toggle;
+					this.plugin.settings.sortByChapterOrder = toggle;
 					await this.plugin.saveSettings();
 				});
 			});

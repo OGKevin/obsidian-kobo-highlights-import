@@ -37,7 +37,7 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 <% } -%>
 <% if (highlight.dateCreated) { -%>
-*Created: <%= highlight.dateCreated.toISOString() %>*
+*<%= highlight.dateCreated.toISOString() %><% if (highlight.chapterProgress != null) { %> · <%= (highlight.chapterProgress * 100).toFixed(0) %>%<% } %>*
 
 <% } -%>
 <% }) -%>
