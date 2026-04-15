@@ -30,11 +30,11 @@ export class BookPickerModal extends FuzzySuggestModal<BookDetails> {
 		return this.books;
 	}
 
-	getItemText(_book: BookDetails): string {
+	getItemText(book: BookDetails): string {
 		return `${book.title} — ${book.author}`;
 	}
 
-	onChooseItem(_book: BookDetails): void {
+	onChooseItem(book: BookDetails): void {
 		this.onChoose(book);
 	}
 }
