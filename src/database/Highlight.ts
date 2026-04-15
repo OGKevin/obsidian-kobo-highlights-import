@@ -66,15 +66,28 @@ export class HighlightService {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
 
-		return highlights.sort(function (a, b): number {
+		return highlights.sort((a, b) => {
 			if (!a.content.bookTitle || !b.content.bookTitle) {
 				throw new Error("bookTitle must be set");
 			}
 
-			return (
-				a.content.bookTitle.localeCompare(b.content.bookTitle) ||
-				a.content.contentId.localeCompare(b.content.contentId)
+			const bookCmp = a.content.bookTitle.localeCompare(
+				b.content.bookTitle,
 			);
+			if (bookCmp !== 0) return bookCmp;
+
+			// Sort chapters by VolumeIndex (the EPUB spine index Kobo stores in
+			// the content table). This is the authoritative reading order and
+			// supersedes ContentID alphanumeric sort, which can mis-order books
+			// with non-sequential filenames (e.g. chapter9.xhtml > chapter10.xhtml).
+			// Null-safe: entries without VolumeIndex fall back to ContentID,
+			// preserving existing behaviour for books that lack spine data.
+			const aVol = a.content.volumeIndex;
+			const bVol = b.content.volumeIndex;
+			if (aVol != null && bVol != null) return aVol - bVol;
+			if (aVol != null) return -1;
+			if (bVol != null) return 1;
+			return a.content.contentId.localeCompare(b.content.contentId);
 		});
 	}
 
