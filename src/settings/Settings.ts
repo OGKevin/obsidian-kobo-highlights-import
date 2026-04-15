@@ -8,6 +8,7 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
+	sqlitePath: "",
 };
 
 export interface KoboHighlightsImporterSettings {
@@ -15,6 +16,7 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
+	sqlitePath: string;
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -30,6 +32,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.containerEl.createEl("h2", { text: this.plugin.manifest.name });
 
 		this.add_destination_folder();
+		this.add_sqlite_path();
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
@@ -47,6 +50,26 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 						this.plugin.settings.storageFolder = newFolder;
 						this.plugin.saveSettings();
 					});
+			});
+	}
+
+	add_sqlite_path(): void {
+		new Setting(this.containerEl)
+			.setName("Kobo SQLite path")
+			.setDesc(
+				"Remembered path to KoboReader.sqlite. Cleared automatically if the file is not found at this location.",
+			)
+			.addText((cb) => {
+				cb.setDisabled(true).setValue(
+					this.plugin.settings.sqlitePath || "(not set)",
+				);
+			})
+			.addButton((cb) => {
+				cb.setButtonText("Clear").onClick(async () => {
+					this.plugin.settings.sqlitePath = "";
+					await this.plugin.saveSettings();
+					this.display();
+				});
 			});
 	}
 
