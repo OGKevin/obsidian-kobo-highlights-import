@@ -11,4 +11,4 @@ jobs:
               with:
                   fetch-depth: 2
             - name: Conform Action
-              uses: siderolabs/conform@v0.1.0-alpha.29
+              uses: siderolabs/conform@v0.1.0-alpha.31
