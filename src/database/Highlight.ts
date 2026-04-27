@@ -56,6 +56,15 @@ export class HighlightService {
 		return m;
 	}
 
+	/**
+	 * Returns all highlights sorted by book title, then by chapter order.
+	 * Within each book, chapters are ordered by VolumeIndex — the EPUB spine
+	 * index Kobo stores in the content table. This is the authoritative reading
+	 * order and supersedes ContentID alphanumeric sort, which can mis-order
+	 * books with non-sequential filenames (e.g. chapter9.xhtml > chapter10.xhtml).
+	 * Null-safe: entries without VolumeIndex fall back to ContentID, preserving
+	 * existing behaviour for books that lack spine data.
+	 */
 	async getAllHighlight(
 		sortByChapterProgress?: boolean,
 	): Promise<Highlight[]> {
@@ -76,12 +85,6 @@ export class HighlightService {
 			);
 			if (bookCmp !== 0) return bookCmp;
 
-			// Sort chapters by VolumeIndex (the EPUB spine index Kobo stores in
-			// the content table). This is the authoritative reading order and
-			// supersedes ContentID alphanumeric sort, which can mis-order books
-			// with non-sequential filenames (e.g. chapter9.xhtml > chapter10.xhtml).
-			// Null-safe: entries without VolumeIndex fall back to ContentID,
-			// preserving existing behaviour for books that lack spine data.
 			const aVol = a.content.volumeIndex;
 			const bVol = b.content.volumeIndex;
 			if (aVol != null && bVol != null) return aVol - bVol;
