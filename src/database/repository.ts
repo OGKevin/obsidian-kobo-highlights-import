@@ -12,11 +12,11 @@ export class Repository {
 		let res;
 		if (sortByChapterProgress) {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, Color from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
 			);
 		} else {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, Color from Bookmark where Text is not null order by DateCreated ASC;`,
 			);
 		}
 		const bookmarks: Bookmark[] = [];
@@ -49,6 +49,7 @@ export class Repository {
 				contentId: row[2].toString(),
 				note: row[3]?.toString(),
 				dateCreated: new Date(row[4].toString()),
+				color: row[6]?.toString(),
 			});
 		});
 
@@ -65,7 +66,7 @@ export class Repository {
 
 	async getBookmarkById(id: string): Promise<Bookmark | null> {
 		const statement = this.db.prepare(
-			`select BookmarkID, Text, ContentID, annotation, DateCreated from Bookmark where BookmarkID = $id;`,
+			`select BookmarkID, Text, ContentID, annotation, DateCreated, Color from Bookmark where BookmarkID = $id;`,
 			{
 				$id: id,
 			},
@@ -87,6 +88,7 @@ export class Repository {
 			contentId: row[2].toString(),
 			note: row[3]?.toString(),
 			dateCreated: new Date(row[4].toString()),
+			color: row[5]?.toString(),
 		};
 	}
 

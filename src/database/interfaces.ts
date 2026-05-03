@@ -5,6 +5,7 @@ export interface Bookmark {
 	contentId: string;
 	note?: string;
 	dateCreated: Date;
+	color?: string;
 }
 
 export interface Content {

@@ -77,7 +77,7 @@ The following variables are available in your template:
 | `bookDetails` | Object                               | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description`                                                                                                                                                            |
 | `chapters`    | Array of `[chapterName, highlights]` | Each `highlights` is an array of bookmarks for that chapter                                                                                                                                                                                                                                                                    |
 | `ReadStatus`  | Enum mapping                         | Maps read status values to their string labels                                                                                                                                                                                                                                                                                 |
-| `highlight`   | Object                               | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
+| `highlight`   | Object                               | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created<br>- `color`: Optional color of the highlight (if any) (0 for yellow, 1 for red, 2 for blue, 3 for green) |
 
 #### Example usage
 
@@ -110,6 +110,45 @@ The following variables are available in your template:
 ```
 
 For more advanced syntax, see the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax).
+
+#### Template example using Obsidian callouts to display color of highlights
+
+```eta
+---
+title: "<%= it.bookDetails.title %>"
+author: <%= it.bookDetails.author %>
+publisher: <%= it.bookDetails.publisher ?? '' %>
+dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
+readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
+percentRead: <%= it.bookDetails.percentRead ?? '' %>
+isbn: <%= it.bookDetails.isbn ?? '' %>
+series: <%= it.bookDetails.series ?? '' %>
+seriesNumber: <%= it.bookDetails.seriesNumber ?? '' %>
+timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
+---
+
+# <%= it.bookDetails.title %>
+
+## Description
+
+<%= it.bookDetails.description?.replace(/<[^>]*>/g, '') ?? '' %>
+
+## Highlights
+
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+### <%= chapterName.trim() %>
+
+<% highlights.forEach((highlight) => { const calloutMap = {'1': 'failure', '2': 'info', '3': 'success'}; const calloutType = calloutMap[highlight.color] ?? 'quote'; const calloutText = highlight.text.split('\n').map(line => '> ' + line).join('\n'); -%>
+> [!<%= calloutType %>]
+<%= calloutText %>
+
+<% if (highlight.note) { -%>
+**Note:** <%= highlight.note %>
+
+<% } -%>
+<% }) -%>
+<% }) %>
+```
 
 ## Helping Screenshots
 
