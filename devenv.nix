@@ -12,6 +12,7 @@
     git
     conform
     nodejs
+    sqlite
   ];
 
   languages.javascript = {

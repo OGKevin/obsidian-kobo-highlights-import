@@ -50,10 +50,10 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 ## Highlights
 
-<% it.chapters.forEach(([chapterName, highlights]) => { -%>
-## <%= chapterName.trim() %>
+<% it.hierarchicalChapters.forEach((chapter) => { -%>
+<%= '#'.repeat(chapter.depth + 1) %> <%= chapter.title.trim() %>
 
-<% highlights.forEach((highlight) => { -%>
+<% chapter.highlights.forEach((highlight) => { -%>
 <%= highlight.text %>
 
 <% if (highlight.note) { -%>
@@ -72,29 +72,40 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 The following variables are available in your template:
 
-| Variable      | Type / Structure                     | Description                                                                                                                                                                                                                                                                                                                    |
-| ------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bookDetails` | Object                               | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description`                                                                                                                                                            |
-| `chapters`    | Array of `[chapterName, highlights]` | Each `highlights` is an array of bookmarks for that chapter                                                                                                                                                                                                                                                                    |
-| `ReadStatus`  | Enum mapping                         | Maps read status values to their string labels                                                                                                                                                                                                                                                                                 |
-| `highlight`   | Object                               | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
+| Variable               | Type / Structure | Description                                                                                                                                                                                                                                                                                                                    |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bookDetails`          | Object           | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description`                                                                                                                                                            |
+| `hierarchicalChapters` | Array            | Array of chapter objects, each containing: <br>- `title`: Chapter/section name<br>- `depth`: Hierarchical depth level (1 = top-level chapter, 2 = section, 3 = subsection, etc.)<br>- `highlights`: Array of bookmarks for that chapter                                                                                       |
+| `ReadStatus`           | Enum mapping     | Maps read status values to their string labels                                                                                                                                                                                                                                                                                 |
+| `highlight`            | Object           | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created |
 
 #### Example usage
 
 ```eta
-<% it.chapters.forEach(([chapterName, highlights]) => { -%>
-## <%= chapterName %>
-<% highlights.forEach(h => { -%>
+<% it.hierarchicalChapters.forEach((chapter) => { -%>
+<%= '#'.repeat(chapter.depth + 1) %> <%= chapter.title %>
+
+<% chapter.highlights.forEach(h => { -%>
 <%= h.text %>
+
 <% if (h.note) { -%>
 **Note:** <%= h.note %>
+
 <% } -%>
 <% if (h.dateCreated) { -%>
 *Created: <%= h.dateCreated.toISOString() %>*
+
 <% } -%>
 <% }) -%>
 <% }) %>
 ```
+
+The `'#'.repeat(chapter.depth + 1)` generates the appropriate markdown heading level:
+- Depth 1 → `##` (Level 2 heading, since `#` is the book title)
+- Depth 2 → `###` (Level 3 heading for subsections)
+- Depth 3 → `####` (Level 4 heading for sub-subsections)
+
+This preserves the hierarchical structure of your book's table of contents.
 
 #### Date formatting examples
 
