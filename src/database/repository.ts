@@ -8,17 +8,23 @@ export class Repository {
 		this.db = db;
 	}
 
-	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
-		let res;
-		if (sortByChapterProgress) {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
-			);
+	async getAllBookmark(sortByChapterProgress?: boolean, importArticles?: boolean): Promise<Bookmark[]> {
+		let query = `select b.BookmarkID, b.Text, b.ContentID, b.annotation, b.DateCreated, b.ChapterProgress from Bookmark b join content c on b.ContentID = c.ContentID where b.Text is not null`;
+
+		if (importArticles) {
+			query += ` and (c.MimeType = 'application/xhtml+xml' or c.MimeType = 'application/x-kobo-epub+zip' or c.MimeType = 'application/x-kobo-html+instapaper')`;
 		} else {
-			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress from Bookmark where Text is not null order by DateCreated ASC;`,
-			);
+			query += ` and (c.MimeType = 'application/xhtml+xml' or c.MimeType = 'application/x-kobo-epub+zip')`;
 		}
+
+		if (sortByChapterProgress) {
+			query += ` order by b.ChapterProgress ASC, b.DateCreated ASC;`;
+		} else {
+			query += ` order by b.DateCreated ASC;`;
+		}
+
+		const res = this.db.exec(query);
+
 		const bookmarks: Bookmark[] = [];
 
 		if (res[0].values == undefined) {
@@ -28,6 +34,7 @@ export class Repository {
 
 			return bookmarks;
 		}
+
 
 		res[0].values.forEach((row) => {
 			if (!(row[0] && row[1] && row[2] && row[4])) {
@@ -92,7 +99,7 @@ export class Repository {
 
 	async getContentByContentId(contentId: string): Promise<Content | null> {
 		const statement = this.db.prepare(
-			`select 
+			`select
                 Title, ContentID, ChapterIDBookmarked, BookTitle from content
                 where ContentID = $id;`,
 			{ $id: contentId },
@@ -111,7 +118,7 @@ export class Repository {
 
 	async getContentLikeContentId(contentId: string): Promise<Content | null> {
 		const statement = this.db.prepare(
-			`select 
+			`select
                 Title, ContentID, ChapterIDBookmarked, BookTitle from content
                 where ContentID like $id;`,
 			{ $id: `%${contentId}%` },
@@ -130,8 +137,8 @@ export class Repository {
 
 	async getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {
 		const statement = this.db.prepare(
-			`select 
-                Title, ContentID, ChapterIDBookmarked, BookTitle from "content" 
+			`select
+                Title, ContentID, ChapterIDBookmarked, BookTitle from "content"
                 where "ContentID" like $id and "ChapterIDBookmarked" not NULL limit 1`,
 			{ $id: `${contentId}%` },
 		);
@@ -183,7 +190,7 @@ export class Repository {
 		bookTitle: string,
 	): Promise<BookDetails | null> {
 		const statement = this.db.prepare(
-			`select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;`,
+			`select Attribution, Description, Publisher, DateLastRead, LastTimeStartedReading, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;`,
 			{
 				$title: bookTitle,
 			},
@@ -197,7 +204,7 @@ export class Repository {
 
 		if (row.length == 0 || row[0] == null) {
 			console.debug(
-				"Used query: select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 2;",
+				"Used query: select Attribution, Description, Publisher, DateLastRead, LastTimeStartedReading, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;",
 				{ $title: bookTitle, result: row },
 			);
 			console.warn("Could not find book details in database");
@@ -211,59 +218,87 @@ export class Repository {
 			description: row[1]?.toString(),
 			publisher: row[2]?.toString(),
 			dateLastRead: row[3] ? new Date(row[3].toString()) : undefined,
-			readStatus: row[4] ? +row[4].toString() : 0,
-			percentRead: row[5] ? +row[5].toString() : 0,
-			isbn: row[6]?.toString(),
-			series: row[7]?.toString(),
-			seriesNumber: row[8] ? +row[8].toString() : undefined,
-			timeSpentReading: row[9] ? +row[9].toString() : 0,
+			lastTimeStartedReading: row[4] ? new Date(row[4].toString()) : undefined,
+			readStatus: row[5] ? +row[5].toString() : 0,
+			percentRead: row[6] ? +row[6].toString() : 0,
+			isbn: row[7]?.toString(),
+			series: row[8]?.toString(),
+			seriesNumber: row[9] ? +row[9].toString() : undefined,
+			timeSpentReading: row[10] ? +row[10].toString() : 0,
 		};
 	}
 
-	async getAllBookDetails(): Promise<BookDetails[]> {
-		const statement = this.db.prepare(
-			`SELECT DISTINCT 
-                Title,
-                Attribution as Author,
-                Description,
-                Publisher,
-                DateLastRead,
-                ReadStatus,
-                ___PercentRead,
-                ISBN,
-                Series,
-                SeriesNumber,
-                TimeSpentReading
-            FROM content 
-            WHERE Title IS NOT NULL 
-            ORDER BY Title ASC;`,
-		);
+	async getAllBookDetails(importArticles?: boolean): Promise<BookDetails[]> {
+		let query = `SELECT
+                COALESCE(BookTitle, Title) as BookTitle,
+                MAX(Attribution) as Author,
+                MAX(Description) as Description,
+                MAX(Publisher) as Publisher,
+                MAX(DateLastRead) as DateLastRead,
+                MAX(LastTimeStartedReading) as LastTimeStartedReading,
+                MAX(ReadStatus) as ReadStatus,
+                MAX(___PercentRead) as ___PercentRead,
+                MAX(ISBN) as ISBN,
+                MAX(Series) as Series,
+                MAX(SeriesNumber) as SeriesNumber,
+                MAX(TimeSpentReading) as TimeSpentReading
+            FROM content
+            WHERE COALESCE(BookTitle, Title) IS NOT NULL`;
+
+		if (importArticles) {
+			query += ` AND (MimeType = 'application/xhtml+xml' or MimeType = 'application/x-kobo-epub+zip' or MimeType = 'application/x-kobo-html+instapaper')`;
+		} else {
+			query += ` AND (MimeType = 'application/xhtml+xml' or MimeType = 'application/x-kobo-epub+zip')`;
+		}
+
+		query += ` GROUP BY COALESCE(BookTitle, Title) ORDER BY COALESCE(BookTitle, Title) ASC;`;
+
+		const statement = this.db.prepare(query);
 
 		const books: BookDetails[] = [];
 
 		while (statement.step()) {
 			const row = statement.get();
-			if (row[0] == null || row[1] == null) {
-				continue; // Skip entries without title or author
+			if (row[0] == null) {
+				continue; // Skip entries without title
 			}
 
 			books.push({
 				title: row[0].toString(),
-				author: row[1].toString(),
+				author: row[1]?.toString() ?? "",
 				description: row[2]?.toString(),
 				publisher: row[3]?.toString(),
 				dateLastRead: row[4] ? new Date(row[4].toString()) : undefined,
-				readStatus: row[5] ? +row[5].toString() : 0,
-				percentRead: row[6] ? +row[6].toString() : 0,
-				isbn: row[7]?.toString(),
-				series: row[8]?.toString(),
-				seriesNumber: row[9] ? +row[9].toString() : undefined,
-				timeSpentReading: row[10] ? +row[10].toString() : 0,
+				lastTimeStartedReading: row[5] ? new Date(row[5].toString()) : undefined,
+				readStatus: row[6] ? +row[6].toString() : 0,
+				percentRead: row[7] ? +row[7].toString() : 0,
+				isbn: row[8]?.toString(),
+				series: row[9]?.toString(),
+				seriesNumber: row[10] ? +row[10].toString() : undefined,
+				timeSpentReading: row[11] ? +row[11].toString() : 0,
 			});
 		}
 
 		statement.free();
 		return books;
+	}
+
+	async getUniqueContentTypes(): Promise<string[]> {
+		const statement = this.db.prepare(
+			`select DISTINCT ContentType from content where ContentType is not null order by ContentType ASC;`,
+		);
+
+		const contentTypes: string[] = [];
+
+		while (statement.step()) {
+			const row = statement.get();
+			if (row[0] != null) {
+				contentTypes.push(row[0].toString());
+			}
+		}
+
+		statement.free();
+		return contentTypes;
 	}
 
 	private parseContentStatement(statement: Statement): Content[] {

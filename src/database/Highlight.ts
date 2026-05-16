@@ -58,10 +58,11 @@ export class HighlightService {
 
 	async getAllHighlight(
 		sortByChapterProgress?: boolean,
+		importArticles?: boolean,
 	): Promise<Highlight[]> {
 		const highlights: Highlight[] = [];
 
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
+		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress, importArticles);
 		for (const bookmark of bookmarks) {
 			highlights.push(await this.createHighlightFromBookmark(bookmark));
 		}
@@ -158,8 +159,8 @@ export class HighlightService {
 		return originalContent;
 	}
 
-	async getAllBooks(): Promise<Map<string, BookDetails>> {
-		const books = await this.repo.getAllBookDetails();
+	async getAllBooks(importArticles?: boolean): Promise<Map<string, BookDetails>> {
+		const books = await this.repo.getAllBookDetails(importArticles);
 		const bookMap = new Map<string, BookDetails>();
 
 		for (const book of books) {
