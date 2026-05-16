@@ -3,8 +3,27 @@ export interface Bookmark {
 	bookmarkId: string;
 	text: string;
 	contentId: string;
+	volumeId: string;
 	note?: string;
 	dateCreated: Date;
+}
+
+export interface TocEntry {
+	title: string;
+	/** ContentID with trailing "-N" stripped, used for matching bookmarks */
+	matchId: string;
+	/** Original ContentID from the 899 row */
+	contentId: string;
+	/** Depth level extracted from trailing "-N" suffix (1=top, 2=part, 3=section...) */
+	depth: number;
+	/** VolumeIndex from DB, preserves TOC ordering */
+	volumeIndex: number;
+}
+
+export interface ChapterEntry {
+	title: string;
+	depth: number;
+	highlights: Bookmark[];
 }
 
 export interface Content {
@@ -12,11 +31,6 @@ export interface Content {
 	contentId: string;
 	chapterIdBookmarked?: string;
 	bookTitle?: string;
-}
-
-export interface Highlight {
-	bookmark: Bookmark;
-	content: Content;
 }
 
 export interface BookDetails {
