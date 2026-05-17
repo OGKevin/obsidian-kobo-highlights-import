@@ -3,20 +3,22 @@ import { BookDetails, Bookmark, Content } from "./interfaces";
 
 export class Repository {
 	db: Database;
+	private bookmarkColorColumnExists?: boolean;
 
 	constructor(db: Database) {
 		this.db = db;
 	}
 
 	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
+		const colorColumn = this.getBookmarkColorColumnSelection();
 		let res;
 		if (sortByChapterProgress) {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, Color from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, ${colorColumn} from Bookmark where Text is not null order by ChapterProgress ASC, DateCreated ASC;`,
 			);
 		} else {
 			res = this.db.exec(
-				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, Color from Bookmark where Text is not null order by DateCreated ASC;`,
+				`select BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, ${colorColumn} from Bookmark where Text is not null order by DateCreated ASC;`,
 			);
 		}
 		const bookmarks: Bookmark[] = [];
@@ -65,8 +67,9 @@ export class Repository {
 	}
 
 	async getBookmarkById(id: string): Promise<Bookmark | null> {
+		const colorColumn = this.getBookmarkColorColumnSelection();
 		const statement = this.db.prepare(
-			`select BookmarkID, Text, ContentID, annotation, DateCreated, Color from Bookmark where BookmarkID = $id;`,
+			`select BookmarkID, Text, ContentID, annotation, DateCreated, ${colorColumn} from Bookmark where BookmarkID = $id;`,
 			{
 				$id: id,
 			},
@@ -90,6 +93,23 @@ export class Repository {
 			dateCreated: new Date(row[4].toString()),
 			color: row[5]?.toString(),
 		};
+	}
+
+	private getBookmarkColorColumnSelection(): string {
+		return this.hasBookmarkColorColumn() ? "Color" : "NULL as Color";
+	}
+
+	private hasBookmarkColorColumn(): boolean {
+		if (this.bookmarkColorColumnExists !== undefined) {
+			return this.bookmarkColorColumnExists;
+		}
+
+		const res = this.db.exec(`PRAGMA table_info(Bookmark);`);
+		this.bookmarkColorColumnExists =
+			res[0]?.values.some((row) => row[1]?.toString() === "Color") ??
+			false;
+
+		return this.bookmarkColorColumnExists;
 	}
 
 	async getContentByContentId(contentId: string): Promise<Content | null> {
