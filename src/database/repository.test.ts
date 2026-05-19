@@ -34,6 +34,37 @@ describe("Repository", async function () {
 			await repo.getBookmarkById("e7f8f92d-38ca-4556-bab8-a4d902e9c430"),
 		).is.not.null;
 	});
+	it("extracts bookmark color", async function () {
+		const SQLEngine = await SqlJs({
+			wasmBinary: binary.buffer,
+		});
+		const colorDb = new SQLEngine.Database();
+		const colorRepo = new Repository(colorDb);
+
+		colorDb.run(`
+			CREATE TABLE Bookmark (
+				BookmarkID TEXT,
+				Text TEXT,
+				ContentID TEXT,
+				annotation TEXT,
+				DateCreated TEXT,
+				ChapterProgress REAL,
+				Color INTEGER
+			);
+			INSERT INTO Bookmark
+				(BookmarkID, Text, ContentID, annotation, DateCreated, ChapterProgress, Color)
+			VALUES
+				('bookmark-with-color', 'Highlighted text', 'content-id', 'Note', '2024-01-01T00:00:00Z', 0.1, 2);
+		`);
+
+		const bookmarks = await colorRepo.getAllBookmark();
+		const bookmark = await colorRepo.getBookmarkById("bookmark-with-color");
+
+		chai.expect(bookmarks[0].color).eq("2");
+		chai.expect(bookmark?.color).eq("2");
+
+		colorDb.close();
+	});
 	it("getAllContent", async function () {
 		chai.expect(await repo.getAllContent()).length.above(0);
 	});
