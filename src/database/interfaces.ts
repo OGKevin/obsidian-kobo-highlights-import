@@ -13,6 +13,7 @@ export interface Content {
 	contentId: string;
 	chapterIdBookmarked?: string;
 	bookTitle?: string;
+	volumeIndex?: number;
 }
 
 export interface Highlight {

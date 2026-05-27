@@ -114,8 +114,8 @@ export class Repository {
 
 	async getContentByContentId(contentId: string): Promise<Content | null> {
 		const statement = this.db.prepare(
-			`select 
-                Title, ContentID, ChapterIDBookmarked, BookTitle from content
+			`select
+                Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content
                 where ContentID = $id;`,
 			{ $id: contentId },
 		);
@@ -133,8 +133,8 @@ export class Repository {
 
 	async getContentLikeContentId(contentId: string): Promise<Content | null> {
 		const statement = this.db.prepare(
-			`select 
-                Title, ContentID, ChapterIDBookmarked, BookTitle from content
+			`select
+                Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content
                 where ContentID like $id;`,
 			{ $id: `%${contentId}%` },
 		);
@@ -152,8 +152,8 @@ export class Repository {
 
 	async getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {
 		const statement = this.db.prepare(
-			`select 
-                Title, ContentID, ChapterIDBookmarked, BookTitle from "content" 
+			`select
+                Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content"
                 where "ContentID" like $id and "ChapterIDBookmarked" not NULL limit 1`,
 			{ $id: `${contentId}%` },
 		);
@@ -165,7 +165,7 @@ export class Repository {
 
 	async getAllContent(limit = 100): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle from content limit $limit`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content limit $limit`,
 			{ $limit: limit },
 		);
 
@@ -177,7 +177,7 @@ export class Repository {
 
 	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle  from "content" where BookTitle = $bookTitle`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -191,7 +191,7 @@ export class Repository {
 		bookTitle: string,
 	): Promise<Content[]> {
 		const statement = this.db.prepare(
-			`select Title, ContentID, ChapterIDBookmarked, BookTitle  from "content" where BookTitle = $bookTitle order by "ContentID"`,
+			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle order by "ContentID"`,
 			{ $bookTitle: bookTitle },
 		);
 
@@ -298,6 +298,7 @@ export class Repository {
 				contentId: row[1]?.toString() ?? "",
 				chapterIdBookmarked: row[2]?.toString(),
 				bookTitle: row[3]?.toString(),
+				volumeIndex: row[4] != null ? +row[4] : undefined,
 			});
 		}
 
