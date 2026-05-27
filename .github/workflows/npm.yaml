@@ -43,6 +43,6 @@ jobs:
 
             - name: Generate artifact attestation
               if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-              uses: actions/attest-build-provenance@v3
+              uses: actions/attest-build-provenance@v4
               with:
                   subject-path: main.js
