@@ -44,6 +44,27 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 <% }) %>
 `;
 
+export const defaultAppendTemplate = `
+## Highlights
+
+<% it.chapters.forEach(([chapterName, highlights]) => { -%>
+## <%= chapterName.trim() %>
+
+<% highlights.forEach((highlight) => { -%>
+<%= highlight.text %>
+
+<% if (highlight.note) { -%>
+**Note:** <%= highlight.note %>
+
+<% } -%>
+<% if (highlight.dateCreated) { -%>
+*Created: <%= highlight.dateCreated.toISOString() %>*
+
+<% } -%>
+<% }) -%>
+<% }) %>
+`;
+
 export function applyTemplateTransformations(
 	rawTemplate: string,
 	chapters: Map<chapter, Bookmark[]>,

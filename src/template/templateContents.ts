@@ -6,11 +6,12 @@ import { defaultTemplate } from "./template";
 export async function getTemplateContents(
 	app: App,
 	templatePath: string | undefined,
+	fallback: string = defaultTemplate,
 ): Promise<string> {
 	const { metadataCache, vault } = app;
 	const normalizedTemplatePath = normalizePath(templatePath ?? "");
 	if (normalizedTemplatePath === "/") {
-		return defaultTemplate;
+		return fallback;
 	}
 
 	try {
@@ -18,7 +19,7 @@ export async function getTemplateContents(
 			normalizedTemplatePath,
 			"",
 		);
-		return templateFile ? vault.cachedRead(templateFile) : defaultTemplate;
+		return templateFile ? vault.cachedRead(templateFile) : fallback;
 	} catch (err) {
 		console.error(
 			`Failed to read the kobo highlight exporter template '${normalizedTemplatePath}'`,
