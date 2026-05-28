@@ -3,7 +3,7 @@ import { sanitize } from "sanitize-filename-ts";
 import SqlJs from "sql.js";
 import { binary } from "src/binaries/sql-wasm";
 import { HighlightService } from "src/database/Highlight";
-import { Bookmark } from "src/database/interfaces";
+import { Highlight } from "src/database/interfaces";
 import { Repository } from "src/database/repository";
 import { KoboHighlightsImporterSettings } from "src/settings/Settings";
 import { applyTemplateTransformations } from "src/template/template";
@@ -40,52 +40,53 @@ export class ExtractHighlightsModal extends Modal {
 			new Repository(db),
 		);
 
-		const content = service.convertToMap(
-			await service.getAllHighlight(this.settings.sortByChapterProgress),
+		const allHighlights = await service.getAllHighlight(
+			this.settings.sortByChapterProgress,
 		);
 
-		const allBooksContent = new Map<string, Map<string, Bookmark[]>>();
-
-		// Add all books with highlights
-		for (const [bookTitle, chapters] of content) {
-			allBooksContent.set(bookTitle, chapters);
+		// Group highlights by book title.
+		const highlightsByBook = new Map<string, Highlight[]>();
+		for (const h of allHighlights) {
+			const bookTitle = h.content.bookTitle ?? service.unknownBookTitle;
+			if (!highlightsByBook.has(bookTitle))
+				highlightsByBook.set(bookTitle, []);
+			highlightsByBook.get(bookTitle)!.push(h);
 		}
 
+		// Include books with no highlights when the setting is enabled.
 		if (this.settings.importAllBooks) {
-			// Add books without highlights
 			const allBooks = await service.getAllBooks();
-
-			for (const [bookTitle, _] of allBooks) {
-				if (!allBooksContent.has(bookTitle)) {
-					allBooksContent.set(
-						bookTitle,
-						service.createEmptyContentMap(),
-					);
-				}
+			for (const [bookTitle] of allBooks) {
+				if (!highlightsByBook.has(bookTitle))
+					highlightsByBook.set(bookTitle, []);
 			}
 		}
 
-		this.nrOfBooksExtracted = allBooksContent.size;
-		await this.writeBooks(service, allBooksContent);
+		this.nrOfBooksExtracted = highlightsByBook.size;
+		await this.writeBooks(service, highlightsByBook);
 	}
 
 	private async writeBooks(
 		service: HighlightService,
-		content: Map<string, Map<string, Bookmark[]>>,
+		highlightsByBook: Map<string, Highlight[]>,
 	) {
 		const template = await getTemplateContents(
 			this.app,
 			this.settings.templatePath,
 		);
 
-		for (const [bookTitle, chapters] of content) {
+		for (const [bookTitle, bookHighlights] of highlightsByBook) {
 			const sanitizedBookName = sanitize(bookTitle);
 			const fileName = normalizePath(
 				`${this.settings.storageFolder}/${sanitizedBookName}.md`,
 			);
 
-			const details =
-				await service.getBookDetailsFromBookTitle(bookTitle);
+			const [chapters, details] = await Promise.all([
+				Promise.resolve(
+					service.buildChapterList(bookHighlights),
+				),
+				service.getBookDetailsFromBookTitle(bookTitle),
+			]);
 
 			await this.app.vault.adapter.write(
 				fileName,

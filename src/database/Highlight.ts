@@ -193,4 +193,24 @@ export class HighlightService {
 	createEmptyContentMap(): Map<chapter, Bookmark[]> {
 		return new Map<chapter, Bookmark[]>();
 	}
+
+	buildChapterList(highlights: Highlight[]): [chapter, Bookmark[]][] {
+		const chapters: [chapter, Bookmark[]][] = [];
+		const contentIdToIndex = new Map<string, number>();
+
+		for (const h of highlights) {
+			const { title, contentId } = h.content;
+			let idx = contentIdToIndex.get(contentId);
+
+			if (idx === undefined) {
+				idx = chapters.length;
+				contentIdToIndex.set(contentId, idx);
+				chapters.push([title, []]);
+			}
+
+			chapters[idx][1].push(h.bookmark);
+		}
+
+		return chapters;
+	}
 }
