@@ -1,2 +1,2 @@
-ARG VARIANT=24-bullseye@sha256:9e8ad3ce25b13bdf0375fc216086c817715f76137dbefad1a269fae903688f8a
+ARG VARIANT=24-bullseye@sha256:ff66e9ab65c0078bd66f81117459271f62038855a131e0f2aea55fafccbad627
 FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:${VARIANT}
