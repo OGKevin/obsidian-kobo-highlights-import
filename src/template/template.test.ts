@@ -304,6 +304,25 @@ readStatus: {{ReadStatus}}
 		chai.expect(content).to.contain("test");
 	});
 
+	it("shorthand syntax tolerates spaces from linters", async function () {
+		const template = `---
+title: "{{ Title }}"
+isbn: { { ISBN } }
+---
+# {{Title}}
+
+{ { highlights } }`;
+		const content = applyTemplateTransformations(template, chapters, {
+			title: "test title",
+			author: "test",
+			isbn: "123",
+		});
+		chai.expect(content).to.contain('title: "test title"');
+		chai.expect(content).to.contain("isbn: 123");
+		chai.expect(content).to.contain("## Chapter 1");
+		chai.expect(content).to.contain("test");
+	});
+
 	it("template rendering error throws with message", async function () {
 		const badTemplate = `<%= it.nonExistent.property.deep %>`;
 		chai.expect(() =>

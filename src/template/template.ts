@@ -39,10 +39,17 @@ const SHORTHAND_MAP: Record<string, string> = {
 function preprocessShorthandSyntax(template: string): string {
 	let result = template;
 
-	result = result.replace(/\{\{highlights\}\}/gi, HIGHLIGHTS_BLOCK);
+	result = result.replace(
+		/\{\s*\{\s*highlights\s*\}\s*\}/gi,
+		HIGHLIGHTS_BLOCK,
+	);
 
 	for (const [key, etaCode] of Object.entries(SHORTHAND_MAP)) {
-		result = result.replaceAll(`{{${key}}}`, etaCode);
+		const pattern = new RegExp(
+			`\\{\\s*\\{\\s*${key}\\s*\\}\\s*\\}`,
+			"g",
+		);
+		result = result.replace(pattern, etaCode);
 	}
 
 	return result;
