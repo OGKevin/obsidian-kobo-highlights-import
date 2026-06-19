@@ -30,9 +30,9 @@ The plugin remembers the path to your KoboReader.sqlite file between sessions. O
 
 ## Non-destructive sync
 
-When you re-import highlights, the plugin preserves any personal content you've added to your book notes. Each generated file includes a `## Personal Notes` section at the bottom — everything under this heading is kept intact across re-imports.
+When you re-import highlights, the plugin preserves any personal content you've added to your book notes. Each generated file includes a `## Personal Notes` section — everything under this heading is kept intact across re-imports. By default, this section is placed after the title heading, before Description and Highlights, but you can position it anywhere in your custom template.
 
-The plugin regenerates everything above (frontmatter, highlights, description) from the Kobo database, so your highlights are always up to date while your personal notes remain untouched.
+The plugin regenerates all other sections (frontmatter, description, highlights) from the Kobo database, so your highlights are always up to date while your personal notes remain untouched.
 
 ## Vocabulary import (My Words)
 
