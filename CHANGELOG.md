@@ -1,5 +1,48 @@
 # Changelog
 
+## [6.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/5.0.0...6.0.0) (2026-06-19)
+
+### ⚠ BREAKING CHANGES
+
+* Default template now includes a `## Personal Notes` section at the bottom. Existing user templates are unaffected.
+* Repository and HighlightService methods are now synchronous (callers using `await` still work).
+
+### Features
+
+* **non-destructive sync:** Re-importing highlights preserves user content under a `## Personal Notes` section instead of overwriting the entire file
+* **vocabulary import:** Import looked-up words from Kobo's "My Words" feature into a single vocabulary file (new settings: "Import vocabulary" and "Vocabulary file name")
+* **simple template syntax:** Support `{{Title}}`, `{{Author}}`, `{{highlights}}` and other shorthand variables in templates as an alternative to Eta `<%= ... %>` syntax
+* **improved error handling:** Show specific, actionable error messages (e.g., "Could not read SQLite file") instead of generic "Check console" notices. Import summary now shows book/highlight counts and warnings.
+* **import context:** Track and display import statistics — books imported, highlights extracted, vocabulary words, and any warnings
+
+### Merged Community PRs
+
+* **#521** (eton-s): Remember KoboReader.sqlite path between sessions — auto-loads from stored path on modal open, saves path via Electron's `webUtils.getPathForFile`, adds read-only settings display with Clear button
+* **#483** (dulangaj): Handle missing bookTitle for custom books — uses content title as fallback instead of throwing, making the plugin resilient to incomplete Kobo database entries
+
+### Bug Fixes
+
+* **Suggest.ts:** Fix broken click/mouseover handlers on suggestion dropdown (`.bind()` result was discarded)
+* **template.ts:** Fix `ReadStatus.Unopened` (0) incorrectly rendering as "Unknown" due to falsy check
+* **Settings.ts:** `saveSettings()` now properly awaited in all onChange handlers
+* **Settings.ts:** Fix typo "progess" → "progress"
+* **repository.ts:** Remove unnecessary `async` from all synchronous sql.js methods
+* **repository.ts:** Replace `SELECT DISTINCT` with `GROUP BY Title` in `getAllBookDetails()` for deterministic deduplication
+* **repository.test.ts:** Fix broken test using `this.repo` instead of outer `repo` variable; replace `forEach(async ...)` with `for...of`
+* **repository.test.ts:** Make tests database-agnostic instead of depending on specific book data
+* **ExtractHighlightsModal.ts:** Fix DOM element creation order; replace `innerHTML` with safe `appendText`/`createEl`
+* **Suggest.ts:** Remove blanket `eslint-disable no-unused-vars`
+* **Highlight.test.ts:** Update test mocks to match synchronous repository methods
+
+### Dependencies
+
+* Remove unused `moment` dependency
+* Move `@types/better-sqlite3`, `esbuild-plugin-wat`, `@popperjs/core` to devDependencies
+
+### Housekeeping
+
+* Add `.claude` and deduplicate `KoboReader.sqlite` in `.gitignore`
+
 ## [5.0.0](https://github.com/OGKevin/obsidian-kobo-highlights-import/compare/4.1.0...5.0.0) (2026-02-19)
 
 

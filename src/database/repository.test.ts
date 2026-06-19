@@ -30,9 +30,11 @@ describe("Repository", async function () {
 		chai.expect(await repo.getBookmarkById("")).is.null;
 	});
 	it("getBookmarkById not null", async function () {
-		chai.expect(
-			await repo.getBookmarkById("e7f8f92d-38ca-4556-bab8-a4d902e9c430"),
-		).is.not.null;
+		const bookmarks = await repo.getAllBookmark();
+		chai.expect(bookmarks.length).to.be.above(0);
+		const first = bookmarks[0];
+		chai.expect(await repo.getBookmarkById(first.bookmarkId)).is.not
+			.null;
 	});
 	it("extracts bookmark color", async function () {
 		const SQLEngine = await SqlJs({
@@ -91,44 +93,93 @@ describe("Repository", async function () {
 			),
 		).length.above(0);
 	});
-	it("getBookDetailsOnePunchMan", async function () {
-		const details = await repo.getBookDetailsByBookTitle(
-			"One-Punch Man, Vol. 2",
-		);
+	it("getBookDetailsByBookTitle returns details for a real book", async function () {
+		const allBooks = repo.getAllBookDetails();
+		chai.expect(allBooks.length).to.be.above(0);
+
+		const firstBook = allBooks[0];
+		const details = repo.getBookDetailsByBookTitle(firstBook.title);
 
 		chai.expect(details).not.null;
-		chai.expect(details?.title).is.eq("One-Punch Man, Vol. 2");
-		chai.expect(details?.author).is.eq("ONE");
-		chai.expect(details?.description).not.null;
-		chai.expect(details?.publisher).is.eq("VIZ Media LLC");
-		chai.expect(details?.dateLastRead).not.null;
-		chai.expect(details?.readStatus).is.eq(2);
-		chai.expect(details?.percentRead).is.eq(100);
-		chai.expect(details?.isbn).is.eq("9781421585659");
-		chai.expect(details?.seriesNumber).is.eq(2);
-		chai.expect(details?.series).is.eq("One-Punch man");
-		chai.expect(details?.timeSpentReading).is.eq(780);
+		chai.expect(details?.title).is.eq(firstBook.title);
+		chai.expect(details?.author).is.eq(firstBook.author);
 	});
-	it("getAllBookDetailsByBookTitle", async function () {
-		const bookmarks = await repo.getAllBookmark();
-		let titles: string[] = [];
+	it("getAllBookDetails returns books with valid data", async function () {
+		const allBooks = repo.getAllBookDetails();
+		chai.expect(allBooks.length).to.be.above(0);
 
-		bookmarks.forEach(async (b) => {
-			let content = await this.repo.getContentByContentId(b.contentId);
+		for (const book of allBooks) {
+			chai.expect(book.title).to.be.a("string").and.not.empty;
+			chai.expect(book.author).to.be.a("string").and.not.empty;
+		}
+	});
 
-			if (content == null) {
-				content = await this.repo.getContentLikeContentId(b.contentId);
-			}
+	describe("WordList", function () {
+		it("hasWordListTable returns false when table absent", async function () {
+			const SQLEngine = await SqlJs({
+				wasmBinary: binary.buffer,
+			});
+			const emptyDb = new SQLEngine.Database();
+			const emptyRepo = new Repository(emptyDb);
 
-			titles.push(content.title);
+			chai.expect(emptyRepo.hasWordListTable()).to.be.false;
+			chai.expect(emptyRepo.getAllWords()).to.have.length(0);
+
+			emptyDb.close();
 		});
 
-		titles = titles.filter((v, i, a) => a.indexOf(v) === i);
+		it("getAllWords returns words from WordList table", async function () {
+			const SQLEngine = await SqlJs({
+				wasmBinary: binary.buffer,
+			});
+			const wordDb = new SQLEngine.Database();
+			const wordRepo = new Repository(wordDb);
 
-		titles.forEach(async (t) => {
-			const details = await repo.getBookDetailsByBookTitle(t);
+			wordDb.run(`
+				CREATE TABLE WordList (
+					Text TEXT,
+					VolumeId TEXT,
+					DictSuffix TEXT,
+					DateCreated TEXT
+				);
+				INSERT INTO WordList (Text, VolumeId, DictSuffix, DateCreated)
+				VALUES
+					('ephemeral', 'file:///mnt/onboard/book1.epub', '-en', '2024-01-15T10:00:00Z'),
+					('ubiquitous', 'file:///mnt/onboard/book2.epub', '-en-fr', '2024-02-20T14:30:00Z'),
+					('Wanderlust', 'file:///mnt/onboard/book3.epub', '-de', '2024-03-01T09:00:00Z');
+			`);
 
-			chai.expect(details).not.null;
+			chai.expect(wordRepo.hasWordListTable()).to.be.true;
+
+			const words = wordRepo.getAllWords();
+			chai.expect(words).to.have.length(3);
+			chai.expect(words[0].text).to.equal("Wanderlust");
+			chai.expect(words[0].dictSuffix).to.equal("-de");
+			chai.expect(words[0].volumeId).to.equal("file:///mnt/onboard/book3.epub");
+			chai.expect(words[0].dateCreated).to.be.instanceOf(Date);
+
+			wordDb.close();
+		});
+
+		it("getAllWords handles missing optional columns", async function () {
+			const SQLEngine = await SqlJs({
+				wasmBinary: binary.buffer,
+			});
+			const wordDb = new SQLEngine.Database();
+			const wordRepo = new Repository(wordDb);
+
+			wordDb.run(`
+				CREATE TABLE WordList (Text TEXT);
+				INSERT INTO WordList (Text) VALUES ('hello'), ('world');
+			`);
+
+			const words = wordRepo.getAllWords();
+			chai.expect(words).to.have.length(2);
+			chai.expect(words[0].text).to.equal("hello");
+			chai.expect(words[0].dictSuffix).to.be.undefined;
+			chai.expect(words[0].dateCreated).to.be.undefined;
+
+			wordDb.close();
 		});
 	});
 });

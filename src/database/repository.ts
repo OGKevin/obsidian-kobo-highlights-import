@@ -1,15 +1,17 @@
 import { Database, Statement } from "sql.js";
-import { BookDetails, Bookmark, Content } from "./interfaces";
+import { BookDetails, Bookmark, Content, Word } from "./interfaces";
 
 export class Repository {
 	db: Database;
 	private bookmarkColorColumnExists?: boolean;
+	private wordListTableExists?: boolean;
+	private wordListColumns?: string[];
 
 	constructor(db: Database) {
 		this.db = db;
 	}
 
-	async getAllBookmark(sortByChapterProgress?: boolean): Promise<Bookmark[]> {
+	getAllBookmark(sortByChapterProgress?: boolean): Bookmark[] {
 		const colorColumn = this.getBookmarkColorColumnSelection();
 		let res;
 		if (sortByChapterProgress) {
@@ -58,7 +60,7 @@ export class Repository {
 		return bookmarks;
 	}
 
-	async getTotalBookmark(): Promise<number> {
+	getTotalBookmark(): number {
 		const res = this.db.exec(
 			`select count(*) from Bookmark where Text is not null;`,
 		);
@@ -66,7 +68,7 @@ export class Repository {
 		return +res[0].values[0].toString();
 	}
 
-	async getBookmarkById(id: string): Promise<Bookmark | null> {
+	getBookmarkById(id: string): Bookmark | null {
 		const colorColumn = this.getBookmarkColorColumnSelection();
 		const statement = this.db.prepare(
 			`select BookmarkID, Text, ContentID, annotation, DateCreated, ${colorColumn} from Bookmark where BookmarkID = $id;`,
@@ -112,7 +114,7 @@ export class Repository {
 		return this.bookmarkColorColumnExists;
 	}
 
-	async getContentByContentId(contentId: string): Promise<Content | null> {
+	getContentByContentId(contentId: string): Content | null {
 		const statement = this.db.prepare(
 			`select
                 Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content
@@ -131,7 +133,7 @@ export class Repository {
 		return contents.pop() || null;
 	}
 
-	async getContentLikeContentId(contentId: string): Promise<Content | null> {
+	getContentLikeContentId(contentId: string): Content | null {
 		const statement = this.db.prepare(
 			`select
                 Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content
@@ -150,7 +152,7 @@ export class Repository {
 		return contents.shift() || null;
 	}
 
-	async getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {
+	getFirstContentLikeContentIdWithBookmarkIdNotNull(contentId: string) {
 		const statement = this.db.prepare(
 			`select
                 Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content"
@@ -163,7 +165,7 @@ export class Repository {
 		return contents.pop() || null;
 	}
 
-	async getAllContent(limit = 100): Promise<Content[]> {
+	getAllContent(limit = 100): Content[] {
 		const statement = this.db.prepare(
 			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from content limit $limit`,
 			{ $limit: limit },
@@ -175,7 +177,7 @@ export class Repository {
 		return contents;
 	}
 
-	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
+	getAllContentByBookTitle(bookTitle: string): Content[] {
 		const statement = this.db.prepare(
 			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle`,
 			{ $bookTitle: bookTitle },
@@ -187,9 +189,9 @@ export class Repository {
 		return contents;
 	}
 
-	async getAllContentByBookTitleOrderedByContentId(
+	getAllContentByBookTitleOrderedByContentId(
 		bookTitle: string,
-	): Promise<Content[]> {
+	): Content[] {
 		const statement = this.db.prepare(
 			`select Title, ContentID, ChapterIDBookmarked, BookTitle, VolumeIndex from "content" where BookTitle = $bookTitle order by "ContentID"`,
 			{ $bookTitle: bookTitle },
@@ -201,9 +203,9 @@ export class Repository {
 		return contents;
 	}
 
-	async getBookDetailsByBookTitle(
+	getBookDetailsByBookTitle(
 		bookTitle: string,
-	): Promise<BookDetails | null> {
+	): BookDetails | null {
 		const statement = this.db.prepare(
 			`select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;`,
 			{
@@ -242,9 +244,9 @@ export class Repository {
 		};
 	}
 
-	async getAllBookDetails(): Promise<BookDetails[]> {
+	getAllBookDetails(): BookDetails[] {
 		const statement = this.db.prepare(
-			`SELECT DISTINCT 
+			`SELECT
                 Title,
                 Attribution as Author,
                 Description,
@@ -256,8 +258,9 @@ export class Repository {
                 Series,
                 SeriesNumber,
                 TimeSpentReading
-            FROM content 
-            WHERE Title IS NOT NULL 
+            FROM content
+            WHERE Title IS NOT NULL
+            GROUP BY Title
             ORDER BY Title ASC;`,
 		);
 
@@ -266,7 +269,7 @@ export class Repository {
 		while (statement.step()) {
 			const row = statement.get();
 			if (row[0] == null || row[1] == null) {
-				continue; // Skip entries without title or author
+				continue;
 			}
 
 			books.push({
@@ -303,5 +306,82 @@ export class Repository {
 		}
 
 		return contents;
+	}
+
+	hasWordListTable(): boolean {
+		if (this.wordListTableExists !== undefined) {
+			return this.wordListTableExists;
+		}
+
+		try {
+			const res = this.db.exec(
+				"SELECT name FROM sqlite_master WHERE type='table' AND name='WordList';",
+			);
+			this.wordListTableExists =
+				res.length > 0 && res[0].values.length > 0;
+		} catch {
+			this.wordListTableExists = false;
+		}
+
+		return this.wordListTableExists;
+	}
+
+	private getWordListColumns(): string[] {
+		if (this.wordListColumns !== undefined) {
+			return this.wordListColumns;
+		}
+
+		const res = this.db.exec("PRAGMA table_info(WordList);");
+		this.wordListColumns =
+			res[0]?.values.map((row) => row[1]?.toString() ?? "") ?? [];
+
+		return this.wordListColumns;
+	}
+
+	getAllWords(): Word[] {
+		if (!this.hasWordListTable()) {
+			return [];
+		}
+
+		const columns = this.getWordListColumns();
+		const hasDictSuffix = columns.includes("DictSuffix");
+		const hasVolumeId = columns.includes("VolumeId");
+		const hasDateCreated = columns.includes("DateCreated");
+
+		const selectCols = ["Text"];
+		if (hasDictSuffix) selectCols.push("DictSuffix");
+		if (hasVolumeId) selectCols.push("VolumeId");
+		if (hasDateCreated) selectCols.push("DateCreated");
+
+		const orderBy = hasDateCreated ? "DateCreated DESC" : "Text ASC";
+		const res = this.db.exec(
+			`SELECT ${selectCols.join(", ")} FROM WordList ORDER BY ${orderBy};`,
+		);
+
+		if (!res[0]?.values) return [];
+
+		const words: Word[] = [];
+		for (const row of res[0].values) {
+			if (!row[0]) continue;
+
+			const word: Word = { text: row[0].toString() };
+			let colIdx = 1;
+
+			if (hasDictSuffix) {
+				word.dictSuffix = row[colIdx]?.toString();
+				colIdx++;
+			}
+			if (hasVolumeId) {
+				word.volumeId = row[colIdx]?.toString();
+				colIdx++;
+			}
+			if (hasDateCreated && row[colIdx]) {
+				word.dateCreated = new Date(row[colIdx]!.toString());
+			}
+
+			words.push(word);
+		}
+
+		return words;
 	}
 }

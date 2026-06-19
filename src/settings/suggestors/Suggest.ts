@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // Credits go to Liam's Periodic Notes Plugin: https://github.com/liamcain/obsidian-periodic-notes
 
 import { createPopper, Instance as PopperInstance } from "@popperjs/core";
@@ -23,11 +22,11 @@ class Suggest<T> {
 		this.owner = owner;
 		this.containerEl = containerEl;
 
-		containerEl.on("click", ".suggestion-item", () => {
-			this.onSuggestionClick.bind(this);
+		containerEl.on("click", ".suggestion-item", (evt, el) => {
+			this.onSuggestionClick(evt as MouseEvent, el as HTMLDivElement);
 		});
-		containerEl.on("mousemove", ".suggestion-item", () => {
-			this.onSuggestionMouseover.bind(this);
+		containerEl.on("mousemove", ".suggestion-item", (evt, el) => {
+			this.onSuggestionMouseover(evt as MouseEvent, el as HTMLDivElement);
 		});
 
 		scope.register([], "ArrowUp", (event) => {
