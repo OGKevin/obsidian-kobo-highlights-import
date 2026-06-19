@@ -1,12 +1,16 @@
 # Obsidian Kobo Highlight Importer
 
-This plugin aims to make highlight import from Kobo devices easier.
+This plugin imports highlights and vocabulary from Kobo e-readers into your Obsidian vault.
 
 - [Obsidian Kobo Highlight Importer](#obsidian-kobo-highlight-importer)
     - [How to use](#how-to-use)
+    - [Non-destructive sync](#non-destructive-sync)
+    - [Vocabulary import (My Words)](#vocabulary-import-my-words)
     - [Templating](#templating)
+        - [Simple syntax](#simple-syntax)
+        - [Eta syntax](#eta-syntax)
         - [Variables](#variables)
-        - [Template Syntax](#template-syntax)
+    - [Settings](#settings)
     - [Helping Screenshots](#helping-screenshots)
     - [Contributing](#contributing)
 
@@ -18,37 +22,80 @@ Once installed, the steps to import your highlights directly into the vault are:
 2. Check if it has mounted automatically, or mount it manually (e.g. open the root folder of your Kobo using a file
    manager)
 3. Open the import window using the plugin button
-4. Locate _KoboReader.sqlite_ in the _.kobo_ folder ( this folder is hidden, so if you don't see it you should enable
-   hidden files view from system configs )
-5. Extract
+4. Locate _KoboReader.sqlite_ in the _.kobo_ folder (this folder is hidden, so if you don't see it you should enable
+   hidden files view from system configs)
+5. Click Extract
+
+The plugin remembers the path to your KoboReader.sqlite file between sessions. On subsequent imports, it will auto-load the file without needing to re-select it. You can clear the remembered path in settings.
+
+## Non-destructive sync
+
+When you re-import highlights, the plugin preserves any personal content you've added to your book notes. Each generated file includes a `## Personal Notes` section at the bottom — everything under this heading is kept intact across re-imports.
+
+The plugin regenerates everything above (frontmatter, highlights, description) from the Kobo database, so your highlights are always up to date while your personal notes remain untouched.
+
+## Vocabulary import (My Words)
+
+The plugin can import words you've looked up on your Kobo device (the "My Words" feature). Enable this in settings with the **Import vocabulary** toggle.
+
+All vocabulary words are saved to a single file (default: `Kobo Vocabulary.md`) in your destination folder. The file includes each word with its dictionary language and the date it was looked up. Like book notes, the vocabulary file supports non-destructive sync with a Personal Notes section.
 
 ## Templating
 
-The plugin uses [Eta.js](https://eta.js.org/) for templating. You can fully customize the output using Eta's template syntax. See the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax) for details.
+You can customize the output format using templates. The plugin supports two syntax styles that can be mixed freely.
 
-The default template is:
+### Simple syntax
+
+Use `{{Variable}}` shorthand for common fields:
+
+```
+---
+title: "{{Title}}"
+author: "{{Author}}"
+date_created: "{{DateLastRead}}"
+isbn: {{ISBN}}
+readStatus: {{ReadStatus}}
+---
+
+# {{Title}} - {{Author}}
+
+## Description
+
+{{Description}}
+
+## Highlights
+
+{{highlights}}
+```
+
+Available shorthand variables:
+
+| Shorthand | Description |
+| --- | --- |
+| `{{Title}}` | Book title |
+| `{{Author}}` | Book author |
+| `{{Description}}` | Book description |
+| `{{DateLastRead}}` | Last read date (ISO format) |
+| `{{ISBN}}` | ISBN number |
+| `{{ReadStatus}}` | Read status label (Unknown, Unopened, Reading, Read) |
+| `{{Publisher}}` | Publisher name |
+| `{{Series}}` | Series name |
+| `{{SeriesNumber}}` | Number in series |
+| `{{PercentRead}}` | Reading progress percentage |
+| `{{TimeSpentReading}}` | Time spent reading (seconds) |
+| `{{highlights}}` | Full highlights section with chapters, text, notes, and dates |
+
+### Eta syntax
+
+For full control, use [Eta.js](https://eta.js.org/) template syntax. All template data is available under `it.*`:
 
 ```eta
 ---
 title: "<%= it.bookDetails.title %>"
 author: <%= it.bookDetails.author %>
-publisher: <%= it.bookDetails.publisher ?? '' %>
-dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
-readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
-percentRead: <%= it.bookDetails.percentRead ?? '' %>
-isbn: <%= it.bookDetails.isbn ?? '' %>
-series: <%= it.bookDetails.series ?? '' %>
-seriesNumber: <%= it.bookDetails.seriesNumber ?? '' %>
-timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 ---
 
 # <%= it.bookDetails.title %>
-
-## Description
-
-<%= it.bookDetails.description ?? '' %>
-
-## Highlights
 
 <% it.chapters.forEach(([chapterName, highlights]) => { -%>
 ## <%= chapterName.trim() %>
@@ -68,33 +115,18 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 <% }) %>
 ```
 
+You can mix both syntaxes in the same template. See the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax) for the full Eta reference.
+
 ### Variables
 
-The following variables are available in your template:
+The following variables are available in Eta templates:
 
-| Variable      | Type / Structure                     | Description                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bookDetails` | Object                               | Book metadata: <br>`title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description`                                                                                                                                                                                                                                                                      |
-| `chapters`    | Array of `[chapterName, highlights]` | Each `highlights` is an array of bookmarks for that chapter                                                                                                                                                                                                                                                                                                                                                                              |
-| `ReadStatus`  | Enum mapping                         | Maps read status values to their string labels                                                                                                                                                                                                                                                                                                                                                                                           |
-| `highlight`   | Object                               | Each highlight/bookmark:<br>- `bookmarkId`: Unique ID<br>- `text`: The raw highlight text<br>- `contentId`: Content identifier<br>- `note`: Optional note/annotation (if any)<br>- `dateCreated`: [Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) when the highlight was created<br>- `color`: Optional color of the highlight (if any) (0 for yellow, 1 for red, 2 for blue, 3 for green) |
-
-#### Example usage
-
-```eta
-<% it.chapters.forEach(([chapterName, highlights]) => { -%>
-## <%= chapterName %>
-<% highlights.forEach(h => { -%>
-<%= h.text %>
-<% if (h.note) { -%>
-**Note:** <%= h.note %>
-<% } -%>
-<% if (h.dateCreated) { -%>
-*Created: <%= h.dateCreated.toISOString() %>*
-<% } -%>
-<% }) -%>
-<% }) %>
-```
+| Variable | Type / Structure | Description |
+| --- | --- | --- |
+| `bookDetails` | Object | Book metadata: `title`, `author`, `publisher`, `dateLastRead`, `readStatus`, `percentRead`, `isbn`, `series`, `seriesNumber`, `timeSpentReading`, `description` |
+| `chapters` | Array of `[chapterName, highlights]` | Each `highlights` is an array of bookmarks for that chapter |
+| `ReadStatus` | Enum mapping | Maps read status values to their string labels |
+| `highlight` | Object | Each highlight/bookmark: `bookmarkId`, `text`, `contentId`, `note` (optional annotation), `dateCreated` ([Date](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)), `color` (optional: 0=yellow, 1=red, 2=blue, 3=green) |
 
 #### Date formatting examples
 
@@ -109,22 +141,12 @@ The following variables are available in your template:
 *Created: <%= h.dateCreated.toLocaleString() %>*
 ```
 
-For more advanced syntax, see the [Eta.js template syntax documentation](https://eta.js.org/docs/intro/template-syntax).
-
 #### Template example using Obsidian callouts to display color of highlights
 
 ```eta
 ---
 title: "<%= it.bookDetails.title %>"
 author: <%= it.bookDetails.author %>
-publisher: <%= it.bookDetails.publisher ?? '' %>
-dateLastRead: <%= it.bookDetails.dateLastRead?.toISOString() ?? '' %>
-readStatus: <%= it.bookDetails.readStatus ? it.ReadStatus[it.bookDetails.readStatus] : it.ReadStatus[it.ReadStatus.Unknown] %>
-percentRead: <%= it.bookDetails.percentRead ?? '' %>
-isbn: <%= it.bookDetails.isbn ?? '' %>
-series: <%= it.bookDetails.series ?? '' %>
-seriesNumber: <%= it.bookDetails.seriesNumber ?? '' %>
-timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 ---
 
 # <%= it.bookDetails.title %>
@@ -150,6 +172,18 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 <% }) %>
 ```
 
+## Settings
+
+| Setting | Description | Default |
+| --- | --- | --- |
+| **Destination folder** | Where to save imported highlights | _(vault root)_ |
+| **Kobo SQLite path** | Remembered path to KoboReader.sqlite (auto-saved, read-only) | _(not set)_ |
+| **Template Path** | Path to a custom template file in your vault | _(default template)_ |
+| **Sort by chapter progress** | Sort highlights by position in book instead of creation date | Off |
+| **Import all books** | Import metadata for all books, not just those with highlights | Off |
+| **Import vocabulary** | Import looked-up words from Kobo's My Words feature | Off |
+| **Vocabulary file name** | Name of the vocabulary file (without .md extension) | Kobo Vocabulary |
+
 ## Helping Screenshots
 
 ![](./README_assets/step1.png)
@@ -159,4 +193,4 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 ## Contributing
 
-Please feel free to test, send feedbacks using Issues and open Pull Requests to improve the process.
+Please feel free to test, send feedback using Issues and open Pull Requests to improve the process.

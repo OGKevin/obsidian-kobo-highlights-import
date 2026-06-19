@@ -12,14 +12,13 @@ describe("HighlightService", async function () {
 
 		before(async function () {
 			const repo = {} as Repository;
-			repo.getContentByContentId = () =>
-				Promise.resolve({
-					title: "Chapter Eight: Holden",
-					contentId:
-						"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
-					bookTitle: "Nemesis Games",
-					chapterIdBookmarked: "true",
-				});
+			repo.getContentByContentId = () => ({
+				title: "Chapter Eight: Holden",
+				contentId:
+					"file:///mnt/onboard/Corey, James S.A_/Nemesis Games - James S.A. Corey.epub#(12)OEBPS/Text/ch09.html",
+				bookTitle: "Nemesis Games",
+				chapterIdBookmarked: "true",
+			});
 			service = new HighlightService(repo);
 		});
 
@@ -38,7 +37,7 @@ describe("HighlightService", async function () {
 					note: "",
 					dateCreated,
 				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
+				highlight = service.createHighlightFromBookmark(bookmark);
 			});
 
 			it("createHighlightFromBookmark", async function () {
@@ -53,7 +52,7 @@ describe("HighlightService", async function () {
 					note: "",
 					dateCreated,
 				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
+				highlight = service.createHighlightFromBookmark(bookmark);
 
 				assert.deepEqual(highlight, {
 					content: {
@@ -107,7 +106,7 @@ describe("HighlightService", async function () {
 					note: "This is a great note!",
 					dateCreated,
 				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
+				highlight = service.createHighlightFromBookmark(bookmark);
 			});
 
 			it("createHighlightFromBookmark", async function () {
@@ -122,7 +121,7 @@ describe("HighlightService", async function () {
 					note: "This is a great note!",
 					dateCreated,
 				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
+				highlight = service.createHighlightFromBookmark(bookmark);
 
 				assert.deepEqual(highlight, {
 					content: {
@@ -150,8 +149,8 @@ describe("HighlightService", async function () {
 
 		before(async function () {
 			const repo = {} as Repository;
-			repo.getContentByContentId = () => Promise.resolve(null);
-			repo.getContentLikeContentId = () => Promise.resolve(null);
+			repo.getContentByContentId = () => null;
+			repo.getContentLikeContentId = () => null;
 			service = new HighlightService(repo);
 		});
 
@@ -170,7 +169,7 @@ describe("HighlightService", async function () {
 					note: "",
 					dateCreated,
 				};
-				highlight = await service.createHighlightFromBookmark(bookmark);
+				highlight = service.createHighlightFromBookmark(bookmark);
 			});
 
 			it("createHighlightFromBookmark with missing content", async function () {
@@ -275,32 +274,32 @@ describe("HighlightService", async function () {
 		before(async function () {
 			repo = {} as Repository;
 			repo.getContentByContentId = (contentId) =>
-				Promise.resolve(contentMap.get(contentId) ?? null);
-			repo.getTotalBookmark = () => Promise.resolve(contentMap.size);
+				contentMap.get(contentId) ?? null;
+			repo.getTotalBookmark = () => contentMap.size;
 			const bookmarks = new Array<Bookmark>();
 			bookmarkMap.forEach((entry) => bookmarks.push(entry));
-			repo.getAllBookmark = () => Promise.resolve(bookmarks);
+			repo.getAllBookmark = () => bookmarks;
 			repo.getBookmarkById = (bookmarkId) =>
-				Promise.resolve(bookmarkMap.get(bookmarkId) ?? null);
+				bookmarkMap.get(bookmarkId) ?? null;
 			service = new HighlightService(repo);
 		});
 
 		it("getAllHighlight", async function () {
-			const all = await service.getAllHighlight();
-			const total = await repo.getTotalBookmark();
+			const all = service.getAllHighlight();
+			const total = repo.getTotalBookmark();
 			expect(all).length(total);
 		});
 
 		for (const [id, content] of contentMap) {
 			it(`createHighlightFromBookmark ${id}`, async function () {
-				const bookmark = await repo.getBookmarkById(id);
+				const bookmark = repo.getBookmarkById(id);
 				if (!bookmark) {
 					assert.isNotNull(bookmark);
 					return;
 				}
 
 				const highlight =
-					await service.createHighlightFromBookmark(bookmark);
+					service.createHighlightFromBookmark(bookmark);
 				assert.deepEqual(highlight, {
 					content: content,
 					bookmark: bookmark,
@@ -344,36 +343,34 @@ describe("HighlightService", async function () {
 		before(async function () {
 			repo = {} as Repository;
 
-			repo.getAllBookDetails = () => Promise.resolve(bookDetails);
+			repo.getAllBookDetails = () => bookDetails;
 			repo.getBookDetailsByBookTitle = (title) => {
 				const details = bookDetails.find(
 					(book) => book.title === title,
 				);
-				return Promise.resolve(details || null);
+				return details || null;
 			};
-			repo.getAllBookmark = () =>
-				Promise.resolve([
-					{
-						bookmarkId: "bookmark1",
-						text: "Sample highlight",
-						contentId: "content1",
-						note: "Test note",
-						dateCreated: new Date("2024-01-01"),
-					},
-				]);
-			repo.getContentByContentId = () =>
-				Promise.resolve({
-					title: "Chapter 1",
+			repo.getAllBookmark = () => [
+				{
+					bookmarkId: "bookmark1",
+					text: "Sample highlight",
 					contentId: "content1",
-					bookTitle: "Book with Highlights",
-					chapterIdBookmarked: "chapter1",
-				});
+					note: "Test note",
+					dateCreated: new Date("2024-01-01"),
+				},
+			];
+			repo.getContentByContentId = () => ({
+				title: "Chapter 1",
+				contentId: "content1",
+				bookTitle: "Book with Highlights",
+				chapterIdBookmarked: "chapter1",
+			});
 
 			service = new HighlightService(repo);
 		});
 
 		it("getAllBooks should return all books with correct details", async function () {
-			const books = await service.getAllBooks();
+			const books = service.getAllBooks();
 			expect(books.size).to.equal(2);
 
 			const bookWithHighlights = books.get("Book with Highlights");
@@ -389,23 +386,20 @@ describe("HighlightService", async function () {
 		});
 
 		it("convertToMap should handle books with and without highlights correctly", async function () {
-			const highlights = await service.getAllHighlight();
+			const highlights = service.getAllHighlight();
 			const contentMap = service.convertToMap(highlights);
 
-			// Verify initial state with only books containing highlights
 			expect(contentMap.size).to.equal(1);
 			expect(contentMap.has("Book with Highlights")).to.be.true;
 			expect(contentMap.has("Book without Highlights")).to.be.false;
 
-			// Add books without highlights
-			const allBooks = await service.getAllBooks();
+			const allBooks = service.getAllBooks();
 			for (const [bookTitle, _] of allBooks) {
 				if (!contentMap.has(bookTitle)) {
 					contentMap.set(bookTitle, service.createEmptyContentMap());
 				}
 			}
 
-			// Verify final state with all books
 			expect(contentMap.size).to.equal(2);
 
 			const bookWithHighlights = contentMap.get("Book with Highlights");
@@ -419,7 +413,7 @@ describe("HighlightService", async function () {
 		});
 
 		it("getBookDetailsFromBookTitle should return correct book details", async function () {
-			const details1 = await service.getBookDetailsFromBookTitle(
+			const details1 = service.getBookDetailsFromBookTitle(
 				"Book with Highlights",
 			);
 			expect(details1).to.deep.include({
@@ -430,7 +424,7 @@ describe("HighlightService", async function () {
 				isbn: "1234567890",
 			});
 
-			const details2 = await service.getBookDetailsFromBookTitle(
+			const details2 = service.getBookDetailsFromBookTitle(
 				"Book without Highlights",
 			);
 			expect(details2).to.deep.include({
@@ -442,7 +436,7 @@ describe("HighlightService", async function () {
 			});
 
 			const nonExistentBook =
-				await service.getBookDetailsFromBookTitle("Non-existent Book");
+				service.getBookDetailsFromBookTitle("Non-existent Book");
 			expect(nonExistentBook).to.deep.equal({
 				title: "Unknown Title",
 				author: "Unknown Author",

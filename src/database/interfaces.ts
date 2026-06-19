@@ -35,6 +35,13 @@ export interface BookDetails {
 	timeSpentReading?: number;
 }
 
+export interface Word {
+	text: string;
+	dictSuffix?: string;
+	volumeId?: string;
+	dateCreated?: Date;
+}
+
 export enum ReadStatus {
 	Unknown = -1,
 	Unopened = 0,

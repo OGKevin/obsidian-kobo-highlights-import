@@ -1,4 +1,4 @@
-import { BookDetails, Bookmark, Content, Highlight } from "./interfaces";
+import { BookDetails, Bookmark, Content, Highlight, Word } from "./interfaces";
 import { Repository } from "./repository";
 
 type bookTitle = string;
@@ -13,8 +13,8 @@ export class HighlightService {
 		this.repo = repo;
 	}
 
-	async getBookDetailsFromBookTitle(title: string): Promise<BookDetails> {
-		const details = await this.repo.getBookDetailsByBookTitle(title);
+	getBookDetailsFromBookTitle(title: string): BookDetails {
+		const details = this.repo.getBookDetailsByBookTitle(title);
 
 		if (details == null) {
 			return {
@@ -30,11 +30,10 @@ export class HighlightService {
 		const m = new Map<string, Map<string, Bookmark[]>>();
 
 		arr.forEach((x) => {
-			if (!x.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
+			const bookTitle =
+				x.content.bookTitle || x.content.title || this.unknownBookTitle;
 
-			const existingBook = m.get(x.content.bookTitle);
+			const existingBook = m.get(bookTitle);
 			if (existingBook) {
 				const existingChapter = existingBook.get(x.content.title);
 
@@ -45,7 +44,7 @@ export class HighlightService {
 				}
 			} else {
 				m.set(
-					x.content.bookTitle,
+					bookTitle,
 					new Map<string, Bookmark[]>().set(x.content.title, [
 						x.bookmark,
 					]),
@@ -65,24 +64,21 @@ export class HighlightService {
 	 * Null-safe: entries without VolumeIndex fall back to ContentID, preserving
 	 * existing behaviour for books that lack spine data.
 	 */
-	async getAllHighlight(
-		sortByChapterProgress?: boolean,
-	): Promise<Highlight[]> {
+	getAllHighlight(sortByChapterProgress?: boolean): Highlight[] {
 		const highlights: Highlight[] = [];
 
-		const bookmarks = await this.repo.getAllBookmark(sortByChapterProgress);
+		const bookmarks = this.repo.getAllBookmark(sortByChapterProgress);
 		for (const bookmark of bookmarks) {
-			highlights.push(await this.createHighlightFromBookmark(bookmark));
+			highlights.push(this.createHighlightFromBookmark(bookmark));
 		}
 
 		return highlights.sort((a, b) => {
-			if (!a.content.bookTitle || !b.content.bookTitle) {
-				throw new Error("bookTitle must be set");
-			}
+			const aBookTitle =
+				a.content.bookTitle || a.content.title || this.unknownBookTitle;
+			const bBookTitle =
+				b.content.bookTitle || b.content.title || this.unknownBookTitle;
 
-			const bookCmp = a.content.bookTitle.localeCompare(
-				b.content.bookTitle,
-			);
+			const bookCmp = aBookTitle.localeCompare(bBookTitle);
 			if (bookCmp !== 0) return bookCmp;
 
 			const aVol = a.content.volumeIndex;
@@ -94,11 +90,11 @@ export class HighlightService {
 		});
 	}
 
-	async createHighlightFromBookmark(bookmark: Bookmark): Promise<Highlight> {
-		let content = await this.repo.getContentByContentId(bookmark.contentId);
+	createHighlightFromBookmark(bookmark: Bookmark): Highlight {
+		let content = this.repo.getContentByContentId(bookmark.contentId);
 
 		if (content == null) {
-			content = await this.repo.getContentLikeContentId(
+			content = this.repo.getContentLikeContentId(
 				bookmark.contentId,
 			);
 			if (content == null) {
@@ -120,7 +116,7 @@ export class HighlightService {
 		if (content.chapterIdBookmarked == null) {
 			return {
 				bookmark: bookmark,
-				content: await this.findRightContentForBookmark(
+				content: this.findRightContentForBookmark(
 					bookmark,
 					content,
 				),
@@ -133,20 +129,25 @@ export class HighlightService {
 		};
 	}
 
-	private async findRightContentForBookmark(
+	private findRightContentForBookmark(
 		bookmark: Bookmark,
 		originalContent: Content,
-	): Promise<Content> {
+	): Content {
+		const bookTitle =
+			originalContent.bookTitle ||
+			originalContent.title ||
+			this.unknownBookTitle;
+
 		if (!originalContent.bookTitle) {
-			throw new Error("bookTitle field must be set");
+			originalContent.bookTitle = bookTitle;
 		}
 
 		const contents =
-			await this.repo.getAllContentByBookTitleOrderedByContentId(
-				originalContent.bookTitle,
+			this.repo.getAllContentByBookTitleOrderedByContentId(
+				bookTitle,
 			);
 		const potential =
-			await this.repo.getFirstContentLikeContentIdWithBookmarkIdNotNull(
+			this.repo.getFirstContentLikeContentIdWithBookmarkIdNotNull(
 				originalContent.contentId,
 			);
 		if (potential) {
@@ -174,8 +175,8 @@ export class HighlightService {
 		return originalContent;
 	}
 
-	async getAllBooks(): Promise<Map<string, BookDetails>> {
-		const books = await this.repo.getAllBookDetails();
+	getAllBooks(): Map<string, BookDetails> {
+		const books = this.repo.getAllBookDetails();
 		const bookMap = new Map<string, BookDetails>();
 
 		for (const book of books) {
@@ -185,12 +186,20 @@ export class HighlightService {
 		return bookMap;
 	}
 
-	async getAllContentByBookTitle(bookTitle: string): Promise<Content[]> {
+	getAllContentByBookTitle(bookTitle: string): Content[] {
 		return this.repo.getAllContentByBookTitle(bookTitle);
 	}
 
 	// Create an empty content map for books without highlights
 	createEmptyContentMap(): Map<chapter, Bookmark[]> {
 		return new Map<chapter, Bookmark[]>();
+	}
+
+	hasVocabulary(): boolean {
+		return this.repo.hasWordListTable();
+	}
+
+	getAllWords(): Word[] {
+		return this.repo.getAllWords();
 	}
 }

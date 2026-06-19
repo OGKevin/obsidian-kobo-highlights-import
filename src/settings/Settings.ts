@@ -8,6 +8,9 @@ export const DEFAULT_SETTINGS: KoboHighlightsImporterSettings = {
 	sortByChapterProgress: false,
 	templatePath: "",
 	importAllBooks: false,
+	importVocabulary: false,
+	vocabularyFilePath: "Kobo Vocabulary",
+	sqlitePath: "",
 };
 
 export interface KoboHighlightsImporterSettings {
@@ -15,6 +18,9 @@ export interface KoboHighlightsImporterSettings {
 	sortByChapterProgress: boolean;
 	templatePath: string;
 	importAllBooks: boolean;
+	importVocabulary: boolean;
+	vocabularyFilePath: string;
+	sqlitePath: string;
 }
 
 export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
@@ -30,9 +36,12 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 		this.containerEl.createEl("h2", { text: this.plugin.manifest.name });
 
 		this.add_destination_folder();
+		this.add_sqlite_path();
 		this.add_template_path();
 		this.add_sort_by_chapter_progress();
 		this.add_import_all_books();
+		this.add_import_vocabulary();
+		this.add_vocabulary_file_path();
 	}
 
 	add_destination_folder(): void {
@@ -43,10 +52,30 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 				new FolderSuggestor(this.app, cb.inputEl);
 				cb.setPlaceholder("Example: folder1/folder2")
 					.setValue(this.plugin.settings.storageFolder)
-					.onChange((newFolder) => {
+					.onChange(async (newFolder) => {
 						this.plugin.settings.storageFolder = newFolder;
-						this.plugin.saveSettings();
+						await this.plugin.saveSettings();
 					});
+			});
+	}
+
+	add_sqlite_path(): void {
+		new Setting(this.containerEl)
+			.setName("Kobo SQLite path")
+			.setDesc(
+				"Remembered path to KoboReader.sqlite. Cleared automatically if the file is not found at this location.",
+			)
+			.addText((cb) => {
+				cb.setDisabled(true).setValue(
+					this.plugin.settings.sqlitePath || "(not set)",
+				);
+			})
+			.addButton((cb) => {
+				cb.setButtonText("Clear").onClick(async () => {
+					this.plugin.settings.sqlitePath = "";
+					await this.plugin.saveSettings();
+					this.display();
+				});
 			});
 	}
 
@@ -58,9 +87,9 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 				new FileSuggestor(this.app, cb.inputEl);
 				cb.setPlaceholder("Example: folder1/template")
 					.setValue(this.plugin.settings.templatePath)
-					.onChange((newTemplatePath) => {
+					.onChange(async (newTemplatePath) => {
 						this.plugin.settings.templatePath = newTemplatePath;
-						this.plugin.saveSettings();
+						await this.plugin.saveSettings();
 					});
 			});
 	}
@@ -68,7 +97,7 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 	add_sort_by_chapter_progress(): void {
 		const desc = document.createDocumentFragment();
 		desc.append(
-			"Turn on to sort highlights by chapter progess. If turned off, highlights are sorted by creation date and time.",
+			"Turn on to sort highlights by chapter progress. If turned off, highlights are sorted by creation date and time.",
 		);
 
 		new Setting(this.containerEl)
@@ -102,6 +131,38 @@ export class KoboHighlightsImporterSettingsTab extends PluginSettingTab {
 						await this.plugin.saveSettings();
 					},
 				);
+			});
+	}
+
+	add_import_vocabulary(): void {
+		new Setting(this.containerEl)
+			.setName("Import vocabulary")
+			.setDesc(
+				"Import looked-up words from your Kobo's My Words feature",
+			)
+			.addToggle((cb) => {
+				cb.setValue(
+					this.plugin.settings.importVocabulary,
+				).onChange(async (toggle) => {
+					this.plugin.settings.importVocabulary = toggle;
+					await this.plugin.saveSettings();
+				});
+			});
+	}
+
+	add_vocabulary_file_path(): void {
+		new Setting(this.containerEl)
+			.setName("Vocabulary file name")
+			.setDesc(
+				"Name of the file to store vocabulary words (without .md extension)",
+			)
+			.addText((cb) => {
+				cb.setPlaceholder("Kobo Vocabulary")
+					.setValue(this.plugin.settings.vocabularyFilePath)
+					.onChange(async (value) => {
+						this.plugin.settings.vocabularyFilePath = value;
+						await this.plugin.saveSettings();
+					});
 			});
 	}
 }
