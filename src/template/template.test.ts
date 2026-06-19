@@ -67,6 +67,8 @@ timeSpentReading:
 
 # test title
 
+## Personal Notes
+
 ## Description
 
 
@@ -85,11 +87,7 @@ test2
 
 **Note:** note2
 
-*Created: 2023-01-01T12:00:00.000Z*
-
-
-
-## Personal Notes`,
+*Created: 2023-01-01T12:00:00.000Z*`,
 			),
 		);
 	});
@@ -114,6 +112,8 @@ timeSpentReading:
 
 # test title
 
+## Personal Notes
+
 ## Description
 
 
@@ -132,11 +132,7 @@ test2
 
 **Note:** note2
 
-*Created: 2023-01-01T12:00:00.000Z*
-
-
-
-## Personal Notes`,
+*Created: 2023-01-01T12:00:00.000Z*`,
 			],
 		],
 		[

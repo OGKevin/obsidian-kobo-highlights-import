@@ -64,6 +64,8 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 # <%= it.bookDetails.title %>
 
+## Personal Notes
+
 ## Description
 
 <%= it.bookDetails.description ?? '' %>
@@ -71,8 +73,6 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 ## Highlights
 
 ${HIGHLIGHTS_BLOCK}
-
-## Personal Notes
 `;
 
 export function applyTemplateTransformations(
