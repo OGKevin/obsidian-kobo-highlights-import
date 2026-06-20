@@ -46,13 +46,12 @@ timeSpentReading: <%= it.bookDetails.timeSpentReading ?? '' %>
 
 export function applyTemplateTransformations(
 	rawTemplate: string,
-	chapters: Map<chapter, Bookmark[]>,
+	chapters: [chapter, Bookmark[]][],
 	bookDetails: BookDetails,
 ): string {
-	const chaptersArr = Array.from(chapters.entries());
 	const rendered = eta.renderString(rawTemplate, {
 		bookDetails,
-		chapters: chaptersArr,
+		chapters,
 		ReadStatus,
 	});
 
