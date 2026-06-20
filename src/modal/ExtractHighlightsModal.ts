@@ -82,9 +82,7 @@ export class ExtractHighlightsModal extends Modal {
 			);
 
 			const [chapters, details] = await Promise.all([
-				Promise.resolve(
-					service.buildChapterList(bookHighlights),
-				),
+				Promise.resolve(service.buildChapterList(bookHighlights)),
 				service.getBookDetailsFromBookTitle(bookTitle),
 			]);
 

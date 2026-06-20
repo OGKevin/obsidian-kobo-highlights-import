@@ -213,12 +213,32 @@ test2
 	it("buildChapterList keeps duplicate chapter titles separate", async function () {
 		const highlights: Highlight[] = [
 			{
-				bookmark: { bookmarkId: "1", text: "highlight in part one", contentId: "c1", dateCreated: testDate },
-				content: { title: "Chapter 1", contentId: "c1", bookTitle: "1984", chapterIdBookmarked: "true" },
+				bookmark: {
+					bookmarkId: "1",
+					text: "highlight in part one",
+					contentId: "c1",
+					dateCreated: testDate,
+				},
+				content: {
+					title: "Chapter 1",
+					contentId: "c1",
+					bookTitle: "1984",
+					chapterIdBookmarked: "true",
+				},
 			},
 			{
-				bookmark: { bookmarkId: "2", text: "highlight in part two", contentId: "c2", dateCreated: testDate },
-				content: { title: "Chapter 1", contentId: "c2", bookTitle: "1984", chapterIdBookmarked: "true" },
+				bookmark: {
+					bookmarkId: "2",
+					text: "highlight in part two",
+					contentId: "c2",
+					dateCreated: testDate,
+				},
+				content: {
+					title: "Chapter 1",
+					contentId: "c2",
+					bookTitle: "1984",
+					chapterIdBookmarked: "true",
+				},
 			},
 		];
 
