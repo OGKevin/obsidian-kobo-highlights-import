@@ -12,7 +12,7 @@ jobs:
             contents: read
             attestations: write
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - name: Setup SOPS
               uses: nhedger/setup-sops@v2
               with:

@@ -7,7 +7,7 @@ jobs:
         runs-on: ubuntu-latest
         if: "!startsWith(github.head_ref, 'renovate/')"
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   fetch-depth: 2
             - name: Conform Action
