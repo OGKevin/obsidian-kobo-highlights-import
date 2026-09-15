@@ -40,7 +40,7 @@
 	},
 	"dependencies": {
 		"@popperjs/core": "2.11.8",
-		"@types/better-sqlite3": "7.6.13",
+		"@types/better-sqlite3": "9.6.0",
 		"esbuild-plugin-wat": "0.2.7",
 		"eta": "^4.0.0",
 		"moment": "2.30.1",
