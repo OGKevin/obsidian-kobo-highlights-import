@@ -43,7 +43,7 @@
 		"@types/better-sqlite3": "7.6.13",
 		"esbuild-plugin-wat": "0.2.7",
 		"eta": "^4.0.0",
-		"moment": "2.30.1",
+		"moment": "2.31.0",
 		"sanitize-filename-ts": "1.0.2",
 		"sql.js": "1.8.0",
 		"uuid": "^13.0.0"
