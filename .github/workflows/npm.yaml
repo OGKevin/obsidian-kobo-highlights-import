@@ -23,7 +23,7 @@ jobs:
               run: |
                   sops --decrypt KoboReader.sqlite.enc > KoboReader.sqlite
             - name: Setup Node.js
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: "24"
             - name: Install dependencies
