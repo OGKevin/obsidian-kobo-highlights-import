@@ -104,6 +104,42 @@ describe("Repository", async function () {
 		chai.expect(details?.title).is.eq(firstBook.title);
 		chai.expect(details?.author).is.eq(firstBook.author);
 	});
+	it("getBookDetailsByBookTitle prefers the book row over a chapter with the same title", async function () {
+		const SQLEngine = await SqlJs({
+			wasmBinary: binary.buffer,
+		});
+		const titleDb = new SQLEngine.Database();
+		const titleRepo = new Repository(titleDb);
+
+		titleDb.run(`
+			CREATE TABLE content (
+				ContentID TEXT,
+				ContentType INTEGER,
+				Title TEXT,
+				Attribution TEXT,
+				Description TEXT,
+				Publisher TEXT,
+				DateLastRead TEXT,
+				ReadStatus INTEGER,
+				___PercentRead INTEGER,
+				ISBN TEXT,
+				Series TEXT,
+				SeriesNumber TEXT,
+				TimeSpentReading INTEGER
+			);
+			INSERT INTO content (ContentID, ContentType, Title, Attribution)
+			VALUES
+				('book.epub!!OEBPS/title.xhtml-1', 899, 'Same Title', NULL),
+				('file:///book.epub', 6, 'Same Title', 'Real Author');
+		`);
+
+		const details = titleRepo.getBookDetailsByBookTitle("Same Title");
+
+		chai.expect(details?.title).eq("Same Title");
+		chai.expect(details?.author).eq("Real Author");
+
+		titleDb.close();
+	});
 	it("getAllBookDetails returns books with valid data", async function () {
 		const allBooks = repo.getAllBookDetails();
 		chai.expect(allBooks.length).to.be.above(0);

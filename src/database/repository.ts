@@ -207,7 +207,7 @@ export class Repository {
 		bookTitle: string,
 	): BookDetails | null {
 		const statement = this.db.prepare(
-			`select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title limit 1;`,
+			`select Attribution, Description, Publisher, DateLastRead, ReadStatus, ___PercentRead, ISBN, Series, SeriesNumber, TimeSpentReading from content where Title = $title order by (ContentType = 6) desc, (Attribution is null) asc limit 1;`,
 			{
 				$title: bookTitle,
 			},
